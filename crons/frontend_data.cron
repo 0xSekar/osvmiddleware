@@ -1,0 +1,2 @@
+0 */4 * * * root [ `ps -ef|grep -v grep | grep update_frontend_yahoo_daily.php|wc -l` -eq 0 ] && cd /opt/lampp/htdocs/oldschoolvalue/frontend/crons/; /opt/lampp/bin/php /opt/lampp/htdocs/oldschoolvalue/frontend/crons/update_frontend_yahoo_daily.php 2>/dev/null
+30 4 * * * root [ `ps -ef|grep -v grep | grep update_frontend_EOL_GF_data.php|wc -l` -eq 0 ] && cd /opt/lampp/htdocs/oldschoolvalue/frontend/crons/; /opt/lampp/bin/php /opt/lampp/htdocs/oldschoolvalue/frontend/crons/update_frontend_EOL_GF_data.php 2>/dev/null

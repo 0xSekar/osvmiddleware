@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+    <meta>
+        <author>Gang Liang</author>
+        <description>
+            Yahoo Finance - Analyst Estimate by Stock Symbol
+        </description>
+        <sampleQuery>
+            SELECT * FROM {table} WHERE symbol='PRLB'
+        </sampleQuery>
+    </meta>
+    <bindings>
+        <select itemPath="" produces="XML">
+            <urls>
+                <url>
+                </url>
+            </urls>
+            <inputs>
+                <key id="symbol" type="xs:string" paramType="variable" required="true" />
+            </inputs>
+            <execute>
+                <![CDATA[
+                function getelement(row)
+                {
+                    if(row.hasOwnProperty("font")) return(row.font.text());
+                    return(row.text());
+                }
+
+                // Setup Query from finance.yahoo.com
+                var url="http://finance.yahoo.com/q/ae?s=" + symbol;
+                var restquery = y.rest( url );
+                var rawresult = restquery.accept( "text/html" ).get().response;
+                var aequery = y.xpath(
+                        rawresult,
+                        "//table[@class='yfnc_tableout1']/tbody/tr[count(td)=0]/parent::*|" +
+                        "//table[@class='yfnc_tableout1']/tbody/tr/td/table/tbody"
+                    );
+
+                // Process Results
+                var aedata = <results symbol={symbol}></results>;
+                var i = 0;
+                while(i < aequery.length())
+                {
+                    var table  = aequery[i];
+                    var thead  = table.tr[0];
+                    var tname  = thead.th[0].strong.text().toString().replace(/ /g, "");
+                    var fname1 = thead.th[1].text().toString().replace(/\n.*/, "");
+                    var fname2 = thead.th[2].text().toString().replace(/\n.*/, "");
+                    var fname3 = thead.th[3].text().toString().replace(/\n.*/, "");
+                    var fname4 = thead.th[4].text().toString().replace(/\n.*/, "");
+                    fname1 = fname1.replace(/[\s\.]+/g, "").replace(/\&/,"");
+                    fname2 = fname2.replace(/[\s\.]+/g, "").replace(/\&/,"");
+                    fname3 = fname3.replace(/[\s\.]+/g, "").replace(/\&/,"");
+                    fname4 = fname4.replace(/[\s\.]+/g, "").replace(/\&/,"");
+
+                    var tblval = <{tname}></{tname}>;
+                    var j = 1;
+                    while(j < table.tr.length())
+                    {
+                        var row   = table.tr[j].td;
+                        var rname = row[0].text().toString().replace(/[\s\.]+/g, "");
+                        rname = rname.replace(/\(.*\)/g,"").replace(/\%/,"").replace(/^(\d)/,"_$1");
+                        rname = rname.replace(/\//, "");
+                        var rval1 = getelement(row[1]).toString();
+                        var rval2 = getelement(row[2]).toString();
+                        var rval3 = getelement(row[3]).toString();
+                        var rval4 = getelement(row[4]).toString();
+						if(rval1.match(/\,/)) {
+							rval1 = rval1.replace(/\,/,"");
+						}
+						if(rval2.match(/\,/)) {
+							rval2 = rval2.replace(/\,/,"");
+						}
+						if(rval3.match(/\,/)) {
+							rval3 = rval3.replace(/\,/,"");
+						}
+						if(rval4.match(/\,/)) {
+							rval4 = rval4.replace(/\,/,"");
+						}
+
+        		        if(rval1.match(/[Bb]$/)) {
+							rval1 = rval1.replace(/[Bb]$/,"");
+							rval1 = (rval1 * 1000000000).toFixed(2);
+						} else if(rval1.match(/[Mm]$/)) {
+							rval1 = rval1.replace(/[Mm]$/,"");
+							rval1 = (rval1 * 1000000).toFixed(2);
+						} else if(rval1.match(/[Kk]$/)) {
+							rval1 = rval1.replace(/[Kk]$/,"");
+							rval1 = (rval1 * 1000).toFixed(2);
+						} else if(rval1.match(/[Tt]$/)) {
+							rval1 = rval1.replace(/[Tt]$/,"");
+							rval1 = (rval1 * 1000000000000).toFixed(2);
+						} else if(rval1.match(/%$/)) {
+							rval1 = rval1.replace(/%$/,"");
+      					} else if(rval1.match(/N\/A$/)) {
+       						rval1 = rval1.replace(/N\/A$/,"");
+      					} else if(rval1.match(/NaN$/)) {
+       						rval1 = rval1.replace(/NaN$/,"");
+						}
+        		        if(rval2.match(/[Bb]$/)) {
+							rval2 = rval2.replace(/[Bb]$/,"");
+							rval2 = (rval2 * 1000000000).toFixed(2);
+						} else if(rval2.match(/[Mm]$/)) {
+							rval2 = rval2.replace(/[Mm]$/,"");
+							rval2 = (rval2 * 1000000).toFixed(2);
+						} else if(rval2.match(/[Kk]$/)) {
+							rval2 = rval2.replace(/[Kk]$/,"");
+							rval2 = (rval2 * 1000).toFixed(2);
+						} else if(rval2.match(/[Tt]$/)) {
+							rval2 = rval2.replace(/[Tt]$/,"");
+							rval2 = (rval2 * 1000000000000).toFixed(2);
+						} else if(rval2.match(/%$/)) {
+							rval2 = rval2.replace(/%$/,"");
+      					} else if(rval2.match(/N\/A$/)) {
+       						rval2 = rval2.replace(/N\/A$/,"");
+      					} else if(rval2.match(/NaN$/)) {
+       						rval2 = rval2.replace(/NaN$/,"");
+						}
+        		        if(rval3.match(/[Bb]$/)) {
+							rval3 = rval3.replace(/[Bb]$/,"");
+							rval3 = (rval3 * 1000000000).toFixed(2);
+						} else if(rval3.match(/[Mm]$/)) {
+							rval3 = rval3.replace(/[Mm]$/,"");
+							rval3 = (rval3 * 1000000).toFixed(2);
+						} else if(rval3.match(/[Kk]$/)) {
+							rval3 = rval3.replace(/[Kk]$/,"");
+							rval3 = (rval3 * 1000).toFixed(2);
+						} else if(rval3.match(/[Tt]$/)) {
+							rval3 = rval3.replace(/[Tt]$/,"");
+							rval3 = (rval3 * 1000000000000).toFixed(2);
+						} else if(rval3.match(/%$/)) {
+							rval3 = rval3.replace(/%$/,"");
+      					} else if(rval3.match(/N\/A$/)) {
+       						rval3 = rval3.replace(/N\/A$/,"");
+      					} else if(rval3.match(/NaN$/)) {
+       						rval3 = rval3.replace(/NaN$/,"");
+						}
+        		        if(rval4.match(/[Bb]$/)) {
+							rval4 = rval4.replace(/[Bb]$/,"");
+							rval4 = (rval4 * 1000000000).toFixed(2);
+						} else if(rval4.match(/[Mm]$/)) {
+							rval4 = rval4.replace(/[Mm]$/,"");
+							rval4 = (rval4 * 1000000).toFixed(2);
+						} else if(rval4.match(/[Kk]$/)) {
+							rval4 = rval4.replace(/[Kk]$/,"");
+							rval4 = (rval4 * 1000).toFixed(2);
+						} else if(rval4.match(/[Tt]$/)) {
+							rval4 = rval4.replace(/[Tt]$/,"");
+							rval4 = (rval4 * 1000000000000).toFixed(2);
+						} else if(rval4.match(/%$/)) {
+							rval4 = rval4.replace(/%$/,"");
+      					} else if(rval4.match(/N\/A$/)) {
+       						rval4 = rval4.replace(/N\/A$/,"");
+      					} else if(rval4.match(/NaN$/)) {
+       						rval4 = rval4.replace(/NaN$/,"");
+						}
+
+                        tblval.appendChild(<{rname}>
+                                              <{fname1}>{rval1}</{fname1}>
+                                              <{fname2}>{rval2}</{fname2}>
+                                              <{fname3}>{rval3}</{fname3}>
+                                              <{fname4}>{rval4}</{fname4}>
+                                           </{rname}>);
+                        j = j + 1;
+                    }
+                    aedata.appendChild(tblval);
+                    i = i + 1;
+                }
+
+                // Return aedata strucuture
+                response.object = aedata;
+                ]]>
+            </execute>
+        </select>
+    </bindings>
+</table>
