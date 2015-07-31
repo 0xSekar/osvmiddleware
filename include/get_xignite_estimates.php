@@ -25,60 +25,7 @@ function update_xignite_estimates_data($ticker_id, $symbol) {
         $param = array(
   	      	"Identifiers" => $symbol,
               	"IdentifierType" => "Symbol",
-              	"EstimateFieldTypes" => array(
-			"EarningsEstimates_CurrentFiscalYearEndDate",
-			"EarningsEstimates_CurrentFiscalYearMean",
-			"EarningsEstimates_CurrentFiscalYearYearPriorActualEarningsPerShare",
-			"EarningsEstimates_CurrentQuarterEndDate",
-			"EarningsEstimates_CurrentQuarterMean",
-			"EarningsEstimates_CurrentQuarterYearPriorActualEarningsPerShare",
-			"EarningsEstimates_LongTermGrowthCurrentMean",
-			"EarningsEstimates_LongTermGrowthHighEstimate",
-			"EarningsEstimates_LongTermGrowthLowEstimate",
-			"EarningsEstimates_NextFiscalYearCurrentMean",
-			"EarningsEstimates_NextFiscalYearEndDate",
-			"EarningsEstimates_NextFiscalYearYearEstimatedEarningsPerShare",
-			"EarningsEstimates_NextQuarterCurrentMean",
-			"EarningsEstimates_NextQuarterEndDate",
-			"EarningsEstimates_NextQuarterYearPriorActualEarningsPerShare",
-			"EarningsEstimates_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean",
-			"EarningsEstimatesConsensusTrend_LongTermGrowthMeanCurrent",
-			"EarningsEstimatesConsensusTrend_NextFiscalYearEndDate",
-			"EPSEstimatesAndRecommendations_IndustryName",
-			"EPSEstimatesAndRecommendations_NextQuarterToReportExpectedReportDate",
-			"EPSGrowthRates_CompanyIndustryCurrentFiscalYearEnd",
-			"EPSGrowthRates_CompanyIndustryNextFiscalYearEnd",
-			"EPSGrowthRates_CompanyLast5YearActualPercentageGrowth",
-			"EPSGrowthRates_CompanyLongTermGrowthRate",
-			"EPSGrowthRates_CompanyNextFiscalYearPERatio",
-			"EPSGrowthRates_IndustryLast5YearActualPercentGrowth",
-			"EPSGrowthRates_IndustryLongTermGrowthRate",
-			"EPSGrowthRates_IndustryNextFiscalYearPERatio",
-			"EPSGrowthRates_SP500Last5YearActualPercentGrowth",
-			"EPSGrowthRates_SP500LongTermGrowthRate",
-			"EPSGrowthRates_SP500NextFiscalYearPERatio",
-			"SectorAnalysis_CurrentFiscalYearPriceEarningsGrowthIndustry",
-			"SectorAnalysis_CurrentFiscalYearPriceEarningsGrowthSector",
-			"SectorAnalysis_CurrentFiscalYearPriceEarningsGrowthSP500",
-			"SectorAnalysis_FiveYearHistoricEarningsPerShareGrowthCompany",
-			"SectorAnalysis_FiveYearHistoricEarningsPerShareGrowthIndustry",
-			"SectorAnalysis_FiveYearHistoricEarningsPerShareGrowthSector",
-			"SectorAnalysis_FiveYearHistoricEarningsPerShareGrowthSP500",
-			"SectorAnalysis_IndustryCurrentFiscalYearEstimateIndustry",
-			"SectorAnalysis_IndustryCurrentFiscalYearEstimateSector",
-			"SectorAnalysis_IndustryMostRecentFiscalYearActualIndustry",
-			"SectorAnalysis_IndustryMostRecentFiscalYearActualSector",
-			"SectorAnalysis_IndustryName",
-			"SectorAnalysis_IndustryNextFiscalYearEstimateIndustry",
-			"SectorAnalysis_IndustryNextFiscalYearEstimateSector",
-			"SectorAnalysis_MeanEstimateIndustryLongTermGrowth",
-			"SectorAnalysis_MeanEstimateSectorLongTermGrowth",
-			"SectorAnalysis_MeanEstimateSP500LongTermGrowth",
-			"SectorAnalysis_NextQuarterEstimateIndustry",
-			"SectorAnalysis_NextQuarterEstimateSector",
-			"SectorAnalysis_NextQuarterEstimateSP500",
-			"SectorAnalysis_Price",
-			"SectorAnalysis_SectorName")
+              	"EstimateGroup" => "All"
 	);
 	
         // add authentication info
@@ -87,16 +34,37 @@ function update_xignite_estimates_data($ticker_id, $symbol) {
 
         $fields= "Security_Ticker or Security_CIK or Security_Cusip or Security_ISIN or Security_CompanyName";
         // call the service, passing the parameters and the name of the operation
-        $result = $client->GetResearchFieldListsByCollection($param);
+        $result = $client->GetResearchFieldLists($param);
 
-	$data = $result->GetResearchFieldListsByCollectionResult->EstimatesResearchFieldList;
+	$data = $result->GetResearchFieldListsResult->EstimatesResearchFieldList;
 	if (isset($data->EstimatesResearchFields)) {
                 $query = "delete from tickers_xignite_estimates where ticker_id = " . $ticker_id;
                 $res = mysql_query($query) or die (mysql_error());
 		$data = $data->EstimatesResearchFields->EstimatesResearchField;
 		$query = "INSERT INTO tickers_xignite_estimates SET ticker_id = ".$ticker_id;
 		foreach( $data as $estimate) {
-			$query .= ", `" . substr($estimate->FieldType,0,64) . "` = ";
+	                if ($estimate->FieldType == "SectorAnalysis_PercentDifferenceIndustryCurrentFiscalYearVsIndustryMostRecentFiscalYearIndustry") {
+        	                $query .= ", `SA_PerDiffIndustryCurrentFYVsIndustryMostRecentFYIndustry`=";
+                	} else if ($estimate->FieldType == "SectorAnalysis_PercentDifferenceIndustryCurrentFiscalYearVsIndustryMostRecentFiscalYearSector") {
+                        	$query .= ", `SA_PerDiffIndustryCurrentFYVsIndustryMostRecentFYSector`=";
+	                } else if ($estimate->FieldType == "SectorAnalysis_PercentDifferenceIndustryNextFiscalYearVsIndustryCurrentFiscalYearIndustry") {
+        	                $query .= ", `SA_PerDiffIndustryNextFYVsIndustryCurrentFYIndustry`=";
+                	} else if ($estimate->FieldType == "SectorAnalysis_PercentDifferenceIndustryNextFiscalYearVsIndustryCurrentFiscalYearSector") {
+                        	$query .= ", `SA_PerDiffIndustryNextFYVsIndustryCurrentFYSector`=";
+	                } else if(substr($estimate->FieldType,0,18) == "EarningsEstimates_") {
+        	                $query .= ", `EE" . substr($estimate->FieldType,strpos($estimate->FieldType,"_"),60) . "`=";
+                	} else if (substr($estimate->FieldType,0,21) == "EarningsEstimatesCons") {
+                        	$query .= ", `EECT" . substr($estimate->FieldType,strpos($estimate->FieldType,"_"),60) . "`=";
+	                } else if (substr($estimate->FieldType,0,17) == "EarningsSurprise_") {
+        	                $query .= ", `ES" . substr($estimate->FieldType,strpos($estimate->FieldType,"_"),60) . "`=";
+                	} else if (substr($estimate->FieldType,0,15) == "EPSGrowthRates_") {
+                        	$query .= ", `EGR" . substr($estimate->FieldType,strpos($estimate->FieldType,"_"),60) . "`=";
+	                } else if (substr($estimate->FieldType,0,15) == "SectorAnalysis_") {
+        	                $query .= ", `SA" . substr($estimate->FieldType,strpos($estimate->FieldType,"_"),60) . "`=";
+                	} else if (substr($estimate->FieldType,0,15) == "EPSEstimatesAnd") {
+                        	$query .= ", `EER" . substr($estimate->FieldType,strpos($estimate->FieldType,"_"),60) . "`=";
+	                }
+
 			if ($estimate->DataType == "Text") {
 				$query .= "'" . mysql_real_escape_string($estimate->Value) . "'";
 			} else if ($estimate->DataType == "Date" && $estimate->DataFormat == "yyyyMMdd") {
