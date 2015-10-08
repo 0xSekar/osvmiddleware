@@ -1,6 +1,6 @@
 <?php
 function update_raw_data_tickers($dates, $rawdata) {
-	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios");
+	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios","reports_extradata");
 	$ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
 
         //Delete all reports before updating to be sure we do not miss any manual update
@@ -595,6 +595,29 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= "'".$rawdata["QuickRatio"][$i]."',";
         		$query .= "'".$rawdata["TaxRate"][$i]."',";
         		$query .= "'".$rawdata["TotalCapital"][$i]."'";
+        		$query .= ")";
+	        	mysql_query($query) or die (mysql_error());
+			//reports_extradata (computed data)
+                        $query = "INSERT INTO `reports_extradata` (`report_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                        $query .= "'".$report_id."',";
+                        $query .= "'".($rawdata["CostofRevenue"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["GrossProfit"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["SellingGeneralAdministrativeExpenses"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["ResearchDevelopmentExpense"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["CFDepreciationAmortization"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["EBITDA"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["OperatingProfit"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["EBIT"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["IncomeTaxes"][$i]/$rawdata["IncomeBeforeTaxes"][$i])."',";
+                        $query .= "'".($rawdata["IncomeBeforeTaxes"][$i]-$rawdata["IncomeTaxes"][$i])."',";
+                        $query .= "'".($rawdata["NetIncome"][$i]/$rawdata["TotalRevenue"][$i])."',";
+                        $query .= "'".($rawdata["DividendsPaid"][$i]/$rawdata["SharesOutstandingBasic"][$i])."',";
+                        $query .= "'".($rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["ShorttermBorrowings"][$i])."',";
+                        $query .= "'".($rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i])."',";
+                        $query .= "'".($rawdata["LongtermDebtProceeds"][$i]+$rawdata["LongtermDebtPayments"][$i])."',";
+                        $query .= "'".(-$rawdata["CapitalExpenditures"][$i])."',";
+                        $query .= "'".($rawdata["CashfromOperatingActivities"][$i]-$rawdata["CapitalExpenditures"][$i])."',";
+                        $query .= "'".($rawdata["CFNetIncome"][$i]+$rawdata["CFDepreciationAmortization"][$i]+$rawdata["EmployeeCompensation"][$i]+$rawdata["AdjustmentforSpecialCharges"][$i]+$rawdata["DeferredIncomeTaxes"][$i]+$rawdata["CapitalExpenditures"][$i]-($rawdata["ChangeinCurrentAssets"][$i]-$rawdata["ChangeinCurrentLiabilities"][$i]))."'";
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
 		}
