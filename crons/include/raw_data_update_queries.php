@@ -474,23 +474,23 @@ function update_raw_data_tickers($dates, $rawdata) {
 	        	$query .= "'".$report_id."',";
         		$query .= "'".$rawdata["fiscalPeriod"][$i]."',";
         		$query .= "'".$rawdata["FiscalPeriod"][$i]."',";
-        		$query .= "'".$rawdata["InterestIncome"][$i]."',";
-        		$query .= "'".$rawdata["InterestExpense"][$i]."',";
-        		$query .= "'".$rawdata["EPSBasic"][$i]."',";
-        		$query .= "'".$rawdata["EPSDiluted"][$i]."',";
-        		$query .= "'".$rawdata["SharesOutstandingDiluted"][$i]."',";
-        		$query .= "'".$rawdata["InventoriesRawMaterialsComponents"][$i]."',";
-        		$query .= "'".$rawdata["InventoriesWorkInProcess"][$i]."',";
-        		$query .= "'".$rawdata["InventoriesInventoriesAdjustments"][$i]."',";
-        		$query .= "'".$rawdata["InventoriesFinishedGoods"][$i]."',";
-        		$query .= "'".$rawdata["InventoriesOther"][$i]."',";
-        		$query .= "'".$rawdata["TotalInventories"][$i]."',";
-        		$query .= "'".$rawdata["LandAndImprovements"][$i]."',";
-        		$query .= "'".$rawdata["BuildingsAndImprovements"][$i]."',";
-        		$query .= "'".$rawdata["MachineryFurnitureEquipment"][$i]."',";
-        		$query .= "'".$rawdata["ConstructionInProgress"][$i]."',";
-        		$query .= "'".$rawdata["GrossPropertyPlantandEquipment"][$i]."',";
-        		$query .= "'".$rawdata["SharesOutstandingBasic"][$i]."'";
+        		$query .= "'".toFloat($rawdata["InterestIncome"][$i])."',";
+        		$query .= "'".toFloat($rawdata["InterestExpense"][$i])."',";
+        		$query .= "'".toFloat($rawdata["EPSBasic"][$i])."',";
+        		$query .= "'".toFloat($rawdata["EPSDiluted"][$i])."',";
+        		$query .= "'".toFloat($rawdata["SharesOutstandingDiluted"][$i])."',";
+        		$query .= "'".toFloat($rawdata["InventoriesRawMaterialsComponents"][$i])."',";
+        		$query .= "'".toFloat($rawdata["InventoriesWorkInProcess"][$i])."',";
+        		$query .= "'".toFloat($rawdata["InventoriesInventoriesAdjustments"][$i])."',";
+        		$query .= "'".toFloat($rawdata["InventoriesFinishedGoods"][$i])."',";
+        		$query .= "'".toFloat($rawdata["InventoriesOther"][$i])."',";
+        		$query .= "'".toFloat($rawdata["TotalInventories"][$i])."',";
+        		$query .= "'".toFloat($rawdata["LandAndImprovements"][$i])."',";
+        		$query .= "'".toFloat($rawdata["BuildingsAndImprovements"][$i])."',";
+        		$query .= "'".toFloat($rawdata["MachineryFurnitureEquipment"][$i])."',";
+        		$query .= "'".toFloat($rawdata["ConstructionInProgress"][$i])."',";
+        		$query .= "'".toFloat($rawdata["GrossPropertyPlantandEquipment"][$i])."',";
+        		$query .= "'".toFloat($rawdata["SharesOutstandingBasic"][$i])."'";
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
 			//reports_incomeconsolidated
@@ -1448,5 +1448,21 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die (mysql_error());
 	}
+}
+
+function toFloat($num) {
+    $dotPos = strrpos($num, '.');
+    $commaPos = strrpos($num, ',');
+    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos : 
+        ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+   
+    if (!$sep) {
+        return floatval(preg_replace("/[^\-0-9]/", "", $num));
+    } 
+
+    return floatval(
+        preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
+        preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
+    );
 }
 ?>
