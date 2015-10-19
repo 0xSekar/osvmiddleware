@@ -28,7 +28,7 @@ set_time_limit(0);                   // ignore php timeout
                         $query .= "'".($rawdata["IncomeTaxes"]/$rawdata["IncomeBeforeTaxes"])."',";
                         $query .= "'".($rawdata["IncomeBeforeTaxes"]-$rawdata["IncomeTaxes"])."',";
                         $query .= "'".($rawdata["NetIncome"]/$rawdata["TotalRevenue"])."',";
-                        $query .= "'".($rawdata["DividendsPaid"]/$rawdata["SharesOutstandingBasic"])."',";
+                        $query .= "'".(-($rawdata["DividendsPaid"][$i])/($rawdata["SharesOutstandingBasic"][$i]*1000000))."',";
                         $query .= "'".($rawdata["CurrentPortionofLongtermDebt"]+$rawdata["ShorttermBorrowings"])."',";
                         $query .= "'".($rawdata["TotalLongtermDebt"]+$rawdata["NotesPayable"])."',";
                         $query .= "'".($rawdata["LongtermDebtProceeds"]+$rawdata["LongtermDebtPayments"])."',";

@@ -621,7 +621,7 @@ function update_raw_data_tickers($dates, $rawdata) {
                         $query .= "'".($rawdata["IncomeTaxes"][$i]/$rawdata["IncomeBeforeTaxes"][$i])."',";
                         $query .= "'".($rawdata["IncomeBeforeTaxes"][$i]-$rawdata["IncomeTaxes"][$i])."',";
                         $query .= "'".($rawdata["NetIncome"][$i]/$rawdata["TotalRevenue"][$i])."',";
-                        $query .= "'".($rawdata["DividendsPaid"][$i]/$rawdata["SharesOutstandingBasic"][$i])."',";
+                        $query .= "'".(-($rawdata["DividendsPaid"][$i])/(toFloat($rawdata["SharesOutstandingBasic"][$i])*1000000))."',";
                         $query .= "'".($rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["ShorttermBorrowings"][$i])."',";
                         $query .= "'".($rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i])."',";
                         $query .= "'".($rawdata["LongtermDebtProceeds"][$i]+$rawdata["LongtermDebtPayments"][$i])."',";
@@ -1093,7 +1093,7 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= "'".($rawdata["IncomeTaxes"][$MRQRow]/$rawdata["IncomeBeforeTaxes"][$MRQRow])."',";
                 $query .= "'".($rawdata["IncomeBeforeTaxes"][$MRQRow]-$rawdata["IncomeTaxes"][$MRQRow])."',";
                 $query .= "'".($rawdata["NetIncome"][$MRQRow]/$rawdata["TotalRevenue"][$MRQRow])."',";
-                $query .= "'".($rawdata["DividendsPaid"][$MRQRow]/$rawdata["SharesOutstandingBasic"][$MRQRow])."',";
+		$query .= "'".(-($rawdata["DividendsPaid"][$MRQRow])/(toFloat($rawdata["SharesOutstandingBasic"][$MRQRow])*1000000))."',";
                 $query .= "'".($rawdata["CurrentPortionofLongtermDebt"][$MRQRow]+$rawdata["ShorttermBorrowings"][$MRQRow])."',";
                 $query .= "'".($rawdata["TotalLongtermDebt"][$MRQRow]+$rawdata["NotesPayable"][$MRQRow])."',";
                 $query .= "'".($rawdata["LongtermDebtProceeds"][$MRQRow]+$rawdata["LongtermDebtPayments"][$MRQRow])."',";
@@ -1116,7 +1116,7 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= "'".($rawdata["IncomeTaxes"][$PMRQRow]/$rawdata["IncomeBeforeTaxes"][$PMRQRow])."',";
                 $query .= "'".($rawdata["IncomeBeforeTaxes"][$PMRQRow]-$rawdata["IncomeTaxes"][$PMRQRow])."',";
                 $query .= "'".($rawdata["NetIncome"][$PMRQRow]/$rawdata["TotalRevenue"][$PMRQRow])."',";
-                $query .= "'".($rawdata["DividendsPaid"][$PMRQRow]/$rawdata["SharesOutstandingBasic"][$PMRQRow])."',";
+		$query .= "'".(-($rawdata["DividendsPaid"][$PMRQRow])/(toFloat($rawdata["SharesOutstandingBasic"][$PMRQRow])*1000000))."',";
                 $query .= "'".($rawdata["CurrentPortionofLongtermDebt"][$PMRQRow]+$rawdata["ShorttermBorrowings"][$PMRQRow])."',";
                 $query .= "'".($rawdata["TotalLongtermDebt"][$PMRQRow]+$rawdata["NotesPayable"][$PMRQRow])."',";
                 $query .= "'".($rawdata["LongtermDebtProceeds"][$PMRQRow]+$rawdata["LongtermDebtPayments"][$PMRQRow])."',";
@@ -1415,7 +1415,7 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= "'".(($rawdata["IncomeTaxes"][23]+$rawdata["IncomeTaxes"][24]+$rawdata["IncomeTaxes"][25]+$rawdata["IncomeTaxes"][26])/($rawdata["IncomeBeforeTaxes"][23]+$rawdata["IncomeBeforeTaxes"][24]+$rawdata["IncomeBeforeTaxes"][25]+$rawdata["IncomeBeforeTaxes"][26]))."',";
                 $query .= "'".(($rawdata["IncomeBeforeTaxes"][23]+$rawdata["IncomeBeforeTaxes"][24]+$rawdata["IncomeBeforeTaxes"][25]+$rawdata["IncomeBeforeTaxes"][26])-($rawdata["IncomeTaxes"][23]+$rawdata["IncomeTaxes"][24]+$rawdata["IncomeTaxes"][25]+$rawdata["IncomeTaxes"][26]))."',";
                 $query .= "'".(($rawdata["NetIncome"][23]+$rawdata["NetIncome"][24]+$rawdata["NetIncome"][25]+$rawdata["NetIncome"][26])/($rawdata["TotalRevenue"][23]+$rawdata["TotalRevenue"][24]+$rawdata["TotalRevenue"][25]+$rawdata["TotalRevenue"][26]))."',";
-                $query .= "'".(($rawdata["DividendsPaid"][23]+$rawdata["DividendsPaid"][24]+$rawdata["DividendsPaid"][25]+$rawdata["DividendsPaid"][26])/($rawdata["SharesOutstandingBasic"][23]+$rawdata["SharesOutstandingBasic"][24]+$rawdata["SharesOutstandingBasic"][25]+$rawdata["SharesOutstandingBasic"][26]))."',";
+                $query .= "'".(-($rawdata["DividendsPaid"][23]+$rawdata["DividendsPaid"][24]+$rawdata["DividendsPaid"][25]+$rawdata["DividendsPaid"][26])/((toFloat($rawdata["SharesOutstandingBasic"][23])+toFloat($rawdata["SharesOutstandingBasic"][24])+toFloat($rawdata["SharesOutstandingBasic"][25])+toFloat($rawdata["SharesOutstandingBasic"][26]))*1000000))."',";
                 $query .= "'".(($rawdata["CurrentPortionofLongtermDebt"][23]+$rawdata["CurrentPortionofLongtermDebt"][24]+$rawdata["CurrentPortionofLongtermDebt"][25]+$rawdata["CurrentPortionofLongtermDebt"][26])+($rawdata["ShorttermBorrowings"][23]+$rawdata["ShorttermBorrowings"][24]+$rawdata["ShorttermBorrowings"][25]+$rawdata["ShorttermBorrowings"][26]))."',";
                 $query .= "'".(($rawdata["TotalLongtermDebt"][23]+$rawdata["TotalLongtermDebt"][24]+$rawdata["TotalLongtermDebt"][25]+$rawdata["TotalLongtermDebt"][26])+($rawdata["NotesPayable"][23]+$rawdata["NotesPayable"][24]+$rawdata["NotesPayable"][25]+$rawdata["NotesPayable"][26]))."',";
                 $query .= "'".(($rawdata["LongtermDebtProceeds"][23]+$rawdata["LongtermDebtProceeds"][24]+$rawdata["LongtermDebtProceeds"][25]+$rawdata["LongtermDebtProceeds"][26])+($rawdata["LongtermDebtPayments"][23]+$rawdata["LongtermDebtPayments"][24]+$rawdata["LongtermDebtPayments"][25]+$rawdata["LongtermDebtPayments"][26]))."',";
@@ -1438,7 +1438,7 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= "'".(($rawdata["IncomeTaxes"][19]+$rawdata["IncomeTaxes"][20]+$rawdata["IncomeTaxes"][21]+$rawdata["IncomeTaxes"][22])/($rawdata["IncomeBeforeTaxes"][19]+$rawdata["IncomeBeforeTaxes"][20]+$rawdata["IncomeBeforeTaxes"][21]+$rawdata["IncomeBeforeTaxes"][22]))."',";
                 $query .= "'".(($rawdata["IncomeBeforeTaxes"][19]+$rawdata["IncomeBeforeTaxes"][20]+$rawdata["IncomeBeforeTaxes"][21]+$rawdata["IncomeBeforeTaxes"][22])-($rawdata["IncomeTaxes"][19]+$rawdata["IncomeTaxes"][20]+$rawdata["IncomeTaxes"][21]+$rawdata["IncomeTaxes"][22]))."',";
                 $query .= "'".(($rawdata["NetIncome"][19]+$rawdata["NetIncome"][20]+$rawdata["NetIncome"][21]+$rawdata["NetIncome"][22])/($rawdata["TotalRevenue"][19]+$rawdata["TotalRevenue"][20]+$rawdata["TotalRevenue"][21]+$rawdata["TotalRevenue"][22]))."',";
-                $query .= "'".(($rawdata["DividendsPaid"][19]+$rawdata["DividendsPaid"][20]+$rawdata["DividendsPaid"][21]+$rawdata["DividendsPaid"][22])/($rawdata["SharesOutstandingBasic"][19]+$rawdata["SharesOutstandingBasic"][20]+$rawdata["SharesOutstandingBasic"][21]+$rawdata["SharesOutstandingBasic"][22]))."',";
+                $query .= "'".(-($rawdata["DividendsPaid"][19]+$rawdata["DividendsPaid"][20]+$rawdata["DividendsPaid"][21]+$rawdata["DividendsPaid"][22])/((toFloat($rawdata["SharesOutstandingBasic"][19])+toFloat($rawdata["SharesOutstandingBasic"][20])+toFloat($rawdata["SharesOutstandingBasic"][21])+toFloat($rawdata["SharesOutstandingBasic"][22]))*1000000))."',";
                 $query .= "'".(($rawdata["CurrentPortionofLongtermDebt"][19]+$rawdata["CurrentPortionofLongtermDebt"][20]+$rawdata["CurrentPortionofLongtermDebt"][21]+$rawdata["CurrentPortionofLongtermDebt"][22])+($rawdata["ShorttermBorrowings"][19]+$rawdata["ShorttermBorrowings"][20]+$rawdata["ShorttermBorrowings"][21]+$rawdata["ShorttermBorrowings"][22]))."',";
                 $query .= "'".(($rawdata["TotalLongtermDebt"][19]+$rawdata["TotalLongtermDebt"][20]+$rawdata["TotalLongtermDebt"][21]+$rawdata["TotalLongtermDebt"][22])+($rawdata["NotesPayable"][19]+$rawdata["NotesPayable"][20]+$rawdata["NotesPayable"][21]+$rawdata["NotesPayable"][22]))."',";
                 $query .= "'".(($rawdata["LongtermDebtProceeds"][19]+$rawdata["LongtermDebtProceeds"][20]+$rawdata["LongtermDebtProceeds"][21]+$rawdata["LongtermDebtProceeds"][22])+($rawdata["LongtermDebtPayments"][19]+$rawdata["LongtermDebtPayments"][20]+$rawdata["LongtermDebtPayments"][21]+$rawdata["LongtermDebtPayments"][22]))."',";
