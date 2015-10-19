@@ -639,7 +639,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	$stock_type = "ADR";
 	$MRQRow = 10;
 	$PMRQRow = 9;
-	if($rawdata["FormType"][10] == "10-K" || $rawdata["FormType"][10] == "10-Q" || $rawdata["FormType"][10] == "8-k" || $rawdata["FormType"][10] == "424B4") {
+	if($rawdata["Country"] == "UNITED STATES OF AMERICA") {
 		$stock_type = "USA";
 		$MRQRow = 26;
 		$PMRQRow = 25;
