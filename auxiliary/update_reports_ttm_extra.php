@@ -23,7 +23,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	if($rawdata["Country"] == "UNITED STATES OF AMERICA") {
 		$stock_type = "USA";
 		$MRQRow = 26;
-		$PMRQRow = 25;
+		$PMRQRow = 22;
 	}
 
 	//Load Balance MRQ data
