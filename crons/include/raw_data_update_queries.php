@@ -2,8 +2,8 @@
 function update_raw_data_tickers($dates, $rawdata) {
 	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios","reports_financialscustom");
 	$ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
-	$ttm_tables = array("ttm_balanceconsolidated","ttm_balancefull","ttm_cashflowconsolidated","ttm_cashflowfull","ttm_incomeconsolidated","ttm_incomefull","ttm_financialscustom");
-	$pttm_tables = array("pttm_balanceconsolidated","pttm_balancefull","pttm_cashflowconsolidated","pttm_cashflowfull","pttm_incomeconsolidated","pttm_incomefull","pttm_financialscustom");
+	$ttm_tables = array("ttm_balanceconsolidated","ttm_balancefull","ttm_cashflowconsolidated","ttm_cashflowfull","ttm_incomeconsolidated","ttm_incomefull","ttm_financialscustom", "ttm_gf_data");
+	$pttm_tables = array("pttm_balanceconsolidated","pttm_balancefull","pttm_cashflowconsolidated","pttm_cashflowfull","pttm_incomeconsolidated","pttm_incomefull","pttm_financialscustom", "pttm_gf_data");
 
         //Delete all reports before updating to be sure we do not miss any manual update
         //as this is a batch process, it will not impact on the UE
@@ -804,6 +804,50 @@ function update_raw_data_tickers($dates, $rawdata) {
 
 	//Cashflow and Financial
 	if($stock_type == "ADR") {
+                $query = "INSERT INTO `ttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
+                $query .= "'".$dates->ticker_id."',";
+                $query .= "'".toFloat($rawdata["InterestIncome"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InterestExpense"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["EPSBasic"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["EPSDiluted"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingDiluted"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesRawMaterialsComponents"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesWorkInProcess"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesInventoriesAdjustments"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesFinishedGoods"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesOther"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["TotalInventories"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["LandAndImprovements"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["BuildingsAndImprovements"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["MachineryFurnitureEquipment"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["ConstructionInProgress"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["GrossPropertyPlantandEquipment"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingBasic"][$MRQRow])."'";
+                $query .= ")";
+                mysql_query($query) or die (mysql_error());
+
+                $query = "INSERT INTO `pttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
+                $query .= "'".$dates->ticker_id."',";
+                $query .= "'".toFloat($rawdata["InterestIncome"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InterestExpense"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["EPSBasic"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["EPSDiluted"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingDiluted"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesRawMaterialsComponents"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesWorkInProcess"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesInventoriesAdjustments"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesFinishedGoods"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesOther"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["TotalInventories"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["LandAndImprovements"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["BuildingsAndImprovements"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["MachineryFurnitureEquipment"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["ConstructionInProgress"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["GrossPropertyPlantandEquipment"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingBasic"][$PMRQRow])."'";
+                $query .= ")";
+                mysql_query($query) or die (mysql_error());
+
 		$query = "INSERT INTO `ttm_cashflowconsolidated` (`ticker_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
 	       	$query .= "'".$dates->ticker_id."',";
         	$query .= "'".$rawdata["ChangeinCurrentAssets"][$MRQRow]."',";
@@ -1126,6 +1170,50 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die (mysql_error());
 	} else {
+                $query = "INSERT INTO `ttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
+                $query .= "'".$dates->ticker_id."',";
+                $query .= "'".(toFloat($rawdata["InterestIncome"][23])+toFloat($rawdata["InterestIncome"][24])+toFloat($rawdata["InterestIncome"][25])+toFloat($rawdata["InterestIncome"][26]))."',";
+                $query .= "'".(toFloat($rawdata["InterestExpense"][23])+toFloat($rawdata["InterestExpense"][24])+toFloat($rawdata["InterestExpense"][25])+toFloat($rawdata["InterestExpense"][26]))."',";
+                $query .= "'".(toFloat($rawdata["EPSBasic"][23])+toFloat($rawdata["EPSBasic"][24])+toFloat($rawdata["EPSBasic"][25])+toFloat($rawdata["EPSBasic"][26]))."',";
+                $query .= "'".(toFloat($rawdata["EPSDiluted"][23])+toFloat($rawdata["EPSDiluted"][24])+toFloat($rawdata["EPSDiluted"][25])+toFloat($rawdata["EPSDiluted"][26]))."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingDiluted"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesRawMaterialsComponents"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesWorkInProcess"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesInventoriesAdjustments"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesFinishedGoods"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesOther"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["TotalInventories"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["LandAndImprovements"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["BuildingsAndImprovements"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["MachineryFurnitureEquipment"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["ConstructionInProgress"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["GrossPropertyPlantandEquipment"][$MRQRow])."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingBasic"][$MRQRow])."'";
+                $query .= ")";
+                mysql_query($query) or die (mysql_error());
+
+                $query = "INSERT INTO `pttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
+                $query .= "'".$dates->ticker_id."',";
+                $query .= "'".(toFloat($rawdata["InterestIncome"][19])+toFloat($rawdata["InterestIncome"][20])+toFloat($rawdata["InterestIncome"][21])+toFloat($rawdata["InterestIncome"][22]))."',";
+                $query .= "'".(toFloat($rawdata["InterestExpense"][19])+toFloat($rawdata["InterestExpense"][20])+toFloat($rawdata["InterestExpense"][21])+toFloat($rawdata["InterestExpense"][22]))."',";
+                $query .= "'".(toFloat($rawdata["EPSBasic"][19])+toFloat($rawdata["EPSBasic"][20])+toFloat($rawdata["EPSBasic"][21])+toFloat($rawdata["EPSBasic"][22]))."',";
+                $query .= "'".(toFloat($rawdata["EPSDiluted"][19])+toFloat($rawdata["EPSDiluted"][20])+toFloat($rawdata["EPSDiluted"][21])+toFloat($rawdata["EPSDiluted"][22]))."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingDiluted"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesRawMaterialsComponents"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesWorkInProcess"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesInventoriesAdjustments"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesFinishedGoods"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["InventoriesOther"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["TotalInventories"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["LandAndImprovements"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["BuildingsAndImprovements"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["MachineryFurnitureEquipment"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["ConstructionInProgress"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["GrossPropertyPlantandEquipment"][$PMRQRow])."',";
+                $query .= "'".toFloat($rawdata["SharesOutstandingBasic"][$PMRQRow])."'";
+                $query .= ")";
+                mysql_query($query) or die (mysql_error());
+
 		$query = "INSERT INTO `ttm_cashflowconsolidated` (`ticker_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
 	       	$query .= "'".$dates->ticker_id."',";
         	$query .= "'".($rawdata["ChangeinCurrentAssets"][23]+$rawdata["ChangeinCurrentAssets"][24]+$rawdata["ChangeinCurrentAssets"][25]+$rawdata["ChangeinCurrentAssets"][26])."',";
@@ -1415,9 +1503,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= "'".(($rawdata["IncomeTaxes"][23]+$rawdata["IncomeTaxes"][24]+$rawdata["IncomeTaxes"][25]+$rawdata["IncomeTaxes"][26])/($rawdata["IncomeBeforeTaxes"][23]+$rawdata["IncomeBeforeTaxes"][24]+$rawdata["IncomeBeforeTaxes"][25]+$rawdata["IncomeBeforeTaxes"][26]))."',";
                 $query .= "'".(($rawdata["IncomeBeforeTaxes"][23]+$rawdata["IncomeBeforeTaxes"][24]+$rawdata["IncomeBeforeTaxes"][25]+$rawdata["IncomeBeforeTaxes"][26])-($rawdata["IncomeTaxes"][23]+$rawdata["IncomeTaxes"][24]+$rawdata["IncomeTaxes"][25]+$rawdata["IncomeTaxes"][26]))."',";
                 $query .= "'".(($rawdata["NetIncome"][23]+$rawdata["NetIncome"][24]+$rawdata["NetIncome"][25]+$rawdata["NetIncome"][26])/($rawdata["TotalRevenue"][23]+$rawdata["TotalRevenue"][24]+$rawdata["TotalRevenue"][25]+$rawdata["TotalRevenue"][26]))."',";
-                $query .= "'".(-($rawdata["DividendsPaid"][23]+$rawdata["DividendsPaid"][24]+$rawdata["DividendsPaid"][25]+$rawdata["DividendsPaid"][26])/((toFloat($rawdata["SharesOutstandingBasic"][23])+toFloat($rawdata["SharesOutstandingBasic"][24])+toFloat($rawdata["SharesOutstandingBasic"][25])+toFloat($rawdata["SharesOutstandingBasic"][26]))*1000000))."',";
-                $query .= "'".(($rawdata["CurrentPortionofLongtermDebt"][23]+$rawdata["CurrentPortionofLongtermDebt"][24]+$rawdata["CurrentPortionofLongtermDebt"][25]+$rawdata["CurrentPortionofLongtermDebt"][26])+($rawdata["ShorttermBorrowings"][23]+$rawdata["ShorttermBorrowings"][24]+$rawdata["ShorttermBorrowings"][25]+$rawdata["ShorttermBorrowings"][26]))."',";
-                $query .= "'".(($rawdata["TotalLongtermDebt"][23]+$rawdata["TotalLongtermDebt"][24]+$rawdata["TotalLongtermDebt"][25]+$rawdata["TotalLongtermDebt"][26])+($rawdata["NotesPayable"][23]+$rawdata["NotesPayable"][24]+$rawdata["NotesPayable"][25]+$rawdata["NotesPayable"][26]))."',";
+		$query .= "'".(-($rawdata["DividendsPaid"][23]/(toFloat($rawdata["SharesOutstandingBasic"][23])*1000000))-($rawdata["DividendsPaid"][24]/(toFloat($rawdata["SharesOutstandingBasic"][24])*1000000))-($rawdata["DividendsPaid"][25]/(toFloat($rawdata["SharesOutstandingBasic"][25])*1000000))-($rawdata["DividendsPaid"][26]/(toFloat($rawdata["SharesOutstandingBasic"][26])*1000000)))."',";
+		$query .= "'".($rawdata["CurrentPortionofLongtermDebt"][$MRQRow]+$rawdata["ShorttermBorrowings"][$MRQRow])."',";
+		$query .= "'".($rawdata["TotalLongtermDebt"][$MRQRow]+$rawdata["NotesPayable"][$MRQRow])."',";
                 $query .= "'".(($rawdata["LongtermDebtProceeds"][23]+$rawdata["LongtermDebtProceeds"][24]+$rawdata["LongtermDebtProceeds"][25]+$rawdata["LongtermDebtProceeds"][26])+($rawdata["LongtermDebtPayments"][23]+$rawdata["LongtermDebtPayments"][24]+$rawdata["LongtermDebtPayments"][25]+$rawdata["LongtermDebtPayments"][26]))."',";
                 $query .= "'".(-($rawdata["CapitalExpenditures"][23]+$rawdata["CapitalExpenditures"][24]+$rawdata["CapitalExpenditures"][25]+$rawdata["CapitalExpenditures"][26]))."',";
                 $query .= "'".(($rawdata["CashfromOperatingActivities"][23]+$rawdata["CashfromOperatingActivities"][24]+$rawdata["CashfromOperatingActivities"][25]+$rawdata["CashfromOperatingActivities"][26])+($rawdata["CapitalExpenditures"][23]+$rawdata["CapitalExpenditures"][24]+$rawdata["CapitalExpenditures"][25]+$rawdata["CapitalExpenditures"][26]))."',";
@@ -1438,9 +1526,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= "'".(($rawdata["IncomeTaxes"][19]+$rawdata["IncomeTaxes"][20]+$rawdata["IncomeTaxes"][21]+$rawdata["IncomeTaxes"][22])/($rawdata["IncomeBeforeTaxes"][19]+$rawdata["IncomeBeforeTaxes"][20]+$rawdata["IncomeBeforeTaxes"][21]+$rawdata["IncomeBeforeTaxes"][22]))."',";
                 $query .= "'".(($rawdata["IncomeBeforeTaxes"][19]+$rawdata["IncomeBeforeTaxes"][20]+$rawdata["IncomeBeforeTaxes"][21]+$rawdata["IncomeBeforeTaxes"][22])-($rawdata["IncomeTaxes"][19]+$rawdata["IncomeTaxes"][20]+$rawdata["IncomeTaxes"][21]+$rawdata["IncomeTaxes"][22]))."',";
                 $query .= "'".(($rawdata["NetIncome"][19]+$rawdata["NetIncome"][20]+$rawdata["NetIncome"][21]+$rawdata["NetIncome"][22])/($rawdata["TotalRevenue"][19]+$rawdata["TotalRevenue"][20]+$rawdata["TotalRevenue"][21]+$rawdata["TotalRevenue"][22]))."',";
-                $query .= "'".(-($rawdata["DividendsPaid"][19]+$rawdata["DividendsPaid"][20]+$rawdata["DividendsPaid"][21]+$rawdata["DividendsPaid"][22])/((toFloat($rawdata["SharesOutstandingBasic"][19])+toFloat($rawdata["SharesOutstandingBasic"][20])+toFloat($rawdata["SharesOutstandingBasic"][21])+toFloat($rawdata["SharesOutstandingBasic"][22]))*1000000))."',";
-                $query .= "'".(($rawdata["CurrentPortionofLongtermDebt"][19]+$rawdata["CurrentPortionofLongtermDebt"][20]+$rawdata["CurrentPortionofLongtermDebt"][21]+$rawdata["CurrentPortionofLongtermDebt"][22])+($rawdata["ShorttermBorrowings"][19]+$rawdata["ShorttermBorrowings"][20]+$rawdata["ShorttermBorrowings"][21]+$rawdata["ShorttermBorrowings"][22]))."',";
-                $query .= "'".(($rawdata["TotalLongtermDebt"][19]+$rawdata["TotalLongtermDebt"][20]+$rawdata["TotalLongtermDebt"][21]+$rawdata["TotalLongtermDebt"][22])+($rawdata["NotesPayable"][19]+$rawdata["NotesPayable"][20]+$rawdata["NotesPayable"][21]+$rawdata["NotesPayable"][22]))."',";
+		$query .= "'".(-($rawdata["DividendsPaid"][19]/(toFloat($rawdata["SharesOutstandingBasic"][19])*1000000))-($rawdata["DividendsPaid"][20]/(toFloat($rawdata["SharesOutstandingBasic"][20])*1000000))-($rawdata["DividendsPaid"][21]/(toFloat($rawdata["SharesOutstandingBasic"][21])*1000000))-($rawdata["DividendsPaid"][22]/(toFloat($rawdata["SharesOutstandingBasic"][22])*1000000)))."',";
+                $query .= "'".($rawdata["CurrentPortionofLongtermDebt"][$PMRQRow]+$rawdata["ShorttermBorrowings"][$PMRQRow])."',";
+                $query .= "'".($rawdata["TotalLongtermDebt"][$PMRQRow]+$rawdata["NotesPayable"][$PMRQRow])."',";
                 $query .= "'".(($rawdata["LongtermDebtProceeds"][19]+$rawdata["LongtermDebtProceeds"][20]+$rawdata["LongtermDebtProceeds"][21]+$rawdata["LongtermDebtProceeds"][22])+($rawdata["LongtermDebtPayments"][19]+$rawdata["LongtermDebtPayments"][20]+$rawdata["LongtermDebtPayments"][21]+$rawdata["LongtermDebtPayments"][22]))."',";
                 $query .= "'".(-($rawdata["CapitalExpenditures"][19]+$rawdata["CapitalExpenditures"][20]+$rawdata["CapitalExpenditures"][21]+$rawdata["CapitalExpenditures"][22]))."',";
                 $query .= "'".(($rawdata["CashfromOperatingActivities"][19]+$rawdata["CashfromOperatingActivities"][20]+$rawdata["CashfromOperatingActivities"][21]+$rawdata["CashfromOperatingActivities"][22])+($rawdata["CapitalExpenditures"][19]+$rawdata["CapitalExpenditures"][20]+$rawdata["CapitalExpenditures"][21]+$rawdata["CapitalExpenditures"][22]))."',";
