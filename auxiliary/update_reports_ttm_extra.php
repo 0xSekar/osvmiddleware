@@ -23,7 +23,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	if($rawdata["Country"] == "UNITED STATES OF AMERICA") {
 		$stock_type = "USA";
 		$MRQRow = 26;
-		$PMRQRow = 22;
+		$PMRQRow = 23;
 	}
 
 	//Load Balance MRQ data
@@ -807,10 +807,10 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= "'".($rawdata["CostOperatingExpenses"][23]+$rawdata["CostOperatingExpenses"][24]+$rawdata["CostOperatingExpenses"][25]+$rawdata["CostOperatingExpenses"][26])."',";
        		$query .= "'".($rawdata["DepreciationExpense"][23]+$rawdata["DepreciationExpense"][24]+$rawdata["DepreciationExpense"][25]+$rawdata["DepreciationExpense"][26])."',";
       		$query .= "'".($rawdata["DilutedEPSNetIncomefromContinuingOperations"][23]+$rawdata["DilutedEPSNetIncomefromContinuingOperations"][24]+$rawdata["DilutedEPSNetIncomefromContinuingOperations"][25]+$rawdata["DilutedEPSNetIncomefromContinuingOperations"][26])."',";
-       		$query .= "'".($rawdata["DilutedWeightedAverageShares"][23]+$rawdata["DilutedWeightedAverageShares"][24]+$rawdata["DilutedWeightedAverageShares"][25]+$rawdata["DilutedWeightedAverageShares"][26])."',";
+		$query .= "'".$rawdata["DilutedWeightedAverageShares"][$MRQRow]."',";
        		$query .= "'".($rawdata["AmortizationExpense"][23]+$rawdata["AmortizationExpense"][24]+$rawdata["AmortizationExpense"][25]+$rawdata["AmortizationExpense"][26])."',";
        		$query .= "'".($rawdata["BasicEPSNetIncomefromContinuingOperations"][23]+$rawdata["BasicEPSNetIncomefromContinuingOperations"][24]+$rawdata["BasicEPSNetIncomefromContinuingOperations"][25]+$rawdata["BasicEPSNetIncomefromContinuingOperations"][26])."',";
-       		$query .= "'".($rawdata["BasicWeightedAverageShares"][23]+$rawdata["BasicWeightedAverageShares"][24]+$rawdata["BasicWeightedAverageShares"][25]+$rawdata["BasicWeightedAverageShares"][26])."',";
+		$query .= "'".$rawdata["BasicWeightedAverageShares"][$MRQRow]."',";
       		$query .= "'".($rawdata["GeneralAdministrativeExpense"][23]+$rawdata["GeneralAdministrativeExpense"][24]+$rawdata["GeneralAdministrativeExpense"][25]+$rawdata["GeneralAdministrativeExpense"][26])."',";
        		$query .= "'".($rawdata["IncomeAfterTaxes"][23]+$rawdata["IncomeAfterTaxes"][24]+$rawdata["IncomeAfterTaxes"][25]+$rawdata["IncomeAfterTaxes"][26])."',";
        		$query .= "'".($rawdata["LaborExpense"][23]+$rawdata["LaborExpense"][24]+$rawdata["LaborExpense"][25]+$rawdata["LaborExpense"][26])."',";
@@ -847,10 +847,10 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= "'".($rawdata["CostOperatingExpenses"][19]+$rawdata["CostOperatingExpenses"][20]+$rawdata["CostOperatingExpenses"][21]+$rawdata["CostOperatingExpenses"][22])."',";
        		$query .= "'".($rawdata["DepreciationExpense"][19]+$rawdata["DepreciationExpense"][20]+$rawdata["DepreciationExpense"][21]+$rawdata["DepreciationExpense"][22])."',";
       		$query .= "'".($rawdata["DilutedEPSNetIncomefromContinuingOperations"][19]+$rawdata["DilutedEPSNetIncomefromContinuingOperations"][20]+$rawdata["DilutedEPSNetIncomefromContinuingOperations"][21]+$rawdata["DilutedEPSNetIncomefromContinuingOperations"][22])."',";
-       		$query .= "'".($rawdata["DilutedWeightedAverageShares"][19]+$rawdata["DilutedWeightedAverageShares"][20]+$rawdata["DilutedWeightedAverageShares"][21]+$rawdata["DilutedWeightedAverageShares"][22])."',";
+		$query .= "'".$rawdata["DilutedWeightedAverageShares"][$PMRQRow]."',";
        		$query .= "'".($rawdata["AmortizationExpense"][19]+$rawdata["AmortizationExpense"][20]+$rawdata["AmortizationExpense"][21]+$rawdata["AmortizationExpense"][22])."',";
        		$query .= "'".($rawdata["BasicEPSNetIncomefromContinuingOperations"][19]+$rawdata["BasicEPSNetIncomefromContinuingOperations"][20]+$rawdata["BasicEPSNetIncomefromContinuingOperations"][21]+$rawdata["BasicEPSNetIncomefromContinuingOperations"][22])."',";
-       		$query .= "'".($rawdata["BasicWeightedAverageShares"][19]+$rawdata["BasicWeightedAverageShares"][20]+$rawdata["BasicWeightedAverageShares"][21]+$rawdata["BasicWeightedAverageShares"][22])."',";
+		$query .= "'".$rawdata["BasicWeightedAverageShares"][$PMRQRow]."',";
       		$query .= "'".($rawdata["GeneralAdministrativeExpense"][19]+$rawdata["GeneralAdministrativeExpense"][20]+$rawdata["GeneralAdministrativeExpense"][21]+$rawdata["GeneralAdministrativeExpense"][22])."',";
        		$query .= "'".($rawdata["IncomeAfterTaxes"][19]+$rawdata["IncomeAfterTaxes"][20]+$rawdata["IncomeAfterTaxes"][21]+$rawdata["IncomeAfterTaxes"][22])."',";
        		$query .= "'".($rawdata["LaborExpense"][19]+$rawdata["LaborExpense"][20]+$rawdata["LaborExpense"][21]+$rawdata["LaborExpense"][22])."',";
