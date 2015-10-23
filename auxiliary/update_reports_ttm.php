@@ -49,6 +49,7 @@ echo "Updating data points... (run1)<br>\n";
 $report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios");
 $ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
 foreach ($result as $symbol) {
+	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
 	//Get last local report date and compare with remote
 	$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
 	$res = mysql_query($query) or die(mysql_error());
@@ -98,6 +99,7 @@ foreach ($result as $symbol) {
 
 echo "Updating data points... (run2)<br>\n";
 foreach ($result2 as $symbol) {
+	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
         //Get last local report date and compare with remote
         $query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
         $res = mysql_query($query) or die(mysql_error());
