@@ -87,7 +87,6 @@ foreach ($result as $symbol) {
 		while ($data = fgetcsv($csvst)) {
 			$rawdata[$data[0]] = $data;
 		}
-
 //fseek($csvst,0);
 //file_put_contents("/tmp/test.csv", $csvst);
 		//Update Raw data
@@ -137,7 +136,6 @@ foreach ($result2 as $symbol) {
                 while ($data = fgetcsv($csvst)) {
                         $rawdata[$data[0]] = $data;
                 }
-
 //fseek($csvst,0);
 //file_put_contents("/tmp/test.csv", $csvst);
                 //Update Raw data

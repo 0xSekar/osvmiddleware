@@ -20,10 +20,10 @@ function update_raw_data_tickers($dates, $rawdata) {
 	$stock_type = "ADR";
 	$MRQRow = 10;
 	$PMRQRow = 9;
-	if($rawdata["Country"] == "UNITED STATES OF AMERICA") {
+	if($rawdata["Country"][10] == "UNITED STATES OF AMERICA" || $rawdata["Country"][26] == "UNITED STATES OF AMERICA") {
 		$stock_type = "USA";
 		$MRQRow = 26;
-		$PMRQRow = 23;
+		$PMRQRow = 22;
 	}
 
 	//Load Balance MRQ data
