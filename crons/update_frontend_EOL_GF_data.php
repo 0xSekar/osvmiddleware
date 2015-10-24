@@ -108,6 +108,7 @@ foreach ($result as $symbol) {
 	//Get last local report date and compare with remote
 	$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
 	$res = mysql_query($query) or die(mysql_error());
+	if(mysql_num_rows($res) == 0) continue;
 	$dates = mysql_fetch_object($res);
 
 	//Fix for different tickers names on different databases
@@ -160,6 +161,7 @@ foreach ($result2 as $symbol) {
         //Get last local report date and compare with remote
         $query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
         $res = mysql_query($query) or die(mysql_error());
+	if(mysql_num_rows($res) == 0) continue;
         $dates = mysql_fetch_object($res);
 
         //Fix for different tickers names on different databases
