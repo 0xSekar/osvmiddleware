@@ -1,6 +1,6 @@
 <?php
 function update_raw_data_tickers($dates, $rawdata) {
-	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios","reports_financialscustom");
+	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios","reports_financialscustom","reports_key_ratios");
 	$ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
 	$ttm_tables = array("ttm_balanceconsolidated","ttm_balancefull","ttm_cashflowconsolidated","ttm_cashflowfull","ttm_incomeconsolidated","ttm_incomefull","ttm_financialscustom", "ttm_gf_data");
 	$pttm_tables = array("pttm_balanceconsolidated","pttm_balancefull","pttm_cashflowconsolidated","pttm_cashflowfull","pttm_incomeconsolidated","pttm_incomefull","pttm_financialscustom", "pttm_gf_data");
@@ -608,7 +608,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
 			//reports_financialscustom (computed data)
-                        $query = "INSERT INTO `reports_financialscustom` (`report_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                        $query = "INSERT INTO `reports_financialscustom` (`report_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                         $query .= "'".$report_id."',";
                         $query .= "'".($rawdata["CostofRevenue"][$i]/$rawdata["TotalRevenue"][$i])."',";
                         $query .= "'".($rawdata["GrossProfit"][$i]/$rawdata["TotalRevenue"][$i])."',";
@@ -630,6 +630,39 @@ function update_raw_data_tickers($dates, $rawdata) {
                         $query .= "'".($rawdata["CFNetIncome"][$i]+$rawdata["CFDepreciationAmortization"][$i]+$rawdata["EmployeeCompensation"][$i]+$rawdata["AdjustmentforSpecialCharges"][$i]+$rawdata["DeferredIncomeTaxes"][$i]+$rawdata["CapitalExpenditures"][$i]-($rawdata["ChangeinCurrentAssets"][$i]-$rawdata["ChangeinCurrentLiabilities"][$i]))."'";
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
+
+			//Populate Key Ratios only for annual reports
+/*			if($i < 11) {
+				$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
+				$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
+				$price = 0;
+				$rquote = mysql_query($qquote) or die (mysql_error());
+				if(mysql_num_rows($rquote) < 1) {
+					$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 2 days"));
+					$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
+					$rquote = mysql_query($qquote) or die (mysql_error());
+					if(mysql_num_rows($rquote) < 1) {
+						$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 4 days"));
+						$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
+						$rquote = mysql_query($qquote) or die (mysql_error());
+						if(mysql_num_rows($rquote) > 0) {
+	                                        	$price = mysql_fetch_assoc($rquote);
+		                                        $price = $price["close"];
+						}
+					} else {
+	                                        $price = mysql_fetch_assoc($rquote);
+	                                        $price = $price["close"];
+					}
+				} else {
+					$price = mysql_fetch_assoc($rquote);
+					$price = $price["close"];
+				}
+				$query = "INSERT INTO `reports_key_ratios` (`report_id`, `ReportDate`, `ReportDateAdjusted`, `SharesOutstandingDiluted`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (";
+				$query .= "'".$report_id."',";
+				
+        	                $query .= ")";
+	                        mysql_query($query) or die (mysql_error());
+			}*/
 		}
 	    }
 	}
@@ -1124,7 +1157,7 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= ")";
         	mysql_query($query) or die (mysql_error());
 
-                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".($rawdata["CostofRevenue"][$MRQRow]/$rawdata["TotalRevenue"][$MRQRow])."',";
                 $query .= "'".($rawdata["GrossProfit"][$MRQRow]/$rawdata["TotalRevenue"][$MRQRow])."',";
@@ -1147,7 +1180,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die (mysql_error());
 
-                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".($rawdata["CostofRevenue"][$PMRQRow]/$rawdata["TotalRevenue"][$PMRQRow])."',";
                 $query .= "'".($rawdata["GrossProfit"][$PMRQRow]/$rawdata["TotalRevenue"][$PMRQRow])."',";
@@ -1490,7 +1523,7 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= ")";
         	mysql_query($query) or die (mysql_error());
 
-                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".(($rawdata["CostofRevenue"][23]+$rawdata["CostofRevenue"][24]+$rawdata["CostofRevenue"][25]+$rawdata["CostofRevenue"][26])/($rawdata["TotalRevenue"][23]+$rawdata["TotalRevenue"][24]+$rawdata["TotalRevenue"][25]+$rawdata["TotalRevenue"][26]))."',";
                 $query .= "'".(($rawdata["GrossProfit"][23]+$rawdata["GrossProfit"][24]+$rawdata["GrossProfit"][25]+$rawdata["GrossProfit"][26])/($rawdata["TotalRevenue"][23]+$rawdata["TotalRevenue"][24]+$rawdata["TotalRevenue"][25]+$rawdata["TotalRevenue"][26]))."',";
@@ -1513,7 +1546,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die (mysql_error());
 
-                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".(($rawdata["CostofRevenue"][19]+$rawdata["CostofRevenue"][20]+$rawdata["CostofRevenue"][21]+$rawdata["CostofRevenue"][22])/($rawdata["TotalRevenue"][19]+$rawdata["TotalRevenue"][20]+$rawdata["TotalRevenue"][21]+$rawdata["TotalRevenue"][22]))."',";
                 $query .= "'".(($rawdata["GrossProfit"][19]+$rawdata["GrossProfit"][20]+$rawdata["GrossProfit"][21]+$rawdata["GrossProfit"][22])/($rawdata["TotalRevenue"][19]+$rawdata["TotalRevenue"][20]+$rawdata["TotalRevenue"][21]+$rawdata["TotalRevenue"][22]))."',";

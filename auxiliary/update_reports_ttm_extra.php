@@ -505,7 +505,7 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= ")";
         	mysql_query($query) or die ($query." ".mysql_error());
 
-                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".($rawdata["CostofRevenue"][$MRQRow]/$rawdata["TotalRevenue"][$MRQRow])."',";
                 $query .= "'".($rawdata["GrossProfit"][$MRQRow]/$rawdata["TotalRevenue"][$MRQRow])."',";
@@ -528,7 +528,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die ($query." ".mysql_error());
 
-                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".($rawdata["CostofRevenue"][$PMRQRow]/$rawdata["TotalRevenue"][$PMRQRow])."',";
                 $query .= "'".($rawdata["GrossProfit"][$PMRQRow]/$rawdata["TotalRevenue"][$PMRQRow])."',";
@@ -871,7 +871,7 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= ")";
         	mysql_query($query) or die ($query." ".mysql_error());
 
-                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".(($rawdata["CostofRevenue"][23]+$rawdata["CostofRevenue"][24]+$rawdata["CostofRevenue"][25]+$rawdata["CostofRevenue"][26])/($rawdata["TotalRevenue"][23]+$rawdata["TotalRevenue"][24]+$rawdata["TotalRevenue"][25]+$rawdata["TotalRevenue"][26]))."',";
                 $query .= "'".(($rawdata["GrossProfit"][23]+$rawdata["GrossProfit"][24]+$rawdata["GrossProfit"][25]+$rawdata["GrossProfit"][26])/($rawdata["TotalRevenue"][23]+$rawdata["TotalRevenue"][24]+$rawdata["TotalRevenue"][25]+$rawdata["TotalRevenue"][26]))."',";
@@ -894,7 +894,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die ($query." ".mysql_error());
 
-                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapitalExpeditures`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
+                $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
                 $query .= "'".(($rawdata["CostofRevenue"][19]+$rawdata["CostofRevenue"][20]+$rawdata["CostofRevenue"][21]+$rawdata["CostofRevenue"][22])/($rawdata["TotalRevenue"][19]+$rawdata["TotalRevenue"][20]+$rawdata["TotalRevenue"][21]+$rawdata["TotalRevenue"][22]))."',";
                 $query .= "'".(($rawdata["GrossProfit"][19]+$rawdata["GrossProfit"][20]+$rawdata["GrossProfit"][21]+$rawdata["GrossProfit"][22])/($rawdata["TotalRevenue"][19]+$rawdata["TotalRevenue"][20]+$rawdata["TotalRevenue"][21]+$rawdata["TotalRevenue"][22]))."',";
