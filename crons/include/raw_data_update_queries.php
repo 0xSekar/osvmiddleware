@@ -632,37 +632,107 @@ function update_raw_data_tickers($dates, $rawdata) {
 	        	mysql_query($query) or die (mysql_error());
 
 			//Populate Key Ratios only for annual reports
-/*			if($i < 11) {
+			if($i < 11) {
+				$CapEx = (-$rawdata["CapitalExpenditures"][$i]);
+				$FreeCashFlow = ($rawdata["CashfromOperatingActivities"][$i]+$rawdata["CapitalExpenditures"][$i]);
+				$OwnerEarningsFCF = ($rawdata["CFNetIncome"][$i]+$rawdata["CFDepreciationAmortization"][$i]+$rawdata["EmployeeCompensation"][$i]+$rawdata["AdjustmentforSpecialCharges"][$i]+$rawdata["DeferredIncomeTaxes"][$i]+$rawdata["CapitalExpenditures"][$i]-($rawdata["ChangeinCurrentAssets"][$i]-$rawdata["ChangeinCurrentLiabilities"][$i]));
+				if($i == 1) {
+					$arpy = $inpy = 0;
+				} else {
+		                        $arpy = $rawdata["AccountsReceivableTradeNet"][$i-1];
+        		                $inpy = $rawdata["InventoriesNet"][$i-1];
+				}
 				$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
 				$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
 				$price = 0;
-				$rquote = mysql_query($qquote) or die (mysql_error());
-				if(mysql_num_rows($rquote) < 1) {
-					$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 2 days"));
-					$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
-					$rquote = mysql_query($qquote) or die (mysql_error());
-					if(mysql_num_rows($rquote) < 1) {
-						$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 4 days"));
-						$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
-						$rquote = mysql_query($qquote) or die (mysql_error());
-						if(mysql_num_rows($rquote) > 0) {
-	                                        	$price = mysql_fetch_assoc($rquote);
+		                $rquote = mysql_query($qquote) or die (mysql_error());
+                		if(mysql_num_rows($rquote) < 1) {
+                        		$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 2 days"));
+                        		$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
+                        		$rquote = mysql_query($qquote) or die (mysql_error());
+                        		if(mysql_num_rows($rquote) < 1) {
+                                		$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 4 days"));
+                                		$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
+		                                $rquote = mysql_query($qquote) or die (mysql_error());
+                		                if(mysql_num_rows($rquote) > 0) {
+                                		        $price = mysql_fetch_assoc($rquote);
 		                                        $price = $price["close"];
-						}
-					} else {
-	                                        $price = mysql_fetch_assoc($rquote);
-	                                        $price = $price["close"];
-					}
-				} else {
-					$price = mysql_fetch_assoc($rquote);
-					$price = $price["close"];
-				}
-				$query = "INSERT INTO `reports_key_ratios` (`report_id`, `ReportDate`, `ReportDateAdjusted`, `SharesOutstandingDiluted`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (";
+                		                }
+		                        } else {
+                		                $price = mysql_fetch_assoc($rquote);
+                                		$price = $price["close"];
+		                        }
+                		} else {
+		                        $price = mysql_fetch_assoc($rquote);
+                		        $price = $price["close"];
+		                }
+		                $entValue = ((toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price)+$rawdata["TotalLongtermDebt"][$i]+$rawdata["TotalShorttermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["PreferredStock"][$i]+$rawdata["MinorityInterestEquityEarnings"][$i]-$rawdata["CashCashEquivalentsandShorttermInvestments"][$i]);
+                		$query = "INSERT INTO `reports_key_ratios` (`report_id`, `ReportYear`, `ReportDate`, `ReportDateAdjusted`, `SharesOutstandingDiluted`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (";
 				$query .= "'".$report_id."',";
-				
-        	                $query .= ")";
-	                        mysql_query($query) or die (mysql_error());
-			}*/
+		                $query .= "'".$rawdata["fiscalYear"][$i]."',";
+                		$query .= "'".date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]))."',";
+		                $query .= "'".$rdate."',";
+                		$query .= "'".(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000)."',";
+		                $query .= "'".$price."',";
+                		$query .= "'".($rawdata["GrossProfit"][$i]-$rawdata["OperatingExpenses"][$i]-($CapEx*(1-$rawdata["TaxRatePercent"][$i])))."',";
+		                $query .= "'".(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price)."',";
+                		$query .= "'".$entValue."',";
+		                $query .= "'".$rawdata["GoodwillIntangibleAssetsNet"][$i]."',";
+                		$query .= "'".($rawdata["TotalStockholdersEquity"][$i] - $rawdata["GoodwillIntangibleAssetsNet"][$i])."',";
+		                $query .= "'".($rawdata["CashandCashEquivalents"][$i] - max(0, ($rawdata["TotalCurrentLiabilities"][$i]-$rawdata["TotalCurrentAssets"][$i]+$rawdata["CashandCashEquivalents"][$i])))."',";
+                		$query .= "'".($rawdata["TotalShorttermDebt"][$i]+$rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["TotalStockholdersEquity"][$i])."',";
+		                $query .= "'".($rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalCurrentLiabilities"][$i])."',";
+                		$query .= "'".($price / toFloat($rawdata["EPSDiluted"][$i]))."',";
+		                $query .= "'".((((toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price)-$rawdata["CashCashEquivalentsandShorttermInvestments"][$i])/(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000))/toFloat($rawdata["EPSDiluted"][$i]))."',";
+                		$query .= "'".($entValue / $rawdata["EBITDA"][$i])."',";
+		                $query .= "'".($entValue / $rawdata["EBIT"][$i])."',";
+                		$query .= "'".($price / ($rawdata["TotalRevenue"][$i]/(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000)))."',";
+		                $query .= "'".($price / ($rawdata["TotalStockholdersEquity"][$i]/(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000)))."',";
+                		$query .= "'".($price / (($rawdata["TotalStockholdersEquity"][$i] - $rawdata["GoodwillIntangibleAssetsNet"][$i])/(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000)))."',";
+		                $query .= "'".($price / (($rawdata["GrossProfit"][$i]-$rawdata["OperatingExpenses"][$i]-($CapEx*(1-$rawdata["TaxRatePercent"][$i])))/(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000)))."',";
+                		$query .= "'".($price / ($FreeCashFlow/(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000)))."',";
+		                $query .= "'".($price / ($OwnerEarningsFCF/(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000)))."',";
+                		$query .= "'".($FreeCashFlow / $rawdata["TotalRevenue"][$i])."',";
+		                $query .= "'".($rawdata["TotalRevenue"][$i] / $FreeCashFlow)."',";
+                		$query .= "'".($rawdata["EBIT"][$i] / $entValue)."',";
+		                $query .= "'".($rawdata["CFNetIncome"][$i] / $rawdata["TotalStockholdersEquity"][$i])."',";
+                		$query .= "'".($rawdata["CFNetIncome"][$i] / $rawdata["TotalAssets"][$i])."',";
+		                $query .= "'".(($rawdata["EBIT"][$i]*(1-$rawdata["TaxRatePercent"][$i])) / ($rawdata["TotalShorttermDebt"][$i]+$rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["TotalStockholdersEquity"][$i]))."',";
+                		$query .= "'".($FreeCashFlow / ($rawdata["TotalShorttermDebt"][$i]+$rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["TotalStockholdersEquity"][$i]))."',";
+		                $query .= "'".($rawdata["GrossProfit"][$i] / $rawdata["TotalAssets"][$i])."',";
+                		$query .= "'".($rawdata["TotalAssets"][$i] / $rawdata["GrossProfit"][$i])."',";
+		                $query .= "'".(($rawdata["TotalCurrentAssets"][$i] - $rawdata["InventoriesNet"][$i]) / $rawdata["TotalCurrentLiabilities"][$i])."',";
+                		$query .= "'".($rawdata["TotalCurrentAssets"][$i] / $rawdata["TotalCurrentLiabilities"][$i])."',";
+		                $query .= "'".(($rawdata["TotalShorttermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]) / $rawdata["TotalStockholdersEquity"][$i])."',";
+                		$query .= "'".(($rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]) / $rawdata["TotalStockholdersEquity"][$i])."',";
+		                $query .= "'".($rawdata["TotalShorttermDebt"][$i] / $rawdata["TotalStockholdersEquity"][$i])."',";
+                		$query .= "'".($rawdata["TotalRevenue"][$i] / $rawdata["TotalAssets"][$i])."',";
+		                $query .= "'".($rawdata["CashCashEquivalentsandShorttermInvestments"][$i] / $rawdata["TotalRevenue"][$i])."',";
+                		$query .= "'".($rawdata["TotalReceivablesNet"][$i] / $rawdata["TotalRevenue"][$i])."',";
+		                $query .= "'".($rawdata["SellingGeneralAdministrativeExpenses"][$i] / $rawdata["TotalRevenue"][$i])."',";
+                		$query .= "'".($rawdata["ResearchDevelopmentExpense"][$i] / $rawdata["TotalRevenue"][$i])."',";
+		                $query .= "'".($rawdata["TotalReceivablesNet"][$i] / $rawdata["TotalRevenue"][$i] * 365)."',";
+                		$query .= "'".($rawdata["InventoriesNet"][$i] / $rawdata["CostofRevenue"][$i] * 365)."',";
+		                $query .= "'".($rawdata["AccountsPayable"][$i] / $rawdata["CostofRevenue"][$i] * 365)."',";
+                		$query .= "'".(($rawdata["TotalReceivablesNet"][$i] / $rawdata["TotalRevenue"][$i] * 365)+($rawdata["InventoriesNet"][$i] / $rawdata["CostofRevenue"][$i] * 365)+($rawdata["AccountsPayable"][$i] / $rawdata["CostofRevenue"][$i] * 365))."',";
+		                if($i==1) {
+                		        $query .= "'0','0','0',";
+		                } else {
+                		        $query .= "'".($rawdata["TotalRevenue"][$i] / ($arpy + $rawdata["AccountsReceivableTradeNet"][$i]))."',";
+		                        $query .= "'".($rawdata["CostofRevenue"][$i] / ($inpy + $rawdata["InventoriesNet"][$i]))."',";
+                			$query .= "'".(365 / ($rawdata["CostofRevenue"][$i] / ($inpy + $rawdata["InventoriesNet"][$i])))."',";
+		                }
+                		$query .= "'".($rawdata["GoodwillIntangibleAssetsNet"][$i] / $rawdata["TotalStockholdersEquity"][$i])."',";
+		                $query .= "'".($rawdata["InventoriesNet"][$i] / $rawdata["TotalRevenue"][$i])."',";
+                		$query .= "'".(($rawdata["TotalLongtermDebt"][$i] + $rawdata["NotesPayable"][$i]) / ($rawdata["TotalShorttermDebt"][$i]+$rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["TotalStockholdersEquity"][$i]))."',";
+		                $query .= "'".($rawdata["TotalShorttermDebt"][$i] / ($rawdata["TotalShorttermDebt"][$i]+$rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["TotalStockholdersEquity"][$i]))."',";
+                		$query .= "'".(($rawdata["TotalLongtermDebt"][$i] + $rawdata["NotesPayable"][$i]) / ($rawdata["TotalShorttermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]))."',";
+		                $query .= "'".($rawdata["TotalShorttermDebt"][$i] / ($rawdata["TotalShorttermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]))."',";
+                		$query .= "'".(($rawdata["TotalShorttermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]) / $rawdata["TotalAssets"][$i])."',";
+		                $query .= "'".((($rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalCurrentLiabilities"][$i]) / (toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000))/$price)."'";
+                		$query .= ")";
+				mysql_query($query) or die (mysql_error());
+			}
 		}
 	    }
 	}

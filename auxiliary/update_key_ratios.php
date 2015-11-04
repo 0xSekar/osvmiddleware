@@ -99,12 +99,12 @@ set_time_limit(0);                   // ignore php timeout
 		$query .= "'".($rawdata["AccountsPayable"] / $rawdata["CostofRevenue"] * 365)."',";
 		$query .= "'".(($rawdata["TotalReceivablesNet"] / $rawdata["TotalRevenue"] * 365)+($rawdata["InventoriesNet"] / $rawdata["CostofRevenue"] * 365)+($rawdata["AccountsPayable"] / $rawdata["CostofRevenue"] * 365))."',";
 		if($idChange==true) {
-			$query .= "'0','0',";
+			$query .= "'0','0','0',";
 		} else {
 			$query .= "'".($rawdata["TotalRevenue"] / ($arpy + $rawdata["AccountsReceivableTradeNet"]))."',";
 			$query .= "'".($rawdata["CostofRevenue"] / ($inpy + $rawdata["InventoriesNet"]))."',";
+			$query .= "'".(365 / ($rawdata["CostofRevenue"] / ($inpy + $rawdata["InventoriesNet"])))."',";
 		}
-		$query .= "'".(365 / ($rawdata["CostofRevenue"] / ($inpy + $rawdata["InventoriesNet"])))."',";
 		$query .= "'".($rawdata["GoodwillIntangibleAssetsNet"] / $rawdata["TotalStockholdersEquity"])."',";
 		$query .= "'".($rawdata["InventoriesNet"] / $rawdata["TotalRevenue"])."',";
 		$query .= "'".(($rawdata["TotalLongtermDebt"] + $rawdata["NotesPayable"]) / ($rawdata["TotalShorttermDebt"]+$rawdata["CurrentPortionofLongtermDebt"]+$rawdata["TotalLongtermDebt"]+$rawdata["NotesPayable"]+$rawdata["TotalStockholdersEquity"]))."',";
