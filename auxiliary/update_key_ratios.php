@@ -57,7 +57,7 @@ set_time_limit(0);                   // ignore php timeout
 		$query .= "'".$rdate."',";
 		$query .= "'".(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)."',";
 		$query .= "'".$price."',";
-		$query .= "'".($rawdata["GrossProfit"]-$rawdata["OperatingExpenses"]-($rawdata["CapEx"]*(1-$rawdata["TaxRatePercent"])))."',";
+		$query .= "'".(($rawdata["GrossProfit"]-$rawdata["OperatingExpenses"]-$rawdata["CapEx"])*(1-$rawdata["TaxRatePercent"]))."',";
 		$query .= "'".(toFloat($rawdata["SharesOutstandingDiluted"])*1000000*$price)."',";
 		$query .= "'".$entValue."',";
 		$query .= "'".$rawdata["GoodwillIntangibleAssetsNet"]."',";
@@ -72,18 +72,18 @@ set_time_limit(0);                   // ignore php timeout
 		$query .= "'".($price / ($rawdata["TotalRevenue"]/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)))."',";
 		$query .= "'".($price / ($rawdata["TotalStockholdersEquity"]/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)))."',";
 		$query .= "'".($price / (($rawdata["TotalStockholdersEquity"] - $rawdata["GoodwillIntangibleAssetsNet"])/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)))."',";
-		$query .= "'".($price / (($rawdata["GrossProfit"]-$rawdata["OperatingExpenses"]-($rawdata["CapEx"]*(1-$rawdata["TaxRatePercent"])))/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)))."',";
+		$query .= "'".($price / ((($rawdata["GrossProfit"]-$rawdata["OperatingExpenses"]-$rawdata["CapEx"])*(1-$rawdata["TaxRatePercent"]))/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)))."',";
 		$query .= "'".($price / ($rawdata["FreeCashFlow"]/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)))."',";
 		$query .= "'".($price / ($rawdata["OwnerEarningsFCF"]/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000)))."',";
 		$query .= "'".($rawdata["FreeCashFlow"] / $rawdata["TotalRevenue"])."',";
-		$query .= "'".($rawdata["TotalRevenue"] / $rawdata["FreeCashFlow"])."',";
+		$query .= "'".(1 / ($price / ($rawdata["FreeCashFlow"]/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000))))."',";
 		$query .= "'".($rawdata["EBIT"] / $entValue)."',";
-		$query .= "'".($rawdata["CFNetIncome"] / $rawdata["TotalStockholdersEquity"])."',";
-		$query .= "'".($rawdata["CFNetIncome"] / $rawdata["TotalAssets"])."',";
+		$query .= "'".($rawdata["NetIncome"] / $rawdata["TotalStockholdersEquity"])."',";
+		$query .= "'".($rawdata["NetIncome"] / $rawdata["TotalAssets"])."',";
 		$query .= "'".(($rawdata["EBIT"]*(1-$rawdata["TaxRatePercent"])) / ($rawdata["TotalShorttermDebt"]+$rawdata["CurrentPortionofLongtermDebt"]+$rawdata["TotalLongtermDebt"]+$rawdata["NotesPayable"]+$rawdata["TotalStockholdersEquity"]))."',";
 		$query .= "'".($rawdata["FreeCashFlow"] / ($rawdata["TotalShorttermDebt"]+$rawdata["CurrentPortionofLongtermDebt"]+$rawdata["TotalLongtermDebt"]+$rawdata["NotesPayable"]+$rawdata["TotalStockholdersEquity"]))."',";
 		$query .= "'".($rawdata["GrossProfit"] / $rawdata["TotalAssets"])."',";
-		$query .= "'".($rawdata["TotalAssets"] / $rawdata["GrossProfit"])."',";
+		$query .= "'".(1 / ($price / ($rawdata["TotalStockholdersEquity"]/(toFloat($rawdata["SharesOutstandingDiluted"])*1000000))))."',";
 		$query .= "'".(($rawdata["TotalCurrentAssets"] - $rawdata["InventoriesNet"]) / $rawdata["TotalCurrentLiabilities"])."',";
 		$query .= "'".($rawdata["TotalCurrentAssets"] / $rawdata["TotalCurrentLiabilities"])."',";
 		$query .= "'".(($rawdata["TotalShorttermDebt"]+$rawdata["TotalLongtermDebt"]+$rawdata["NotesPayable"]) / $rawdata["TotalStockholdersEquity"])."',";
@@ -97,13 +97,15 @@ set_time_limit(0);                   // ignore php timeout
 		$query .= "'".($rawdata["TotalReceivablesNet"] / $rawdata["TotalRevenue"] * 365)."',";
 		$query .= "'".($rawdata["InventoriesNet"] / $rawdata["CostofRevenue"] * 365)."',";
 		$query .= "'".($rawdata["AccountsPayable"] / $rawdata["CostofRevenue"] * 365)."',";
-		$query .= "'".(($rawdata["TotalReceivablesNet"] / $rawdata["TotalRevenue"] * 365)+($rawdata["InventoriesNet"] / $rawdata["CostofRevenue"] * 365)+($rawdata["AccountsPayable"] / $rawdata["CostofRevenue"] * 365))."',";
+		$query .= "'".(($rawdata["TotalReceivablesNet"] / $rawdata["TotalRevenue"] * 365)+($rawdata["InventoriesNet"] / $rawdata["CostofRevenue"] * 365)-($rawdata["AccountsPayable"] / $rawdata["CostofRevenue"] * 365))."',";
 		if($idChange==true) {
-			$query .= "'0','0','0',";
+			$query .= "'".($rawdata["TotalRevenue"] / ($rawdata["AccountsReceivableTradeNet"]))."',";
+			$query .= "'".($rawdata["CostofRevenue"] / ($rawdata["InventoriesNet"]))."',";
+			$query .= "'".(365 / ($rawdata["CostofRevenue"] / ($rawdata["InventoriesNet"])))."',";
 		} else {
-			$query .= "'".($rawdata["TotalRevenue"] / ($arpy + $rawdata["AccountsReceivableTradeNet"]))."',";
-			$query .= "'".($rawdata["CostofRevenue"] / ($inpy + $rawdata["InventoriesNet"]))."',";
-			$query .= "'".(365 / ($rawdata["CostofRevenue"] / ($inpy + $rawdata["InventoriesNet"])))."',";
+			$query .= "'".($rawdata["TotalRevenue"] / (($arpy + $rawdata["AccountsReceivableTradeNet"])/2))."',";
+			$query .= "'".($rawdata["CostofRevenue"] / (($inpy + $rawdata["InventoriesNet"])/2))."',";
+			$query .= "'".(365 / ($rawdata["CostofRevenue"] / (($inpy + $rawdata["InventoriesNet"])/2)))."',";
 		}
 		$query .= "'".($rawdata["GoodwillIntangibleAssetsNet"] / $rawdata["TotalStockholdersEquity"])."',";
 		$query .= "'".($rawdata["InventoriesNet"] / $rawdata["TotalRevenue"])."',";
