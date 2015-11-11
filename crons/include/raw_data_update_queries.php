@@ -634,7 +634,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 			//Populate Key Ratios only for annual reports
 			//Also Populate quality checks for annual reports
 			if($i < 11) {
-				$value = 0;
+				$total = 0;
 				$CapEx = (-$rawdata["CapitalExpenditures"][$i]);
 				$FreeCashFlow = ($rawdata["CashfromOperatingActivities"][$i]+$rawdata["CapitalExpenditures"][$i]);
 				$OwnerEarningsFCF = ($rawdata["CFNetIncome"][$i]+$rawdata["CFDepreciationAmortization"][$i]+$rawdata["EmployeeCompensation"][$i]+$rawdata["AdjustmentforSpecialCharges"][$i]+$rawdata["DeferredIncomeTaxes"][$i]+$rawdata["CapitalExpenditures"][$i]-($rawdata["ChangeinCurrentAssets"][$i]-$rawdata["ChangeinCurrentLiabilities"][$i]));
