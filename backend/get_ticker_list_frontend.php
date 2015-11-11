@@ -12,9 +12,7 @@ set_time_limit(0);                   // ignore php timeout
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
-//$sql = "SELECT c.id, c.ticker, c.cik, c.company, c.exchange, c.siccode, c.entityid, r.insdate, r.reporttype
-//FROM `eol_cik_ticker` c
-$sql = "SELECT c.id, c.ticker, c.cik, c.companyname as company, c.exchange, c.formername, c.industry, c.sector, c.country, d.siccode, d.entityid, r.insdate, r.reporttype
+/*$sql = "SELECT c.id, c.ticker, c.cik, c.companyname as company, c.exchange, c.formername, c.industry, c.sector, c.country, d.siccode, d.entityid, r.insdate, r.reporttype
 FROM `eol_cik_ticker_list` c
 LEFT JOIN eol_reports r ON c.ticker = r.ticker
 LEFT JOIN eol_cik_ticker d ON c.ticker = d.ticker
@@ -24,7 +22,13 @@ SELECT MAX( insdate )
 FROM eol_reports r2
 WHERE r2.ticker = c.ticker
 GROUP BY r2.idcontrol LIMIT 1)
-GROUP BY ticker";
+GROUP BY ticker";*/
+
+$sql = "SELECT c.id, c.ticker, c.cik, c.companyname as company, c.exchange, c.formername, c.industry, c.sector, c.country, d.siccode, d.entityid, max(r.insdate) as insdate, r.reporttype
+FROM `eol_cik_ticker_list` c
+LEFT JOIN eol_reports r ON c.ticker = r.ticker
+LEFT JOIN eol_cik_ticker d ON c.ticker = d.ticker
+GROUP BY ticker, reporttype order by id, insdate desc";
 
 $res = mysql_query($sql) or die (mysql_error());
 $result = array();
