@@ -645,28 +645,13 @@ function update_raw_data_tickers($dates, $rawdata) {
         		                $inpy = $rawdata["InventoriesNet"][$i-1];
 				}
 				$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
-				$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
+				$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date <= '".$rdate."' order by report_date desc limit 1";
 				$price = 0;
 		                $rquote = mysql_query($qquote) or die (mysql_error());
-                		if(mysql_num_rows($rquote) < 1) {
-                        		$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 2 days"));
-                        		$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
-                        		$rquote = mysql_query($qquote) or die (mysql_error());
-                        		if(mysql_num_rows($rquote) < 1) {
-                                		$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i] . " - 4 days"));
-                                		$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date = '".$rdate."'";
-		                                $rquote = mysql_query($qquote) or die (mysql_error());
-                		                if(mysql_num_rows($rquote) > 0) {
-                                		        $price = mysql_fetch_assoc($rquote);
-		                                        $price = $price["close"];
-                		                }
-		                        } else {
-                		                $price = mysql_fetch_assoc($rquote);
-                                		$price = $price["close"];
-		                        }
-                		} else {
-		                        $price = mysql_fetch_assoc($rquote);
-                		        $price = $price["close"];
+                		if(mysql_num_rows($rquote) > 0) {
+		                      	$price = mysql_fetch_assoc($rquote);
+              				$rdate = $price["report_date"];
+		                        $price = $price["adj_close"];
 		                }
 		                $entValue = ((toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price)+$rawdata["TotalLongtermDebt"][$i]+$rawdata["TotalShorttermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["PreferredStock"][$i]+$rawdata["MinorityInterestEquityEarnings"][$i]-$rawdata["CashCashEquivalentsandShorttermInvestments"][$i]);
                 		$query = "INSERT INTO `reports_key_ratios` (`report_id`, `ReportYear`, `ReportDate`, `ReportDateAdjusted`, `SharesOutstandingDiluted`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (";
