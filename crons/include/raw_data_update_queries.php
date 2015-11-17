@@ -352,7 +352,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
 			//reports_balancefull
-			$query = "INSERT INTO `reports_balancefull` (`report_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`) VALUES (";
+			$query = "INSERT INTO `reports_balancefull` (`report_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (";
 	        	$query .= "'".$report_id."',";
         		$query .= "'".$rawdata["TotalDebt"][$i]."',";
         		$query .= "'".$rawdata["TotalAssetsFQ"][$i]."',";
@@ -379,7 +379,8 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= "'".$rawdata["PropertyandEquipmentGross"][$i]."',";
         		$query .= "'".$rawdata["TotalLongtermAssets"][$i]."',";
         		$query .= "'".$rawdata["TotalLongtermLiabilities"][$i]."',";
-        		$query .= "'".$rawdata["TotalSharesOutstanding"][$i]."'";
+        		$query .= "'".$rawdata["TotalSharesOutstanding"][$i]."',";
+			$query .= "'".$rawdata["ShorttermInvestments"][$i]."'";
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
 			//reports_cashflowconsolidated
@@ -427,7 +428,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
 			//reports_cashflowfull
-			$query = "INSERT INTO `reports_cashflowfull` (`report_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `ShorttermInvestments`, `TotalNoncashAdjustments`) VALUES (";
+			$query = "INSERT INTO `reports_cashflowfull` (`report_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
 	        	$query .= "'".$report_id."',";
         		$query .= "'".$rawdata["ChangeinLongtermDebtNet"][$i]."',";
         		$query .= "'".$rawdata["ChangeinShorttermBorrowingsNet"][$i]."',";
@@ -446,7 +447,6 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= "'".$rawdata["RepurchaseofEquity"][$i]."',";
         		$query .= "'".$rawdata["SaleofInvestments"][$i]."',";
         		$query .= "'".$rawdata["ShorttermBorrowings"][$i]."',";
-        		$query .= "'".$rawdata["ShorttermInvestments"][$i]."',";
         		$query .= "'".$rawdata["TotalNoncashAdjustments"][$i]."'";
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
@@ -830,7 +830,7 @@ function update_raw_data_tickers($dates, $rawdata) {
        	$query .= ")";
        	mysql_query($query) or die (mysql_error());
 
-	$query = "INSERT INTO `ttm_balancefull` (`ticker_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`) VALUES (";
+	$query = "INSERT INTO `ttm_balancefull` (`ticker_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (";
        	$query .= "'".$dates->ticker_id."',";
        	$query .= "'".$rawdata["TotalDebt"][$MRQRow]."',";
        	$query .= "'".$rawdata["TotalAssetsFQ"][$MRQRow]."',";
@@ -857,11 +857,12 @@ function update_raw_data_tickers($dates, $rawdata) {
        	$query .= "'".$rawdata["PropertyandEquipmentGross"][$MRQRow]."',";
        	$query .= "'".$rawdata["TotalLongtermAssets"][$MRQRow]."',";
        	$query .= "'".$rawdata["TotalLongtermLiabilities"][$MRQRow]."',";
-       	$query .= "'".$rawdata["TotalSharesOutstanding"][$MRQRow]."'";
+       	$query .= "'".$rawdata["TotalSharesOutstanding"][$MRQRow]."',";
+	$query .= "'".$rawdata["ShorttermInvestments"][$MRQRow]."'";
        	$query .= ")";
        	mysql_query($query) or die (mysql_error());
 
-	$query = "INSERT INTO `pttm_balancefull` (`ticker_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`) VALUES (";
+	$query = "INSERT INTO `pttm_balancefull` (`ticker_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (";
        	$query .= "'".$dates->ticker_id."',";
        	$query .= "'".$rawdata["TotalDebt"][$PMRQRow]."',";
        	$query .= "'".$rawdata["TotalAssetsFQ"][$PMRQRow]."',";
@@ -888,7 +889,8 @@ function update_raw_data_tickers($dates, $rawdata) {
        	$query .= "'".$rawdata["PropertyandEquipmentGross"][$PMRQRow]."',";
        	$query .= "'".$rawdata["TotalLongtermAssets"][$PMRQRow]."',";
        	$query .= "'".$rawdata["TotalLongtermLiabilities"][$PMRQRow]."',";
-       	$query .= "'".$rawdata["TotalSharesOutstanding"][$PMRQRow]."'";
+       	$query .= "'".$rawdata["TotalSharesOutstanding"][$PMRQRow]."',";
+	$query .= "'".$rawdata["ShorttermInvestments"][$PMRQRow]."'";
        	$query .= ")";
        	mysql_query($query) or die (mysql_error());
 
@@ -1026,7 +1028,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die (mysql_error());
 
-		$query = "INSERT INTO `ttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `ShorttermInvestments`, `TotalNoncashAdjustments`) VALUES (";
+		$query = "INSERT INTO `ttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
        		$query .= "'".$rawdata["ChangeinLongtermDebtNet"][$MRQRow]."',";
        		$query .= "'".$rawdata["ChangeinShorttermBorrowingsNet"][$MRQRow]."',";
@@ -1045,12 +1047,11 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= "'".$rawdata["RepurchaseofEquity"][$MRQRow]."',";
        		$query .= "'".$rawdata["SaleofInvestments"][$MRQRow]."',";
        		$query .= "'".$rawdata["ShorttermBorrowings"][$MRQRow]."',";
-       		$query .= "'".$rawdata["ShorttermInvestments"][$MRQRow]."',";
        		$query .= "'".$rawdata["TotalNoncashAdjustments"][$MRQRow]."'";
        		$query .= ")";
         	mysql_query($query) or die (mysql_error());
 
-		$query = "INSERT INTO `pttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `ShorttermInvestments`, `TotalNoncashAdjustments`) VALUES (";
+		$query = "INSERT INTO `pttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
        		$query .= "'".$rawdata["ChangeinLongtermDebtNet"][$PMRQRow]."',";
        		$query .= "'".$rawdata["ChangeinShorttermBorrowingsNet"][$PMRQRow]."',";
@@ -1069,7 +1070,6 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= "'".$rawdata["RepurchaseofEquity"][$PMRQRow]."',";
        		$query .= "'".$rawdata["SaleofInvestments"][$PMRQRow]."',";
        		$query .= "'".$rawdata["ShorttermBorrowings"][$PMRQRow]."',";
-       		$query .= "'".$rawdata["ShorttermInvestments"][$PMRQRow]."',";
        		$query .= "'".$rawdata["TotalNoncashAdjustments"][$PMRQRow]."'";
        		$query .= ")";
         	mysql_query($query) or die (mysql_error());
@@ -1392,7 +1392,7 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= ")";
 	       	mysql_query($query) or die (mysql_error());
 
-		$query = "INSERT INTO `ttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `ShorttermInvestments`, `TotalNoncashAdjustments`) VALUES (";
+		$query = "INSERT INTO `ttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
        		$query .= "'".($rawdata["ChangeinLongtermDebtNet"][23]+$rawdata["ChangeinLongtermDebtNet"][24]+$rawdata["ChangeinLongtermDebtNet"][25]+$rawdata["ChangeinLongtermDebtNet"][26])."',";
        		$query .= "'".($rawdata["ChangeinShorttermBorrowingsNet"][23]+$rawdata["ChangeinShorttermBorrowingsNet"][24]+$rawdata["ChangeinShorttermBorrowingsNet"][25]+$rawdata["ChangeinShorttermBorrowingsNet"][26])."',";
@@ -1411,12 +1411,11 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= "'".($rawdata["RepurchaseofEquity"][23]+$rawdata["RepurchaseofEquity"][24]+$rawdata["RepurchaseofEquity"][25]+$rawdata["RepurchaseofEquity"][26])."',";
        		$query .= "'".($rawdata["SaleofInvestments"][23]+$rawdata["SaleofInvestments"][24]+$rawdata["SaleofInvestments"][25]+$rawdata["SaleofInvestments"][26])."',";
        		$query .= "'".($rawdata["ShorttermBorrowings"][23]+$rawdata["ShorttermBorrowings"][24]+$rawdata["ShorttermBorrowings"][25]+$rawdata["ShorttermBorrowings"][26])."',";
-       		$query .= "'".($rawdata["ShorttermInvestments"][23]+$rawdata["ShorttermInvestments"][24]+$rawdata["ShorttermInvestments"][25]+$rawdata["ShorttermInvestments"][26])."',";
        		$query .= "'".($rawdata["TotalNoncashAdjustments"][23]+$rawdata["TotalNoncashAdjustments"][24]+$rawdata["TotalNoncashAdjustments"][25]+$rawdata["TotalNoncashAdjustments"][26])."'";
        		$query .= ")";
         	mysql_query($query) or die (mysql_error());
 
-		$query = "INSERT INTO `pttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `ShorttermInvestments`, `TotalNoncashAdjustments`) VALUES (";
+		$query = "INSERT INTO `pttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
        		$query .= "'".($rawdata["ChangeinLongtermDebtNet"][19]+$rawdata["ChangeinLongtermDebtNet"][20]+$rawdata["ChangeinLongtermDebtNet"][21]+$rawdata["ChangeinLongtermDebtNet"][22])."',";
        		$query .= "'".($rawdata["ChangeinShorttermBorrowingsNet"][19]+$rawdata["ChangeinShorttermBorrowingsNet"][20]+$rawdata["ChangeinShorttermBorrowingsNet"][21]+$rawdata["ChangeinShorttermBorrowingsNet"][22])."',";
@@ -1435,7 +1434,6 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= "'".($rawdata["RepurchaseofEquity"][19]+$rawdata["RepurchaseofEquity"][20]+$rawdata["RepurchaseofEquity"][21]+$rawdata["RepurchaseofEquity"][22])."',";
        		$query .= "'".($rawdata["SaleofInvestments"][19]+$rawdata["SaleofInvestments"][20]+$rawdata["SaleofInvestments"][21]+$rawdata["SaleofInvestments"][22])."',";
        		$query .= "'".($rawdata["ShorttermBorrowings"][19]+$rawdata["ShorttermBorrowings"][20]+$rawdata["ShorttermBorrowings"][21]+$rawdata["ShorttermBorrowings"][22])."',";
-       		$query .= "'".($rawdata["ShorttermInvestments"][19]+$rawdata["ShorttermInvestments"][20]+$rawdata["ShorttermInvestments"][21]+$rawdata["ShorttermInvestments"][22])."',";
        		$query .= "'".($rawdata["TotalNoncashAdjustments"][19]+$rawdata["TotalNoncashAdjustments"][20]+$rawdata["TotalNoncashAdjustments"][21]+$rawdata["TotalNoncashAdjustments"][22])."'";
        		$query .= ")";
         	mysql_query($query) or die (mysql_error());
