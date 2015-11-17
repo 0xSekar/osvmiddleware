@@ -1,6 +1,6 @@
 <?php
 function update_raw_data_tickers($dates, $rawdata) {
-	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios","reports_financialscustom","reports_key_ratios", "reports_quality_checks");
+	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios","reports_financialscustom","reports_key_ratios");
 	$ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
 	$ttm_tables = array("ttm_balanceconsolidated","ttm_balancefull","ttm_cashflowconsolidated","ttm_cashflowfull","ttm_incomeconsolidated","ttm_incomefull","ttm_financialscustom", "ttm_gf_data");
 	$pttm_tables = array("pttm_balanceconsolidated","pttm_balancefull","pttm_cashflowconsolidated","pttm_cashflowfull","pttm_incomeconsolidated","pttm_incomefull","pttm_financialscustom", "pttm_gf_data");
@@ -632,9 +632,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	        	mysql_query($query) or die (mysql_error());
 
 			//Populate Key Ratios only for annual reports
-			//Also Populate quality checks for annual reports
 			if($i < 11) {
-				$total = 0;
 				$CapEx = (-$rawdata["CapitalExpenditures"][$i]);
 				$FreeCashFlow = ($rawdata["CashfromOperatingActivities"][$i]+$rawdata["CapitalExpenditures"][$i]);
 				$OwnerEarningsFCF = ($rawdata["CFNetIncome"][$i]+$rawdata["CFDepreciationAmortization"][$i]+$rawdata["EmployeeCompensation"][$i]+$rawdata["AdjustmentforSpecialCharges"][$i]+$rawdata["DeferredIncomeTaxes"][$i]+$rawdata["CapitalExpenditures"][$i]-($rawdata["ChangeinCurrentAssets"][$i]-$rawdata["ChangeinCurrentLiabilities"][$i]));
@@ -721,91 +719,6 @@ function update_raw_data_tickers($dates, $rawdata) {
 		                $query .= "'".((($rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalCurrentLiabilities"][$i]) / (toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000))/$price)."'";
                 		$query .= ")";
 				mysql_query($query) or die (mysql_error());
-
-				//Start Quality Checks update
-		                $query = "INSERT INTO `reports_quality_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
-		                $query .= "'".$report_id."',";
-                		//Pio 1
-		                $value = ($rawdata["NetIncome"][$i] > 0 ? 1 : 0);
-                		$total += $value;
-		                $query .= "'".($value)."',";
-                		//Pio 2
-		                $value = ($rawdata["CashfromOperatingActivities"][$i] > 0 ? 1 : 0);
-                		$total += $value;
-		                $query .= "'".($value)."',";
-                		//Pio 3
-				if($i == 1) {
-		                        if($rawdata["TotalAssets"][$i] == 0) {
-                		                $query .= "'0',";
-		                        } else {
-                		                $value = (($rawdata["NetIncome"][$i]/$rawdata["TotalAssets"][$i]) > 0 ? 1 : 0);
-                                		$total += $value;
-		                                $query .= "'".($value)."',";
-                		        }
-		                } else {
-                		        $vn = ($rawdata["TotalAssets"][$i] == 0) ? 0 : ($rawdata["NetIncome"][$i]/$rawdata["TotalAssets"][$i]);
-		                        $vv = ($rawdata["TotalAssets"][$i-1] == 0) ? 0 : ($rawdata["NetIncome"][$i-1]/$rawdata["TotalAssets"][$i-1]);
-                		        $value = ($vn > $vv ? 1 : 0);
-		                        $total += $value;
-                		        $query .= "'".($value)."',";
-		                }
-                		//Pio 4
-		                $value = ($rawdata["CashfromOperatingActivities"][$i] > $rawdata["NetIncome"][$i] ? 1 : 0);
-                		$total += $value;
-		                $query .= "'".($value)."',";
-				if($i == 1) {
-		                        //Pio 5
-                		        if($rawdata["TotalAssets"][$i] == 0) {
-                                		$query .= "'1',";
-		                                $total++;
-                		        } else {
-                                		$value = ((($rawdata["TotalLongtermDebt"][$i] + $rawdata["NotesPayable"][$i])/$rawdata["TotalAssets"][$i]) >= 0 ? 1 : 0);
-		                                $total += $value;
-                		                $query .= "'".($value)."',";
-		                        }
-                		        //Pio 6
-		                        if($rawdata["TotalCurrentLiabilities"][$i] == 0) {
-                		                $query .= "'0',";
-		                        } else {
-                		                $value = (($rawdata["TotalCurrentAssets"][$i]/$rawdata["TotalCurrentLiabilities"][$i]) > 0.5 ? 1 : 0);
-                                		$total += $value;
-		                                $query .= "'".($value)."',";
-                		        }
-		                        //Pio 7, 8, 9
-                		        $query .= "'0','0','0',";
-		                } else {
-                		        //Pio 5
-		                        $vn = ($rawdata["TotalAssets"][$i] == 0) ? 0 : (($rawdata["TotalLongtermDebt"][$i] + $rawdata["NotesPayable"][$i])/$rawdata["TotalAssets"][$i]);
-                		        $vv = ($rawdata["TotalAssets"][$i-1] == 0) ? 0 : (($rawdata["TotalLongtermDebt"][$i-1] + $rawdata["NotesPayable"][$i-1])/$rawdata["TotalAssets"][$i-1]);
-		                        $value = ($vn <= $vv ? 1 : 0);
-                		        $total += $value;
-		                        $query .= "'".($value)."',";
-                		        //Pio 6
-		                        $vn = ($rawdata["TotalCurrentLiabilities"][$i] == 0) ? 0 : ($rawdata["TotalCurrentAssets"][$i]/$rawdata["TotalCurrentLiabilities"][$i]);
-                		        $vv = ($rawdata["TotalCurrentLiabilities"][$i-1] == 0) ? 0 : ($rawdata["TotalCurrentAssets"][$i-1]/$rawdata["TotalCurrentLiabilities"][$i-1]);
-		                        $value = ($vn > $vv ? 1 : 0);
-                		        $total += $value;
-		                        $query .= "'".($value)."',";
-                		        //Pio 7
-		                        $value = (toFloat($rawdata["SharesOutstandingDiluted"][$i]) < toFloat($prawdata["SharesOutstandingDiluted"][$i]) ? 1 : 0);
-                		        $total += $value;
-		                        $query .= "'".($value)."',";
-                		        //Pio 8
-		                        $vn = ($rawdata["TotalRevenue"][$i] == 0) ? 0 : ($rawdata["GrossProfit"][$i]/$rawdata["TotalRevenue"][$i]);
-                		        $vv = ($rawdata["TotalRevenue"][$i-1] == 0) ? 0 : ($rawdata["GrossProfit"][$i-1]/$rawdata["TotalRevenue"][$i-1]);
-		                        $value = ($vn > $vv ? 1 : 0);
-                		        $total += $value;
-		                        $query .= "'".($value)."',";
-                		        //Pio 9
-		                        $vn = ($rawdata["TotalAssets"][$i] == 0) ? 0 : ($rawdata["TotalRevenue"][$i]/$rawdata["TotalAssets"][$i]);
-                		        $vv = ($rawdata["TotalAssets"][$i-1] == 0) ? 0 : ($rawdata["TotalRevenue"][$i-1]/$rawdata["TotalAssets"][$i-1]);
-		                        $value = ($vn > $vv ? 1 : 0);
-                		        $total += $value;
-		                        $query .= "'".($value)."',";
-                		}
-		                $query .= "'".($total)."'";
-                		$query .= ")";
-		                mysql_query($query) or die (mysql_error());
 			}
 		}
 	    }

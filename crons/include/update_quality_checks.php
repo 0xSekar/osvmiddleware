@@ -1,14 +1,10 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE);
-error_reporting(0);
-include_once('../db/database.php');
-connectfe();
-
-set_time_limit(0);                   // ignore php timeout
+function update_quality_checks() {
 	$query = "delete from reports_quality_checks";
 	$res = mysql_query($query) or die (mysql_error());
-	$query = "DELETE from ttm_quality_checks";
-	mysql_query($query) or die (mysql_error());
+        $query = "DELETE from ttm_quality_checks";
+        mysql_query($query) or die (mysql_error());
+
 	$query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
 	$res = mysql_query($query) or die (mysql_error());
         $pid = 0;
@@ -176,21 +172,6 @@ set_time_limit(0);                   // ignore php timeout
                 	mysql_query($query) or die (mysql_error());
 		}
 	}
-		
-function toFloat($num) {
-    $dotPos = strrpos($num, '.');
-    $commaPos = strrpos($num, ',');
-    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
-        ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
-
-    if (!$sep) {
-        return floatval(preg_replace("/[^\-0-9]/", "", $num));
-    }
-
-    return floatval(
-        preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
-        preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
-    );
 }
 
 ?>

@@ -14,6 +14,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 include_once('../db/database.php');
 include_once('./include/raw_data_update_queries.php');
 include_once('./include/update_key_ratios_ttm.php');
+include_once('./include/update_quality_checks.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -211,5 +212,8 @@ foreach ($result2 as $symbol) {
 echo "$count total rows. $updated stocks has new reports<br>\n";
 echo "Updating key ratios TTM... ";
 update_key_ratios_ttm();
+echo "done<br>\n";
+echo "Updating Quality Checks... ";
+update_quality_checks();
 echo "done<br>\n";
 ?>
