@@ -24,129 +24,39 @@ while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
 //Get full list of symbols from backend
-$symbols = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend.php");
-$result = json_decode($symbols);
+$query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id group by a.id";
+$res = mysql_query($query) or die (mysql_error());
+
 $count = 0;
 $inserted = 0;
 $updated = 0;
-echo "Updating ticker lists....<br>\n";
 
-//Process the tickers and add any missing ticket to the tables (only basic ticker data)
-foreach ($result as $symbol) {
-	$count ++;
-}
-
-$symbols2 = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_extra.php");
-$result2 = json_decode($symbols2);
-foreach ($result2 as $symbol) {
-        $count ++;
-}
-
-echo "$count total rows. $inserted new rows<br>\n";
-//For each symbol in the database, check if there is new reports
-//vased on the last report date in the resultset
-echo "Updating data points... (run1)<br>\n";
-$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios");
-$ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
-foreach ($result as $symbol) {
-	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
-	//Get last local report date and compare with remote
-	$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
-	$res = mysql_query($query) or die(mysql_error());
-	if(mysql_num_rows($res) == 0) continue;
-	$dates = mysql_fetch_object($res);
-
-	//Fix for different tickers names on different databases
-	$fixdate = $symbol->insdate;
-	$fixticker = $symbol->ticker;
-	$fixtype = $symbol->reporttype;
-	if (preg_match("/[\.\-\']/",$symbol->ticker, $match)) {
-		$fixsym = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_special.php?ticker=$symbol->ticker");
-		$fixsym = json_decode($fixsym);
-		$fixsym = $fixsym[0];
-		if(isset($fixsym->ticker)) {
-			if($fixsym->ticker != $symbol->ticker) {
-				if(!is_null($fixsym->insdate) && (is_null($fixdate) || $fixdate < $fixsym->insdate)) {
-				        $fixdate = $fixsym->insdate;
-				        $fixticker = $fixsym->ticker;
-				        $fixtype = $fixsym->reporttype;
-				}
-			}
+echo "Updating data points...)<br>\n";
+while($row = mysql_fetch_assoc($res)) {
+	$count++;
+	$rawdata = array();
+	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='ANN' order by a.fiscal_year";
+	$res2 = mysql_query($query) or die (mysql_error());
+	$pos = 0;
+	while($row2 = mysql_fetch_assoc($res2)) {
+		$pos++;
+		foreach ($row2 as $v=>$y) {
+			$rawdata[$v][0] = $v;
+			$rawdata[$v][$pos]=$y;
 		}
 	}
-	//End fix for different tickers
 
-	if (!is_null($fixdate) && $fixtype != "Dummy") {
-		//If the remote report is newer, download the new report and update data points
-		$updated++;
-		$csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
-//echo ("Get: $symbol->ticker<br>");
-		$csvst = fopen('php://memory', 'r+');
-		fwrite($csvst, $csv);
-		unset($csv);
-		fseek($csvst, 0);
-		$rawdata = array();
-		while ($data = fgetcsv($csvst)) {
-			$rawdata[$data[0]] = $data;
+	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='QTR' order by a.fiscal_year, a.fiscal_quarter";
+	$res2 = mysql_query($query) or die (mysql_error());
+	while($row2 = mysql_fetch_assoc($res2)) {
+		$pos++;
+		foreach ($row2 as $v=>$y) {
+			$rawdata[$v][$pos]=$y;
 		}
-//fseek($csvst,0);
-//file_put_contents("/tmp/test.csv", $csvst);
-		//Update Raw data
-		update_raw_data_tickers($dates, $rawdata);
-		
-		fclose($csvst);
 	}
-}
+	$dates->ticker_id = $row["id"];
+        update_raw_data_tickers($dates, $rawdata);
 
-echo "Updating data points... (run2)<br>\n";
-foreach ($result2 as $symbol) {
-	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
-        //Get last local report date and compare with remote
-        $query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
-        $res = mysql_query($query) or die(mysql_error());
-	if(mysql_num_rows($res) == 0) continue;
-        $dates = mysql_fetch_object($res);
-
-        //Fix for different tickers names on different databases
-        $fixdate = $symbol->insdate;
-        $fixticker = $symbol->ticker;
-        $fixtype = $symbol->reporttype;
-        if (preg_match("/[\.\-\']/",$symbol->ticker, $match)) {
-                $fixsym = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_special.php?ticker=$symbol->ticker");
-                $fixsym = json_decode($fixsym);
-                $fixsym = $fixsym[0];
-                if(isset($fixsym->ticker)) {
-                        if($fixsym->ticker != $symbol->ticker) {
-                                if(!is_null($fixsym->insdate) && (is_null($fixdate) || $fixdate < $fixsym->insdate)) {
-                                        $fixdate = $fixsym->insdate;
-                                        $fixticker = $fixsym->ticker;
-                                        $fixtype = $fixsym->reporttype;
-                                }
-                        }
-                }
-        }
-        //End fix for different tickers
-
-        if (!is_null($fixdate) && $fixtype != "Dummy") {
-                //If the remote report is newer, download the new report and update data points
-                $updated++;
-                $csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
-//echo ("Get: $symbol->ticker<br>");
-                $csvst = fopen('php://memory', 'r+');
-                fwrite($csvst, $csv);
-                unset($csv);
-                fseek($csvst, 0);
-                $rawdata = array();
-                while ($data = fgetcsv($csvst)) {
-                        $rawdata[$data[0]] = $data;
-                }
-//fseek($csvst,0);
-//file_put_contents("/tmp/test.csv", $csvst);
-                //Update Raw data
-                update_raw_data_tickers($dates, $rawdata);
-
-                fclose($csvst);
-        }
 }
 
 echo "$count total rows. $updated stocks has new reports<br>\n";
