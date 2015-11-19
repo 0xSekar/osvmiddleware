@@ -25,7 +25,7 @@ function update_key_ratios_ttm() {
 		$query .= "'".$entValue."',";
 		$query .= "'".$rawdata["GoodwillIntangibleAssetsNet"]."',";
 		$query .= "'".($rawdata["TotalStockholdersEquity"] - $rawdata["GoodwillIntangibleAssetsNet"])."',";
-		$query .= "'".($rawdata["CashandCashEquivalents"] - max(0, ($rawdata["TotalCurrentLiabilities"]-$rawdata["TotalCurrentAssets"]+$rawdata["CashandCashEquivalents"])))."',";
+		$query .= "'".($rawdata["CashCashEquivalentsandShorttermInvestments"] - max(0, ($rawdata["TotalCurrentLiabilities"]-$rawdata["TotalCurrentAssets"]+$rawdata["CashCashEquivalentsandShorttermInvestments"])))."',";
 		$query .= "'".($rawdata["TotalShorttermDebt"]+$rawdata["CurrentPortionofLongtermDebt"]+$rawdata["TotalLongtermDebt"]+$rawdata["NotesPayable"]+$rawdata["TotalStockholdersEquity"])."',";
 		$query .= "'".($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"])."',";
 		$query .= "'".($price / toFloat($rawdata["EPSDiluted"]))."',";

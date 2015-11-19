@@ -664,7 +664,7 @@ function update_raw_data_tickers($dates, $rawdata) {
                 		$query .= "'".$entValue."',";
 		                $query .= "'".$rawdata["GoodwillIntangibleAssetsNet"][$i]."',";
                 		$query .= "'".($rawdata["TotalStockholdersEquity"][$i] - $rawdata["GoodwillIntangibleAssetsNet"][$i])."',";
-		                $query .= "'".($rawdata["CashandCashEquivalents"][$i] - max(0, ($rawdata["TotalCurrentLiabilities"][$i]-$rawdata["TotalCurrentAssets"][$i]+$rawdata["CashandCashEquivalents"][$i])))."',";
+		                $query .= "'".($rawdata["CashCashEquivalentsandShorttermInvestments"][$i] - max(0, ($rawdata["TotalCurrentLiabilities"][$i]-$rawdata["TotalCurrentAssets"][$i]+$rawdata["CashCashEquivalentsandShorttermInvestments"][$i])))."',";
                 		$query .= "'".($rawdata["TotalShorttermDebt"][$i]+$rawdata["CurrentPortionofLongtermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]+$rawdata["NotesPayable"][$i]+$rawdata["TotalStockholdersEquity"][$i])."',";
 		                $query .= "'".($rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalCurrentLiabilities"][$i])."',";
                 		$query .= "'".($price / toFloat($rawdata["EPSDiluted"][$i]))."',";
