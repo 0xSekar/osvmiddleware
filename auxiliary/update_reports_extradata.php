@@ -34,7 +34,7 @@ set_time_limit(0);                   // ignore php timeout
                         $query .= "'".($rawdata["LongtermDebtProceeds"]+$rawdata["LongtermDebtPayments"])."',";
                         $query .= "'".(-$rawdata["CapitalExpenditures"])."',";
                         $query .= "'".($rawdata["CashfromOperatingActivities"]+$rawdata["CapitalExpenditures"])."',";
-                        $query .= "'".($rawdata["CFNetIncome"]+$rawdata["CFDepreciationAmortization"]+$rawdata["EmployeeCompensation"]+$rawdata["AdjustmentforSpecialCharges"]+$rawdata["DeferredIncomeTaxes"]+$rawdata["CapitalExpenditures"]-($rawdata["ChangeinCurrentAssets"]-$rawdata["ChangeinCurrentLiabilities"]))."'";
+                        $query .= "'".($rawdata["CFNetIncome"]+$rawdata["CFDepreciationAmortization"]+$rawdata["EmployeeCompensation"]+$rawdata["AdjustmentforSpecialCharges"]+$rawdata["DeferredIncomeTaxes"]+$rawdata["CapitalExpenditures"]+($rawdata["ChangeinCurrentAssets"]+$rawdata["ChangeinCurrentLiabilities"]))."'";
         		$query .= ")";
 	        	mysql_query($query) or die (mysql_error());
 	}
