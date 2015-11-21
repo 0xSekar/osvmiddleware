@@ -729,7 +729,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	$stock_type = "ADR";
 	$MRQRow = 10;
 	$PMRQRow = 9;
-	if($rawdata["Country"][10] == "UNITED STATES OF AMERICA" || $rawdata["Country"][26] == "UNITED STATES OF AMERICA") {
+	if($rawdata["Country"][10] == "UNITED STATES OF AMERICA" || $rawdata["Country"][26] == "UNITED STATES OF AMERICA" || strpos($rawdata["FormType"][10], "10-K") !== false || strpos($rawdata["FormType"][26], "10-K") !== false || strpos($rawdata["FormType"][10], "10-Q") !== false || strpos($rawdata["FormType"][26], "10-Q") !== false || strpos($rawdata["FormType"][10], "8-K") !== false || strpos($rawdata["FormType"][26], "8-K") !== false) {
 		$stock_type = "USA";
 		$MRQRow = 26;
 		$PMRQRow = 22;
