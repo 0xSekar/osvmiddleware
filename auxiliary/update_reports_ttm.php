@@ -10,7 +10,8 @@
 // This will avoid server overload
 
 // Database Connection
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(0);
+//error_reporting(E_ALL & ~E_NOTICE);
 include_once('../db/database.php');
 include_once('./update_reports_ttm_extra.php');
 
@@ -31,7 +32,7 @@ $count = 0;
 $inserted = 0;
 $updated = 0;
 
-echo "Updating data points...)<br>\n";
+echo "Updating data points...<br>\n";
 while($row = mysql_fetch_assoc($res)) {
 	$count++;
 	$rawdata = array();
