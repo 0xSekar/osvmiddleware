@@ -142,7 +142,7 @@ function update_quality_checks() {
                         //Pio 5
                         $vn = ($trawdata["TotalAssets"] == 0) ? 0 : (($trawdata["TotalLongtermDebt"] + $trawdata["NotesPayable"])/$trawdata["TotalAssets"]);
                         $vv = ($prawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/$prawdata["TotalAssets"]);
-                        $value = ($vn < $vv ? 1 : 0);
+                        $value = ($vn <= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 6
