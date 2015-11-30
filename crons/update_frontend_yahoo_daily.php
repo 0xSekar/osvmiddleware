@@ -10,6 +10,7 @@ include_once('../db/database.php');
 include_once('./include/raw_data_update_yahoo_estimates.php');
 include_once('./include/raw_data_update_yahoo_keystats.php');
 require_once("../include/yahoo/common.inc.php");
+include_once('./include/update_key_ratios_ttm.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -211,4 +212,23 @@ echo "Key Stats:\n";
 echo "\t".$kupdated." tickers updates\n";
 echo "\t".$knotfound." tickers not found on yahoo\n";
 echo "\t".$kerrors." errors updating tickers\n";
+echo "Updating key ratios TTM... ";
+update_key_ratios_ttm();
+echo "done\n";
+
+function toFloat($num) {
+    $dotPos = strrpos($num, '.');
+    $commaPos = strrpos($num, ',');
+    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
+        ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+
+    if (!$sep) {
+        return floatval(preg_replace("/[^\-0-9]/", "", $num));
+    }
+
+    return floatval(
+        preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
+        preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
+    );
+}
 ?>
