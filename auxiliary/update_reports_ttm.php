@@ -34,11 +34,19 @@ $updated = 0;
 
 echo "Updating data points...<br>\n";
 while($row = mysql_fetch_assoc($res)) {
+	$query = "Select count(*) as c from reports_header a where a.ticker_id=".$row["id"]." AND a.report_type='ANN'";
+	$res2 = mysql_query($query) or die (mysql_error());
+	$annCount = mysql_fetch_assoc($res2);
+	$annCount = $annCount["c"];
+	$query = "Select count(*) as c from reports_header a where a.ticker_id=".$row["id"]." AND a.report_type='QTR'";
+	$res2 = mysql_query($query) or die (mysql_error());
+	$qtrCount = mysql_fetch_assoc($res2);
+	$qtrCount = $qtrCount["c"];
 	$count++;
 	$rawdata = array();
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='ANN' order by a.fiscal_year";
 	$res2 = mysql_query($query) or die (mysql_error());
-	$pos = 0;
+	$pos = 10 - $annCount;
 	while($row2 = mysql_fetch_assoc($res2)) {
 		$pos++;
 		foreach ($row2 as $v=>$y) {
@@ -49,6 +57,7 @@ while($row = mysql_fetch_assoc($res)) {
 
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='QTR' order by a.fiscal_year, a.fiscal_quarter";
 	$res2 = mysql_query($query) or die (mysql_error());
+	$pos = 26 - $qtrCount;
 	while($row2 = mysql_fetch_assoc($res2)) {
 		$pos++;
 		foreach ($row2 as $v=>$y) {

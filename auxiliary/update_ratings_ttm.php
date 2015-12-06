@@ -31,6 +31,7 @@ $squ = 0.998;
 $qw1 = 0.275;
 $qw2 = 0.45;
 $qw3 = 0.275;
+
 //CROIC
 $query = "
 SELECT x.ticker_id, x.position, x.CROIC as value
