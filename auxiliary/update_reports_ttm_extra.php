@@ -918,6 +918,10 @@ function update_raw_data_tickers($dates, $rawdata) {
 }
 
 function toFloat($num) {
+    if (is_null($num)) {
+        return 'null';
+    }
+
     $dotPos = strrpos($num, '.');
     $commaPos = strrpos($num, ',');
     $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :

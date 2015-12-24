@@ -105,6 +105,10 @@ set_time_limit(0);                   // ignore php timeout
 	}
 
 function toFloat($num) {
+    if (is_null($num)) {
+        return 'null';
+    }
+
     $dotPos = strrpos($num, '.');
     $commaPos = strrpos($num, ',');
     $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :

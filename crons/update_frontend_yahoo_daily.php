@@ -217,6 +217,10 @@ update_key_ratios_ttm();
 echo "done\n";
 
 function toFloat($num) {
+    if (is_null($num)) {
+        return 'null';
+    }
+
     $dotPos = strrpos($num, '.');
     $commaPos = strrpos($num, ',');
     $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :

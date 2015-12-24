@@ -145,11 +145,14 @@ foreach ($result as $symbol) {
 		while ($data = fgetcsv($csvst)) {
 			$rawdata[$data[0]] = $data;
 		}
+		array_walk_recursive($rawdata, 'nullValues');
 
 		//Update Raw data
-		update_raw_data_tickers($dates, $rawdata);
+		echo "Updating ticker ".$symbol->ticker."\n";
+		if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
+			update_raw_data_tickers($dates, $rawdata);
+		}
 		
-
 		//Finally update local report date
 		$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
 		mysql_query($query) or die (mysql_error());
@@ -198,9 +201,13 @@ foreach ($result2 as $symbol) {
                 while ($data = fgetcsv($csvst)) {
                         $rawdata[$data[0]] = $data;
                 }
+		array_walk_recursive($rawdata, 'nullValues');
 
                 //Update Raw data
-                update_raw_data_tickers($dates, $rawdata);
+		echo "Updating ticker ".$symbol->ticker."\n";
+		if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
+	                update_raw_data_tickers($dates, $rawdata);
+		}
 
 
                 //Finally update local report date
@@ -216,4 +223,12 @@ echo "done<br>\n";
 echo "Updating Quality Checks... ";
 update_quality_checks();
 echo "done<br>\n";
+
+function nullValues(&$item, $key) {
+        if(strlen(trim($item)) == 0) {
+                $item = 'null';
+        } else if($item == "-") {
+                $item = 'null';
+        }
+}
 ?>
