@@ -20,7 +20,7 @@ FROM (
 ";
 $res = mysql_query($query) or die (mysql_error());
 while ($row = mysql_fetch_assoc($res)) {
-	$values[$row["ticker_id"]]["Q1"] = $row["value"] * 100;
+	$values[$row["ticker_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
 	$values[$row["ticker_id"]]["QP1"] = $row["position"];
 	$tickerCount++;
 }
@@ -42,7 +42,7 @@ FROM (
 ";
 $res = mysql_query($query) or die (mysql_error());
 while ($row = mysql_fetch_assoc($res)) {
-	$values[$row["ticker_id"]]["Q2"] = $row["value"] * 100;
+	$values[$row["ticker_id"]]["Q2"] = is_null($row["value"])?null:($row["value"] * 100);
 	$values[$row["ticker_id"]]["QP2"] = $row["position"];
 }
 //PIO F Score
@@ -59,28 +59,44 @@ while ($row = mysql_fetch_assoc($res)) {
 	$values[$row["ticker_id"]]["QP3"] = $row["position"];
 }
 
+//Correction for missing PIO Values
+foreach($values as $id => $value) {
+	if(!isset($value["Q3"]) || is_null($value["Q3"])) {
+		$values[$id]["Q3"] = null;
+		$values[$id]["QP3"] = $tickerCount;
+	}
+}
+
 foreach($values as $id => $value) {
 	//PENALIZE RATINGS
 	//FCF / Sales
-	if($value["Q1"] < 0) 
+	if(is_null($value["Q1"])) {
 		$values[$id]["QPP1"] = round(5*$value["QP1"]);
-	if($value["Q1"] >= 0 && $value["Q1"] < 30) 
-		$values[$id]["QPP1"] = round(0.01*$value["QP1"]);
-	if($value["Q1"] >= 30 && $value["Q1"] < 60) 
-		$values[$id]["QPP1"] = round(1.5*$value["QP1"]);
-	if($value["Q1"] >= 60) 
-		$values[$id]["QPP1"] = round(5*$value["QP1"]);
+	} else {
+		if($value["Q1"] < 0) 
+			$values[$id]["QPP1"] = round(5*$value["QP1"]);
+		if($value["Q1"] >= 0 && $value["Q1"] < 30) 
+			$values[$id]["QPP1"] = round(0.01*$value["QP1"]);
+		if($value["Q1"] >= 30 && $value["Q1"] < 60) 
+			$values[$id]["QPP1"] = round(1.5*$value["QP1"]);
+		if($value["Q1"] >= 60) 
+			$values[$id]["QPP1"] = round(5*$value["QP1"]);
+	}
 	//CROIC
-	if($value["Q2"] < 0) 
-		$values[$id]["QPP2"] = round(3*$value["QP2"]);
-	if($value["Q2"] >= 0 && $value["Q2"] < 23) 
-		$values[$id]["QPP2"] = $value["QP2"];
-	if($value["Q2"] >= 23 && $value["Q2"] < 40) 
-		$values[$id]["QPP2"] = round(0.01*$value["QP2"]);
-	if($value["Q2"] >= 40 && $value["Q2"] < 60) 
-		$values[$id]["QPP2"] = round(1.5*$value["QP2"]);
-	if($value["Q2"] >= 60) 
-		$values[$id]["QPP2"] = round(3*$value["QP2"]);
+        if(is_null($value["Q2"])) {
+                $values[$id]["QPP2"] = round(3*$value["QP2"]);
+        } else {
+		if($value["Q2"] < 0) 
+			$values[$id]["QPP2"] = round(3*$value["QP2"]);
+		if($value["Q2"] >= 0 && $value["Q2"] < 23) 
+			$values[$id]["QPP2"] = $value["QP2"];
+		if($value["Q2"] >= 23 && $value["Q2"] < 40) 
+			$values[$id]["QPP2"] = round(0.01*$value["QP2"]);
+		if($value["Q2"] >= 40 && $value["Q2"] < 60) 
+			$values[$id]["QPP2"] = round(1.5*$value["QP2"]);
+		if($value["Q2"] >= 60) 
+			$values[$id]["QPP2"] = round(3*$value["QP2"]);
+	}
 	//PIO F Score
 	$values[$id]["QPP3"] = $value["QP3"];
 
@@ -103,9 +119,9 @@ foreach($values as $id => $value) {
 	$values[$id]["QPS3"] = ($values[$id]["QPT3"] - 50) * $squ + 50;
 
 	//Apply Weight
-	$values[$id]["QPW1"] = $values[$id]["QPS1"] * $qw1;
-	$values[$id]["QPW2"] = $values[$id]["QPS2"] * $qw2;
-	$values[$id]["QPW3"] = $values[$id]["QPS3"] * $qw3;
+	$values[$id]["QPW1"] = is_null($values[$id]["Q1"])?0:($values[$id]["QPS1"] * $qw1);
+	$values[$id]["QPW2"] = is_null($values[$id]["Q2"])?0:($values[$id]["QPS2"] * $qw2);
+	$values[$id]["QPW3"] = is_null($values[$id]["Q3"])?0:($values[$id]["QPS3"] * $qw3);
 	$values[$id]["QF"] = $values[$id]["QPW1"] + $values[$id]["QPW2"] + $values[$id]["QPW3"];
 
 	//Save data
@@ -116,5 +132,14 @@ foreach($values as $id => $value) {
 	$query .= $values[$id]["QPW3"].",";
 	$query .= $values[$id]["QF"].")";
 	$save = mysql_query($query) or die (mysql_error());
+
+	$values[$id]["id"] = $id;
 }
+//Export to csv
+/*$o = fopen('file.csv', 'w');
+fputcsv($o,array_keys($values[1]));
+foreach($values as $id=>$value) {
+        fputcsv($o,$value);
+}
+fclose($o);*/
 ?>
