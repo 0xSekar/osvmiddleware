@@ -99,7 +99,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	$response = $yql->execute("select * from yahoo.finance.dividendhistory where startDate = '".date("Y-m-d", strtotime("-1 years"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
 	if(isset($response->query) && isset($response->query->results)) {
 		foreach($response->query->results->quote as $element) {
-			if (!is_null($element->Date) && $element->Date!="0000-00-00") {
+			if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
 				$query_div = "INSERT INTO `tickers_yahoo_dividend_history` (ticker_id, qtrDate, dividends) VALUES (";
 				$query_div .= "'".$row["id"]."',";
 				$query_div .= "'".$element->Date."',";
@@ -148,7 +148,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime("-1 month"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
 	if(isset($response->query) && isset($response->query->results)) {
 		foreach($response->query->results->quote as $element) {
-			if (!is_null($element->Date) && $element->Date!="0000-00-00") {
+			if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
 				$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
 				$query_div .= "'".$row["id"]."',";
 				$query_div .= "'".$element->Date."',";
