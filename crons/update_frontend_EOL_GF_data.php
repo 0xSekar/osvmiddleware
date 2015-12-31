@@ -15,6 +15,8 @@ include_once('../db/database.php');
 include_once('./include/raw_data_update_queries.php');
 include_once('./include/update_key_ratios_ttm.php');
 include_once('./include/update_quality_checks.php');
+include_once('./include/update_ratings.php');
+include_once('./include/update_ratings_ttm.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -222,6 +224,12 @@ update_key_ratios_ttm();
 echo "done<br>\n";
 echo "Updating Quality Checks... ";
 update_quality_checks();
+echo "done<br>\n";
+echo "Updating Ratings... ";
+update_ratings();
+echo "done<br>\n";
+echo "Updating Ratings TTM... ";
+update_ratings_ttm();
 echo "done<br>\n";
 
 function nullValues(&$item, $key) {
