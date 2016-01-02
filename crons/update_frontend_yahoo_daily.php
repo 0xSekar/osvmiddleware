@@ -182,6 +182,13 @@ while ($row = mysql_fetch_assoc($res)) {
         if(isset($response->query) && isset($response->query->results)) {
                 //Check if the symbol exists
                 if(isset($response->query->results->stats->MarketCap)) {
+			if(is_array($response->query->results->stats->MarketCap)) {
+				foreach($response->query->results->stats as $key=>$value) {
+					if($key != "symbol" && count($value) == 2) {
+						$response->query->results->stats->{$key} = $value[0];
+					} 
+				}
+			}
                         update_raw_data_yahoo_keystats($row["id"], $response->query->results->stats);
                         $kupdated ++;
                 } else {
