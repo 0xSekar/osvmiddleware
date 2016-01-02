@@ -49,7 +49,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	echo "Updating ".$row["ticker"]."...";
 	//UPDATE ESTIMATES
 	//Try to get yahoo data for the ticker
-	$response = $yql->execute("select * from osv.finance.analystestimate where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://DdSfqZBdFqJyHvfhGzzxyO");	
+	$response = $yql->execute("select * from osv.finance.analystestimate where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
 	if(isset($response->query) && isset($response->query->results)) {
 		//Check if the symbol exists
 		if(isset($response->query->results->results->EarningsEst)) {
@@ -178,7 +178,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
         //UPDATE KEYSTATS
         //Try to get yahoo data for the ticker
-        $response = $yql->execute("select * from osv.finance.keystats where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://DdSfqZBdFqJyHvfhGzzxyO");
+        $response = $yql->execute("select * from osv.finance.keystats where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
         if(isset($response->query) && isset($response->query->results)) {
                 //Check if the symbol exists
                 if(isset($response->query->results->stats->MarketCap)) {

@@ -137,10 +137,10 @@ function update_raw_data_yahoo_estimates($ticker_id, $dates, $rawdata) {
 	//tickers_yahoo_estimates_earn_hist
 	$query = "INSERT INTO `tickers_yahoo_estimates_earn_hist` (`ticker_id` ,`date1` ,`date2` ,`date3` ,`date4` ,`EarnHistEPSEst1` ,`EarnHistEPSEst2` ,`EarnHistEPSEst3` ,`EarnHistEPSEst4` ,`EarnHistEPSActual1` ,`EarnHistEPSActual2` ,`EarnHistEPSActual3` ,`EarnHistEPSActual4` ,`EarnHistDifference1` ,`EarnHistDifference2` ,`EarnHistDifference3` ,`EarnHistDifference4` ,`EarnHistSurprise1` ,`EarnHistSurprise2` ,`EarnHistSurprise3` ,`EarnHistSurprise4`) VALUES (";
         $query .= "'".$ticker_id."',";
-        $query .= "'".$dates->hDate[0]."',";
-        $query .= "'".$dates->hDate[1]."',";
-        $query .= "'".$dates->hDate[2]."',";
-        $query .= "'".$dates->hDate[3]."',";
+        $query .= ($dates->hDate[0]=="nodate1"?"NULL":"'".$dates->hDate[0]."'").",";
+        $query .= ($dates->hDate[1]=="nodate2"?"NULL":"'".$dates->hDate[1]."'").",";
+        $query .= ($dates->hDate[2]=="nodate3"?"NULL":"'".$dates->hDate[2]."'").",";
+        $query .= ($dates->hDate[3]=="nodate4"?"NULL":"'".$dates->hDate[3]."'").",";
         $query .= (is_null($rawdata->EarningsHistory->EPSEst->{$dates->hDateText[0]})?"NULL":str_replace(',', '', $rawdata->EarningsHistory->EPSEst->{$dates->hDateText[0]})).",";
         $query .= (is_null($rawdata->EarningsHistory->EPSEst->{$dates->hDateText[1]})?"NULL":str_replace(',', '', $rawdata->EarningsHistory->EPSEst->{$dates->hDateText[1]})).",";
         $query .= (is_null($rawdata->EarningsHistory->EPSEst->{$dates->hDateText[2]})?"NULL":str_replace(',', '', $rawdata->EarningsHistory->EPSEst->{$dates->hDateText[2]})).",";
