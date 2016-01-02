@@ -34,11 +34,11 @@ set_time_limit(0);                   // ignore php timeout
 		$query = "INSERT INTO `reports_quality_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
                 $query .= "'".$row["id"]."',";
 		//Pio 1
-                $value = (!is_null($rawdata["NetIncome"]) && $rawdata["NetIncome"] > 0 ? 1 : 0);
+                $value = (!is_null($rawdata["NetIncome"]) && $rawdata["NetIncome"] >= 0 ? 1 : 0);
                 $total += $value;
                 $query .= "'".($value)."',";
                 //Pio 2
-                $value = (!is_null($rawdata["CashfromOperatingActivities"]) && $rawdata["CashfromOperatingActivities"] > 0 ? 1 : 0);
+                $value = (!is_null($rawdata["CashfromOperatingActivities"]) && $rawdata["CashfromOperatingActivities"] >= 0 ? 1 : 0);
                 $total += $value;
                 $query .= "'".($value)."',";
                 //Pio 3
@@ -46,19 +46,19 @@ set_time_limit(0);                   // ignore php timeout
                         if(is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) {
                                 $query .= "'0',";
                         } else {
-                                $value = (($rawdata["NetIncome"]/$rawdata["TotalAssets"]) > 0 ? 1 : 0);
+                                $value = (($rawdata["NetIncome"]/$rawdata["TotalAssets"]) >= 0 ? 1 : 0);
                                 $total += $value;
                                 $query .= "'".($value)."',";
                         }
                 } else {
                         $vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? 0 : ($rawdata["NetIncome"]/$rawdata["TotalAssets"]);
                         $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["NetIncome"]/$prawdata["TotalAssets"]);
-                        $value = ($vn > $vv ? 1 : 0);
+                        $value = ($vn >= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                 }
                 //Pio 4
-                $value = ($rawdata["CashfromOperatingActivities"] > $rawdata["NetIncome"] ? 1 : 0);
+                $value = ($rawdata["CashfromOperatingActivities"] >= $rawdata["NetIncome"] ? 1 : 0);
                 $total += $value;
                 $query .= "'".($value)."',";
 
@@ -92,7 +92,7 @@ set_time_limit(0);                   // ignore php timeout
                         //Pio 6
                         $vn = (is_null($rawdata["TotalCurrentLiabilities"]) || $rawdata["TotalCurrentLiabilities"] == 0) ? 0 : ($rawdata["TotalCurrentAssets"]/$rawdata["TotalCurrentLiabilities"]);
                         $vv = (is_null($prawdata["TotalCurrentLiabilities"]) || $prawdata["TotalCurrentLiabilities"] == 0) ? 0 : ($prawdata["TotalCurrentAssets"]/$prawdata["TotalCurrentLiabilities"]);
-                        $value = ($vn > $vv ? 1 : 0);
+                        $value = ($vn >= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 7
@@ -102,13 +102,13 @@ set_time_limit(0);                   // ignore php timeout
                         //Pio 8
                         $vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? 0 : ($rawdata["GrossProfit"]/$rawdata["TotalRevenue"]);
                         $vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? 0 : ($prawdata["GrossProfit"]/$prawdata["TotalRevenue"]);
-                        $value = ($vn > $vv ? 1 : 0);
+                        $value = ($vn >= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 9
                         $vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? 0 : ($rawdata["TotalRevenue"]/$rawdata["TotalAssets"]);
                         $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["TotalRevenue"]/$prawdata["TotalAssets"]);
-                        $value = ($vn > $vv ? 1 : 0);
+                        $value = ($vn >= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                 }
@@ -126,11 +126,11 @@ set_time_limit(0);                   // ignore php timeout
 	                $query = "INSERT INTO `ttm_quality_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
         	        $query .= "'".$ppid."',";
                 	//Pio 1
-                        $value = (!is_null($trawdata["NetIncome"]) && $trawdata["NetIncome"] > 0 ? 1 : 0);
+                        $value = (!is_null($trawdata["NetIncome"]) && $trawdata["NetIncome"] >= 0 ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 2
-                        $value = (!is_null($trawdata["CashfromOperatingActivities"]) && $trawdata["CashfromOperatingActivities"] > 0 ? 1 : 0);
+                        $value = (!is_null($trawdata["CashfromOperatingActivities"]) && $trawdata["CashfromOperatingActivities"] >= 0 ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 3
@@ -140,7 +140,7 @@ set_time_limit(0);                   // ignore php timeout
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 4
-                        $value = ($trawdata["CashfromOperatingActivities"] > $trawdata["NetIncome"] ? 1 : 0);
+                        $value = ($trawdata["CashfromOperatingActivities"] >= $trawdata["NetIncome"] ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 5
