@@ -76,10 +76,11 @@ while ($row = mysql_fetch_assoc($res)) {
                                 $dates->hDateText[] = $property;
 			}
 			//Get CurrentQtrEstimates date and compare with fetched one. If differs update all
-			$query_est = "SELECT report_date FROM tickers_yahoo_estimates_curr_qtr WHERE ticker_id = ".$row["id"];
+			$query_est = "SELECT * FROM tickers_yahoo_estimates_curr_qtr WHERE ticker_id = ".$row["id"];
 			$res_est = mysql_query($query_est) or die(mysql_error());
 			$row_est = mysql_fetch_array($res_est);
-			if (!isset($row_est) || $dates->currQtrDate != $row_est["report_date"]) {
+			if (!isset($row_est) || $dates->currQtrDate != $row_est["report_date"] || 
+				$response->query->results->results->EPSTrends->CurrentEstimate->{"CurrentQtr".$dates->currQtrDateText} != $row_est["EPSTrendCurrentEst"] || $response->query->results->results->GrowthEst->CurrentQtr->{$row["ticker"]} != $row_est["GrowthEstTicker"]) {
 				//Data needs to be updated
 				update_raw_data_yahoo_estimates($row["id"], $dates, $response->query->results->results);
 				$eupdated ++;
