@@ -56,7 +56,7 @@ while($rowy = mysql_fetch_assoc($resy)) {
 	$position = 1;
 	$query = "
 		SELECT report_id, pioTotal AS value
-		FROM reports_quality_checks r
+		FROM reports_pio_checks r
 		LEFT JOIN reports_header h ON r.report_id = h.id
 		WHERE h.report_type =  'ANN'
 		AND h.fiscal_year = ".$rowy["fiscal_year"]."

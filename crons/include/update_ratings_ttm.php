@@ -45,7 +45,7 @@ $query = "
 SELECT x.ticker_id, x.position, x.pioTotal as value
 FROM (
       select ticker_id, pioTotal, @rownum := @rownum + 1 AS position from 
-	 ttm_quality_checks,(SELECT @rownum := 0) r order by pioTotal desc
+	 ttm_pio_checks,(SELECT @rownum := 0) r order by pioTotal desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());

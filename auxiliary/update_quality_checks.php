@@ -5,9 +5,9 @@ include_once('../db/database.php');
 connectfe();
 
 set_time_limit(0);                   // ignore php timeout
-	$query = "delete from reports_quality_checks";
+	$query = "delete from reports_pio_checks";
 	$res = mysql_query($query) or die (mysql_error());
-	$query = "DELETE from ttm_quality_checks";
+	$query = "DELETE from ttm_pio_checks";
 	mysql_query($query) or die (mysql_error());
 	$query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
 	$res = mysql_query($query) or die (mysql_error());
@@ -31,7 +31,7 @@ set_time_limit(0);                   // ignore php timeout
 		$res2 = mysql_query($query) or die (mysql_error());
 		$rawdata = mysql_fetch_assoc($res2);
 
-		$query = "INSERT INTO `reports_quality_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
+		$query = "INSERT INTO `reports_pio_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
                 $query .= "'".$row["id"]."',";
 		//Pio 1
                 $value = (!is_null($rawdata["NetIncome"]) && $rawdata["NetIncome"] >= 0 ? 1 : 0);
@@ -123,7 +123,7 @@ set_time_limit(0);                   // ignore php timeout
 			$tquery = "SELECT * FROM `ttm_balanceconsolidated` a, ttm_balancefull b, ttm_cashflowconsolidated c, ttm_cashflowfull d, ttm_financialscustom e, ttm_incomeconsolidated f, ttm_incomefull g, ttm_gf_data h WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id=d.ticker_id AND a.ticker_id=e.ticker_id AND a.ticker_id=f.ticker_id AND a.ticker_id=g.ticker_id and a.ticker_id=h.ticker_id and a.ticker_id = $ppid";
         		$tres = mysql_query($tquery) or die (mysql_error());
 			$trawdata = mysql_fetch_assoc($tres);
-	                $query = "INSERT INTO `ttm_quality_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
+	                $query = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
         	        $query .= "'".$ppid."',";
                 	//Pio 1
                         $value = (!is_null($trawdata["NetIncome"]) && $trawdata["NetIncome"] >= 0 ? 1 : 0);

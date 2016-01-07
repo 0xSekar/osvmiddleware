@@ -24,7 +24,7 @@ set ReportDateAdjusted = null
 where DATE_FORMAT(ReportDateAdjusted,'%Y-%m-%d') = '0000-00-00';*/
 ALTER TABLE reports_key_ratios ENGINE=InnoDB;
 ALTER TABLE reports_metadata_eol ENGINE=InnoDB;
-ALTER TABLE reports_quality_checks ENGINE=InnoDB;
+ALTER TABLE reports_pio_checks ENGINE=InnoDB;
 ALTER TABLE reports_ratings ENGINE=InnoDB;
 ALTER TABLE reports_variable_ratios ENGINE=InnoDB;
 ALTER TABLE sic_codes ENGINE=InnoDB;
@@ -69,6 +69,6 @@ ALTER TABLE ttm_gf_data ENGINE=InnoDB;
 ALTER TABLE ttm_incomeconsolidated ENGINE=InnoDB;
 ALTER TABLE ttm_incomefull ENGINE=InnoDB;
 ALTER TABLE ttm_key_ratios ENGINE=InnoDB;
-ALTER TABLE ttm_quality_checks ENGINE=InnoDB;
+ALTER TABLE ttm_pio_checks ENGINE=InnoDB;
 ALTER TABLE ttm_ratings ENGINE=InnoDB;
 
