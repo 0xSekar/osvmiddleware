@@ -420,7 +420,7 @@ while($rowy = mysql_fetch_assoc($resy)) {
                 if ($values[$id]["AS"] >= 45 && $values[$id]["AS"] < 55)
                         $values[$id]["RS"] = 'D';
                 if ($values[$id]["AS"] < 45)
-                        $values[$id]["RS"] = 'E';
+                        $values[$id]["RS"] = 'F';
 
 		//Save data
 		$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `Grade`) VALUES (";
