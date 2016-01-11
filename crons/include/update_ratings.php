@@ -411,9 +411,19 @@ while($rowy = mysql_fetch_assoc($resy)) {
         	$values[$id]["VPW4"] = is_null($values[$id]["Q3"])?0:($values[$id]["QPS3"] * $vw4);
 	        $values[$id]["VF"] = $values[$id]["VPW1"] + $values[$id]["VPW2"] + $values[$id]["VPW3"] + $values[$id]["VPW4"];
 		$values[$id]["AS"] = ($values[$id]["QF"] + $values[$id]["GF"] + $values[$id]["VF"])/3;
+                if ($values[$id]["AS"] >= 75)
+                        $values[$id]["RS"] = 'A';
+                if ($values[$id]["AS"] >= 65 && $values[$id]["AS"] < 75)
+                        $values[$id]["RS"] = 'B';
+                if ($values[$id]["AS"] >= 55 && $values[$id]["AS"] < 65)
+                        $values[$id]["RS"] = 'C';
+                if ($values[$id]["AS"] >= 45 && $values[$id]["AS"] < 55)
+                        $values[$id]["RS"] = 'D';
+                if ($values[$id]["AS"] < 45)
+                        $values[$id]["RS"] = 'E';
 
 		//Save data
-		$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`) VALUES (";
+		$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `Grade`) VALUES (";
 		$query .= $id.",";
 		$query .= $values[$id]["QPW1"].",";
 		$query .= $values[$id]["QPW2"].",";
@@ -429,7 +439,8 @@ while($rowy = mysql_fetch_assoc($resy)) {
         	$query .= $values[$id]["VPW3"].",";
 	        $query .= $values[$id]["VPW4"].",";
         	$query .= $values[$id]["VF"].",";
-		$query .= $values[$id]["AS"];
+		$query .= $values[$id]["AS"].",";
+		$query .= "'".$values[$id]["RS"]."'";
 		$query .= ")";
 		$save = mysql_query($query) or die (mysql_error());
 
