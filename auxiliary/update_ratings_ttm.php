@@ -172,12 +172,6 @@ foreach($values as $id => $value) {
 			$values[$id]["QPP1"] = round(1.5*$value["QP1"]);
                 if($value["Q1"] >= 60)
                         $values[$id]["QPP1"] = $tickerCount;
-/*		if($value["Q1"] >= 60 && $value["Q1"] < 200) 
-			$values[$id]["QPP1"] = round(7*$value["QP1"]);
-		if($value["Q1"] >= 200 && $value["Q1"] < 1000) 
-			$values[$id]["QPP1"] = round(9*$value["QP1"]);
-		if($value["Q1"] >= 1000) 
-			$values[$id]["QPP1"] = round(21*$value["QP1"]);*/
 	}
 	//CROIC
         if(is_null($value["Q2"])) {
@@ -193,33 +187,21 @@ foreach($values as $id => $value) {
 			$values[$id]["QPP2"] = round(1.5*$value["QP2"]);
                 if($value["Q2"] >= 60)
                         $values[$id]["QPP2"] = $tickerCount;
-/*		if($value["Q2"] >= 60 && $value["Q2"] < 200) 
-			$values[$id]["QPP2"] = round(4*$value["QP2"]);
-		if($value["Q2"] >= 200 && $value["Q2"] < 1000) 
-			$values[$id]["QPP2"] = round(9*$value["QP2"]);
-		if($value["Q2"] >= 1000) 
-			$values[$id]["QPP2"] = round(21*$value["QP2"]);*/
 	}
 	//PIO F Score
 	$values[$id]["QPP3"] = $value["QP3"];
         //SalesPercChange
         if(is_null($value["G1"])) {
-                $values[$id]["GPP1"] = round(21*$value["GP1"]);
+                $values[$id]["GPP1"] = round(10*$value["GP1"]);
         } else {
                 if($value["G1"] < 0)
-                        $values[$id]["GPP1"] = round(3*$value["GP1"]);
+                        $values[$id]["GPP1"] = round(10*$value["GP1"]);
                 if($value["G1"] >= 0 && $value["G1"] < 60)
                         $values[$id]["GPP1"] = round(0.2*$value["GP1"]);
-                if($value["G1"] >= 60 && $value["G1"] < 100)
+                if($value["G1"] >= 60 && $value["G1"] <= 100)
                         $values[$id]["GPP1"] = round(1.3*$value["GP1"]);
-                if($value["G1"] >= 100)
+                if($value["G1"] > 100)
                         $values[$id]["GPP1"] = $tickerCount;
-/*                if($value["G1"] >= 100 && $value["G1"] < 300)
-                        $values[$id]["GPP1"] = round(4*$value["GP1"]);
-                if($value["G1"] >= 300 && $value["G1"] < 1000)
-                        $values[$id]["GPP1"] = round(6*$value["GP1"]);
-                if($value["G1"] >= 1000)
-                        $values[$id]["GPP1"] = round(11*$value["GP1"]);*/
         }
         //Sales5YYCGrPerc
         if(is_null($value["G2"])) {
@@ -229,31 +211,23 @@ foreach($values as $id => $value) {
                         $values[$id]["GPP2"] = round(3*$value["GP2"]);
                 if($value["G2"] >= 0 && $value["G2"] < 40)
                         $values[$id]["GPP2"] = round(0.2*$value["GP2"]);
-                if($value["G2"] >= 40 && $value["G2"] < 80)
+                if($value["G2"] >= 40 && $value["G2"] <= 70)
                         $values[$id]["GPP2"] = round(1.25*$value["GP2"]);
-                if($value["G2"] >= 80)
+                if($value["G2"] > 70)
                         $values[$id]["GPP2"] = $tickerCount;
-/*                if($value["G2"] >= 80 && $value["G2"] < 200)
-                        $values[$id]["GPP2"] = round(1.5*$value["GP2"]);
-                if($value["G2"] >= 200 && $value["G2"] < 300)
-                        $values[$id]["GPP2"] = round(6*$value["GP2"]);
-                if($value["G2"] >= 300)
-                        $values[$id]["GPP2"] = round(11*$value["GP2"]);*/
         }
         //GrossProfitAstTotal
         if(is_null($value["G3"])) {
                 $values[$id]["GPP3"] = round(3*$value["GP3"]);
         } else {
                 if($value["G3"] < 0)
-                        $values[$id]["GPP3"] = round(3*$value["GP3"]);
+                        $values[$id]["GPP3"] = $tickerCount;
                 if($value["G3"] >= 0 && $value["G3"] < 1)
                         $values[$id]["GPP3"] = $value["GP3"];
-                if($value["G3"] >= 1 && $value["G3"] < 1.8)
+                if($value["G3"] >= 1 && $value["G3"] <= 1.8)
                         $values[$id]["GPP3"] = round(0.01*$value["GP3"]);
-                if($value["G3"] >= 1.8 && $value["G3"] < 2.5)
-                        $values[$id]["GPP3"] = round(3*$value["GP3"]);
-                if($value["G3"] >= 2.5)
-                        $values[$id]["GPP3"] = round(3*$value["GP3"]);
+                if($value["G3"] > 1.8)
+                        $values[$id]["GPP3"] = $tickerCount;
         }
         //EV/EBIT
         if(is_null($value["V1"])) {
@@ -273,12 +247,6 @@ foreach($values as $id => $value) {
                         $values[$id]["VPP1"] = round(9*$value["VP1"]);
                 if($value["V1"] >= 70)
                         $values[$id]["VPP1"] = $tickerCount;
-/*                if($value["V1"] >= 40 && $value["V1"] < 200)
-                        $values[$id]["VPP1"] = round(9*$value["VP1"]);
-                if($value["V1"] >= 200 && $value["V1"] < 1000)
-                        $values[$id]["VPP1"] = round(17*$value["VP1"]);
-                if($value["V1"] >= 1000)
-                        $values[$id]["VPP1"] = round(31*$value["VP1"]);*/
         }
         //P/FCF
         if(is_null($value["V2"])) {
@@ -296,25 +264,21 @@ foreach($values as $id => $value) {
                         $values[$id]["VPP2"] = round(4*$value["VP2"]);
                 if($value["V2"] >= 100)
                         $values[$id]["VPP2"] = $tickerCount;
-/*                if($value["V2"] >= 100 && $value["V2"] < 300)
-                        $values[$id]["VPP2"] = round(9*$value["VP2"]);
-                if($value["V2"] >= 300 && $value["V2"] < 500)
-                        $values[$id]["VPP2"] = round(17*$value["VP2"]);
-                if($value["V2"] >= 500)
-                        $values[$id]["VPP2"] = round(31*$value["VP2"]);*/
         }
         //-Pr2BookQ
         if(is_null($value["V3"])) {
                 $values[$id]["VPP3"] = round(3*$value["VP3"]);
         } else {
                 if(-$value["V3"] < 0)
-                        $values[$id]["VPP3"] = round(3*$value["VP3"]);
+                        $values[$id]["VPP3"] = $tickerCount;
                 if(-$value["V3"] >= 0 && -$value["V3"] < 3)
                         $values[$id]["VPP3"] = $value["VP3"];
                 if(-$value["V3"] >= 3 && -$value["V3"] < 7)
                         $values[$id]["VPP3"] = round(1.3*$value["VP3"]);
-                if(-$value["V3"] >= 7)
+                if(-$value["V3"] >= 7 && -$value["V3"] <= 11)
                         $values[$id]["VPP3"] = round(1.6*$value["VP3"]);
+                if(-$value["V3"] > 11)
+                        $values[$id]["VPP3"] = $tickerCount;
         }
 
 	//Cut values that exceed the number of tickers
@@ -381,15 +345,15 @@ foreach($values as $id => $value) {
         $values[$id]["VPW4"] = is_null($values[$id]["Q3"])?0:($values[$id]["QPS3"] * $vw4);
         $values[$id]["VF"] = $values[$id]["VPW1"] + $values[$id]["VPW2"] + $values[$id]["VPW3"] + $values[$id]["VPW4"];
         $values[$id]["AS"] = ($values[$id]["QF"] + $values[$id]["GF"] + $values[$id]["VF"])/3;
-	if ($values[$id]["AS"] >= 75)
+	if ($values[$id]["AS"] >= 85)
 		$values[$id]["RS"] = 'A';
-	if ($values[$id]["AS"] >= 65 && $values[$id]["AS"] < 75)
+	if ($values[$id]["AS"] >= 75 && $values[$id]["AS"] < 85)
 		$values[$id]["RS"] = 'B';
-	if ($values[$id]["AS"] >= 55 && $values[$id]["AS"] < 65)
+	if ($values[$id]["AS"] >= 65 && $values[$id]["AS"] < 75)
 		$values[$id]["RS"] = 'C';
-	if ($values[$id]["AS"] >= 45 && $values[$id]["AS"] < 55)
+	if ($values[$id]["AS"] >= 50 && $values[$id]["AS"] < 65)
 		$values[$id]["RS"] = 'D';
-	if ($values[$id]["AS"] < 45)
+	if ($values[$id]["AS"] < 50)
 		$values[$id]["RS"] = 'F';
 
 	//Save data
