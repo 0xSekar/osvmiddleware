@@ -40,7 +40,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	if(isset($response->query) && isset($response->query->results)) {
 		//Check if the symbol exists
 		if(isset($response->query->results->results->EarningsEst)) {
-			$dates = new stdClass();;
+			$dates = new stdClass();
 			//Get dates from fetched ticker
 			foreach($response->query->results->results->EarningsEst->AvgEstimate as $property => $value) {
 				//Get dates
