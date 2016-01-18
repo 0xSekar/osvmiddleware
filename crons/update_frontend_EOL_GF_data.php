@@ -33,9 +33,12 @@ $result = json_decode($symbols);
 $count = 0;
 $inserted = 0;
 $updated = 0;
+$update_array = array(".","'");
 echo "Updating ticker lists....<br>\n";
-
 //Process the tickers and add any missing ticket to the tables (only basic ticker data)
+foreach ($result as $key => $symbol) {
+	$result[$key]->ticker = str_replace($update_array, "-", $result[$key]->ticker);
+}
 foreach ($result as $symbol) {
 	$count ++;
 	$query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol->ticker'";
@@ -54,6 +57,9 @@ foreach ($result as $symbol) {
 
 $symbols2 = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_extra.php");
 $result2 = json_decode($symbols2);
+foreach ($result2 as $key => $symbol) {
+	$result2[$key]->ticker = str_replace($update_array, "-", $result2[$key]->ticker);
+}
 foreach ($result2 as $symbol2) {
         $count ++;
         $query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol2->ticker'";
@@ -63,20 +69,6 @@ foreach ($result2 as $symbol2) {
 		$fixdate = $symbol2->insdate;
 		$fixticker = $symbol2->ticker;
 		$fixtype = $symbol2->reporttype;
-	        if (preg_match("/[\.\-\']/",$symbol2->ticker, $match)) {
-        	        $fixsym = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_special.php?ticker=$symbol2->ticker");
-                	$fixsym = json_decode($fixsym);
-	                $fixsym = $fixsym[0];
-        	        if(isset($fixsym->ticker)) {
-                	        if($fixsym->ticker != $symbol2->ticker) {
-                        	        if(!is_null($fixsym->insdate) && (is_null($fixdate) || $fixdate < $fixsym->insdate)) {
-                                	        $fixdate = $fixsym->insdate;
-	                                        $fixticker = $fixsym->ticker;
-        	                                $fixtype = $fixsym->reporttype;
-                	                }
-                        	}
-	                }
-        	}
 		if (!is_null($fixdate) && $fixtype != "Dummy") {
                 	$inserted ++;
 	                $csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
@@ -119,20 +111,6 @@ foreach ($result as $symbol) {
 	$fixdate = $symbol->insdate;
 	$fixticker = $symbol->ticker;
 	$fixtype = $symbol->reporttype;
-	if (preg_match("/[\.\-\']/",$symbol->ticker, $match)) {
-		$fixsym = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_special.php?ticker=$symbol->ticker");
-		$fixsym = json_decode($fixsym);
-		$fixsym = $fixsym[0];
-		if(isset($fixsym->ticker)) {
-			if($fixsym->ticker != $symbol->ticker) {
-				if(!is_null($fixsym->insdate) && (is_null($fixdate) || $fixdate < $fixsym->insdate)) {
-				        $fixdate = $fixsym->insdate;
-				        $fixticker = $fixsym->ticker;
-				        $fixtype = $fixsym->reporttype;
-				}
-			}
-		}
-	}
 	//End fix for different tickers
 
 	if (!is_null($fixdate) && $dates->last_eol_date < $fixdate && $fixtype != "Dummy") {
@@ -175,20 +153,6 @@ foreach ($result2 as $symbol) {
         $fixdate = $symbol->insdate;
         $fixticker = $symbol->ticker;
         $fixtype = $symbol->reporttype;
-        if (preg_match("/[\.\-\']/",$symbol->ticker, $match)) {
-                $fixsym = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_special.php?ticker=$symbol->ticker");
-                $fixsym = json_decode($fixsym);
-                $fixsym = $fixsym[0];
-                if(isset($fixsym->ticker)) {
-                        if($fixsym->ticker != $symbol->ticker) {
-                                if(!is_null($fixsym->insdate) && (is_null($fixdate) || $fixdate < $fixsym->insdate)) {
-                                        $fixdate = $fixsym->insdate;
-                                        $fixticker = $fixsym->ticker;
-                                        $fixtype = $fixsym->reporttype;
-                                }
-                        }
-                }
-        }
         //End fix for different tickers
 
         if (!is_null($fixdate) && $dates->last_eol_date < $fixdate && $fixtype != "Dummy") {

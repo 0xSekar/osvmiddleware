@@ -14,8 +14,8 @@ ob_implicit_flush(true);             // output stuff directly
 
 $ticker1 = "";
 if(isset($_REQUEST['ticker'])) {
-	if (preg_match("/[\.\-\']/",$_REQUEST['ticker'], $res)) {
-		$ticker1 = " AND (ticker = '".str_replace($res[0],"-",$_REQUEST['ticker'])."' OR ticker='".str_replace($res[0],".",$_REQUEST['ticker'])."') ";
+	if (preg_match("/[\.\']/",$_REQUEST['ticker'], $res)) {
+		$ticker1 = " AND ticker = '".str_replace($res[0],"-",$_REQUEST['ticker'])."' ";
 	} else {
 		$ticker1 = " AND ticker = '".$_REQUEST['ticker']."' ";
 	}
