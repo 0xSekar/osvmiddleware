@@ -26,7 +26,7 @@ $enotfound2 = 0;
 $eerrors = 0;
 echo "Updating Tickers...\n";
 //Analyst Estimates needs more frequent updates
-$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id";
+$query = "SELECT * FROM  `tickers` WHERE OCTET_LENGTH( description ) = 0 OR description IS NULL OR TRIM( sector ) =  ''";
 $res = mysql_query($query) or die(mysql_error());
 while ($row = mysql_fetch_assoc($res)) {
 	$count2++;
