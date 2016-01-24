@@ -350,9 +350,39 @@ foreach($values as $id => $value) {
 		$values[$id]["RS"] = 'D';
 	if ($values[$id]["AS"] < 50)
 		$values[$id]["RS"] = 'F';
+        if ($values[$id]["QF"] >= 85)
+                $values[$id]["QG"] = 'A';
+        if ($values[$id]["QF"] >= 75 && $values[$id]["QF"] < 85)
+                $values[$id]["QG"] = 'B';
+        if ($values[$id]["QF"] >= 65 && $values[$id]["QF"] < 75)
+                $values[$id]["QG"] = 'C';
+        if ($values[$id]["QF"] >= 50 && $values[$id]["QF"] < 65)
+                $values[$id]["QG"] = 'D';
+        if ($values[$id]["QF"] < 50)
+                $values[$id]["QG"] = 'F';
+        if ($values[$id]["GF"] >= 85)
+                $values[$id]["GG"] = 'A';
+        if ($values[$id]["GF"] >= 75 && $values[$id]["GF"] < 85)
+                $values[$id]["GG"] = 'B';
+        if ($values[$id]["GF"] >= 65 && $values[$id]["GF"] < 75)
+                $values[$id]["GG"] = 'C';
+        if ($values[$id]["GF"] >= 50 && $values[$id]["GF"] < 65)
+                $values[$id]["GG"] = 'D';
+        if ($values[$id]["GF"] < 50)
+                $values[$id]["GG"] = 'F';
+        if ($values[$id]["VF"] >= 85)
+                $values[$id]["VG"] = 'A';
+        if ($values[$id]["VF"] >= 75 && $values[$id]["VF"] < 85)
+                $values[$id]["VG"] = 'B';
+        if ($values[$id]["VF"] >= 65 && $values[$id]["VF"] < 75)
+                $values[$id]["VG"] = 'C';
+        if ($values[$id]["VF"] >= 50 && $values[$id]["VF"] < 65)
+                $values[$id]["VG"] = 'D';
+        if ($values[$id]["VF"] < 50)
+                $values[$id]["VG"] = 'F';
 
 	//Save data
-	$query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `Grade`) VALUES (";
+	$query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (";
 	$query .= $id.",";
 	$query .= $values[$id]["QPW1"].",";
 	$query .= $values[$id]["QPW2"].",";
@@ -369,7 +399,10 @@ foreach($values as $id => $value) {
         $query .= $values[$id]["VPW4"].",";
         $query .= $values[$id]["VF"].",";
 	$query .= $values[$id]["AS"].",";
-	$query .= "'".$values[$id]["RS"]."'";
+        $query .= "'".$values[$id]["RS"]."',";
+        $query .= "'".$values[$id]["QG"]."',";
+        $query .= "'".$values[$id]["GG"]."',";
+        $query .= "'".$values[$id]["VG"]."'";
         $query .= ")";
 	$save = mysql_query($query) or die (mysql_error());
 
