@@ -401,8 +401,8 @@ foreach($values as $id => $value) {
 	$query .= $values[$id]["AS"].",";
         $query .= "'".$values[$id]["RS"]."',";
         $query .= "'".$values[$id]["QG"]."',";
-        $query .= "'".$values[$id]["GG"]."',";
-        $query .= "'".$values[$id]["VG"]."'";
+        $query .= "'".$values[$id]["VG"]."',";
+        $query .= "'".$values[$id]["GG"]."'";
         $query .= ")";
 	$save = mysql_query($query) or die (mysql_error());
 
