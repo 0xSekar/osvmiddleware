@@ -1,8 +1,5 @@
 <?php
 //Get yahoo estimates using YQL.
-//AFTER FIRST RUN, DATES FOR HISTORY NEEDS TO BE MODIFIED TO TAKE ONLY LAST FEW RECORDS:
-//YEAR FOR DIVIDEND
-//MONTH FOR HISTORY
 
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
@@ -64,65 +61,70 @@ while ($row = mysql_fetch_assoc($res)) {
                 $dnotfound ++;
         }
 
-	//UPDATE HISTORICAL DATA
-	//replace this block with the next one after initial import
-/*
-	for ($years = -12; $years < 0; $years++) {
-	$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime($years ." years"))."' and endDate = '".date("Y-m-d", strtotime(($years+1) ." years"))."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
-	if(isset($response->query) && isset($response->query->results)) {
-		foreach($response->query->results->quote as $element) {
-			$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
-			$query_div .= "'".$row["id"]."',";
-			$query_div .= "'".$element->Date."',";
-			$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
-			$query_div .= (is_null($element->High)?"NULL":$element->High).",";
-			$query_div .= (is_null($element->Low)?"NULL":$element->Low).",";
-			$query_div .= (is_null($element->Close)?"NULL":$element->Close).",";
-			$query_div .= (is_null($element->Volume)?"NULL":$element->Volume).",";
-			$query_div .= (is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-			$query_div .= ") ON DUPLICATE KEY UPDATE ";
-			$query_div .= "open = ".(is_null($element->Open)?"NULL":$element->Open).",";
-			$query_div .= "high = ".(is_null($element->High)?"NULL":$element->High).",";
-			$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
-			$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
-			$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
-			$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-			mysql_query($query_div) or die(mysql_error());
-		}
-	}
-	}
-*/
+	$q_count = "select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["ticker"]."'";
+	$r_count = mysql_query($q_count) or die (mysql_error());
+	$r_row = mysql_fetch_assoc($r_count);
 
-	$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime("-1 month"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
-	if(isset($response->query) && isset($response->query->results)) {
-		foreach($response->query->results->quote as $element) {
-			if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
-				$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
-				$query_div .= "'".$row["id"]."',";
-				$query_div .= "'".$element->Date."',";
-				$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
-				$query_div .= (is_null($element->High)?"NULL":$element->High).",";
-				$query_div .= (is_null($element->Low)?"NULL":$element->Low).",";
-				$query_div .= (is_null($element->Close)?"NULL":$element->Close).",";
-				$query_div .= (is_null($element->Volume)?"NULL":$element->Volume).",";
-				$query_div .= (is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-				$query_div .= ") ON DUPLICATE KEY UPDATE ";
-				$query_div .= "open = ".(is_null($element->Open)?"NULL":$element->Open).",";
-				$query_div .= "high = ".(is_null($element->High)?"NULL":$element->High).",";
-				$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
-				$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
-				$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
-				$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-				mysql_query($query_div) or die(mysql_error());
+	//UPDATE HISTORICAL DATA
+	if($r_row["a"] < 360) {
+echo "Getting 10 years data\n";
+		for ($years = -12; $years < 0; $years++) {
+			$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime($years ." years"))."' and endDate = '".date("Y-m-d", strtotime(($years+1) ." years"))."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
+			if(isset($response->query) && isset($response->query->results)) {
+				foreach($response->query->results->quote as $element) {
+					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
+					$query_div .= "'".$row["id"]."',";
+					$query_div .= "'".$element->Date."',";
+					$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
+					$query_div .= (is_null($element->High)?"NULL":$element->High).",";
+					$query_div .= (is_null($element->Low)?"NULL":$element->Low).",";
+					$query_div .= (is_null($element->Close)?"NULL":$element->Close).",";
+					$query_div .= (is_null($element->Volume)?"NULL":$element->Volume).",";
+					$query_div .= (is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
+					$query_div .= ") ON DUPLICATE KEY UPDATE ";
+					$query_div .= "open = ".(is_null($element->Open)?"NULL":$element->Open).",";
+					$query_div .= "high = ".(is_null($element->High)?"NULL":$element->High).",";
+					$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
+					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
+					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
+					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
+					mysql_query($query_div) or die(mysql_error());
+				}
 			}
 		}
-		$hupdated ++;
-        } elseif(isset($response->error)) {
-                $herrors ++;
-        } else {
-                $hnotfound ++;
-        }
 
+	} else {
+echo "Getting 30 days data\n";
+		$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime("-1 month"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
+		if(isset($response->query) && isset($response->query->results)) {
+			foreach($response->query->results->quote as $element) {
+				if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
+					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
+					$query_div .= "'".$row["id"]."',";
+					$query_div .= "'".$element->Date."',";
+					$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
+					$query_div .= (is_null($element->High)?"NULL":$element->High).",";
+					$query_div .= (is_null($element->Low)?"NULL":$element->Low).",";
+					$query_div .= (is_null($element->Close)?"NULL":$element->Close).",";
+					$query_div .= (is_null($element->Volume)?"NULL":$element->Volume).",";
+					$query_div .= (is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
+					$query_div .= ") ON DUPLICATE KEY UPDATE ";
+					$query_div .= "open = ".(is_null($element->Open)?"NULL":$element->Open).",";
+					$query_div .= "high = ".(is_null($element->High)?"NULL":$element->High).",";
+					$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
+					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
+					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
+					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
+					mysql_query($query_div) or die(mysql_error());
+				}
+			}
+			$hupdated ++;
+	        } elseif(isset($response->error)) {
+        	        $herrors ++;
+	        } else {
+        	        $hnotfound ++;
+	        }
+	}
 
         //UPDATE KEYSTATS
         //Try to get yahoo data for the ticker
