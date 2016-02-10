@@ -61,12 +61,15 @@ while ($row = mysql_fetch_assoc($res)) {
                 $dnotfound ++;
         }
 
-	$q_count = "select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["ticker"]."'";
+	//UPDATE HISTORICAL DATA
+	$q_count = "select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["id"]."'";
 	$r_count = mysql_query($q_count) or die (mysql_error());
 	$r_row = mysql_fetch_assoc($r_count);
 
-	//UPDATE HISTORICAL DATA
-	if($r_row["a"] < 360) {
+	$split_date = date("Ymd",strtotime($row["last_split_date"]));
+	$sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+
+	if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date)) {
 echo "Getting 10 years data\n";
 		for ($years = -12; $years < 0; $years++) {
 			$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime($years ." years"))."' and endDate = '".date("Y-m-d", strtotime(($years+1) ." years"))."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
@@ -92,7 +95,10 @@ echo "Getting 10 years data\n";
 				}
 			}
 		}
-
+		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
+		        $query_up = "UPDATE tickers_control SET last_split_date = '".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."' WHERE ticker_id = " . $row["id"];
+        		mysql_query($query_up) or die(mysql_error());		
+		}
 	} else {
 echo "Getting 30 days data\n";
 		$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime("-1 month"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	

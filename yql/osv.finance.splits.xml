@@ -1,0 +1,38 @@
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+<meta>
+<author>Sergio Karsvnie</author>
+<description>Yahoo Finance Stock last split date</description>
+<sampleQuery>
+select * from {table} where symbol = "IBM"
+</sampleQuery>
+</meta>
+<bindings>
+<select itemPath="splits.SplitDate" produces="XML">
+<urls>
+<url>http://ichart.finance.yahoo.com/x</url>
+</urls>
+<inputs>
+<key id="s" as="symbol" type="xs:string" paramType="query" required="true"/>
+<key id="g" type="xs:string" paramType="query" required="false" const="true" default="v"/>
+<key id="y" type="xs:string" paramType="query" required="false" const="true" default="0"/>
+<key id="z" type="xs:string" paramType="query" required="false" const="true" default="30000"/>
+</inputs>
+<execute>
+<![CDATA[
+var encodedUrl = request.url;
+results = y.query("select * from csv(2,0) where url=@url",{url:encodedUrl});
+var splits = <splits/>;
+rows=results.results.row;
+for each (var row in rows) {
+	if(row.col0 == "SPLIT") {
+  		splits.SplitDate += <SplitDate>{row.col1.text().toString()}</SplitDate>;
+		break;
+	}
+}
+response.object = splits;
+]]>
+</execute>
+</select>
+</bindings>
+</table>
+
