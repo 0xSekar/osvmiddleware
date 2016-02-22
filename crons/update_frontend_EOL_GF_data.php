@@ -116,7 +116,9 @@ foreach ($result as $symbol) {
 	if (!is_null($fixdate) && $dates->last_eol_date < $fixdate && $fixtype != "Dummy") {
 		//If the remote report is newer, download the new report and update data points
 		$updated++;
+		echo "Downloading data for ".$fixticker."... ";
 		$csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
+		echo "Updating ticker ".$symbol->ticker."\n";
 		$csvst = fopen('php://memory', 'r+');
 		fwrite($csvst, $csv);
 		unset($csv);
@@ -128,7 +130,6 @@ foreach ($result as $symbol) {
 		array_walk_recursive($rawdata, 'nullValues');
 
 		//Update Raw data
-		echo "Updating ticker ".$symbol->ticker."\n";
 		if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
 			update_raw_data_tickers($dates, $rawdata);
 		}
@@ -158,7 +159,9 @@ foreach ($result2 as $symbol) {
         if (!is_null($fixdate) && $dates->last_eol_date < $fixdate && $fixtype != "Dummy") {
                 //If the remote report is newer, download the new report and update data points
                 $updated++;
+		echo "Downloading data for ".$fixticker."... ";
                 $csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
+		echo "Updating ticker ".$symbol->ticker."\n";
                 $csvst = fopen('php://memory', 'r+');
                 fwrite($csvst, $csv);
                 unset($csv);
@@ -170,7 +173,6 @@ foreach ($result2 as $symbol) {
 		array_walk_recursive($rawdata, 'nullValues');
 
                 //Update Raw data
-		echo "Updating ticker ".$symbol->ticker."\n";
 		if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
 	                update_raw_data_tickers($dates, $rawdata);
 		}
