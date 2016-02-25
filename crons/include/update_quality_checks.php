@@ -22,6 +22,7 @@ function update_quality_checks() {
 			$first = false;
                         $idChange = false;
                 }
+		$pprawdata = $prawdata;
                 $prawdata = $rawdata;
 		$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.id= " . $row["id"];
 		$res2 = mysql_query($query) or die (mysql_error());
@@ -30,7 +31,7 @@ function update_quality_checks() {
 		$query = "INSERT INTO `reports_pio_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
                 $query .= "'".$row["id"]."',";
 		//Pio 1
-		$value = (!is_null($rawdata["NetIncome"]) && $rawdata["NetIncome"] >= 0 ? 1 : 0);
+		$value = (!is_null($rawdata["IncomebeforeExtraordinaryItems"]) && $rawdata["IncomebeforeExtraordinaryItems"] >= 0 ? 1 : 0);
 		$total += $value;
 		$query .= "'".($value)."',";
 		//Pio 2
@@ -42,19 +43,19 @@ function update_quality_checks() {
 			if(is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) {
 				$query .= "'0',";
 			} else {
-				$value = (($rawdata["NetIncome"]/$rawdata["TotalAssets"]) >= 0 ? 1 : 0);
+				$value = (($rawdata["IncomebeforeExtraordinaryItems"]/$rawdata["TotalAssets"]) >= 0 ? 1 : 0);
 				$total += $value;
 				$query .= "'".($value)."',";
 			}
 		} else {
-			$vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? 0 : ($rawdata["NetIncome"]/$rawdata["TotalAssets"]);
-			$vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["NetIncome"]/$prawdata["TotalAssets"]);
+			$vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? 0 : ($rawdata["IncomebeforeExtraordinaryItems"]/$rawdata["TotalAssets"]);
+			$vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["IncomebeforeExtraordinaryItems"]/$prawdata["TotalAssets"]);
 			$value = ($vn >= $vv ? 1 : 0);
 			$total += $value;
 			$query .= "'".($value)."',";
 		}
 		//Pio 4
-		$value = ($rawdata["CashfromOperatingActivities"] >= $rawdata["NetIncome"] ? 1 : 0);
+		$value = ($rawdata["CashfromOperatingActivities"] >= $rawdata["IncomebeforeExtraordinaryItems"] ? 1 : 0);
 		$total += $value;
 		$query .= "'".($value)."',";
 
@@ -80,8 +81,12 @@ function update_quality_checks() {
 			$query .= "'0','0','0',";
 		} else {
 			//Pio 5
-			$vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? 0 : (($rawdata["TotalLongtermDebt"] + $rawdata["NotesPayable"])/$rawdata["TotalAssets"]);
-			$vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/$prawdata["TotalAssets"]);
+			$vn = (($rawdata["TotalAssets"]+$prawdata["TotalAssets"]) == 0) ? 0 : (($rawdata["TotalLongtermDebt"] + $rawdata["NotesPayable"])/(($rawdata["TotalAssets"]+$prawdata["TotalAssets"])/2));
+			if ($pprawdata["ticker_id"] == $prawdata["ticker_id"]) {
+				$vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
+			} else {
+				$vv = (is_null($prawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/$prawdata["TotalAssets"]);
+			}
 			$value = ($vn <= $vv ? 1 : 0);
 			$total += $value;
 			$query .= "'".($value)."',";
@@ -102,8 +107,12 @@ function update_quality_checks() {
 			$total += $value;
 			$query .= "'".($value)."',";
 			//Pio 9
-			$vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? 0 : ($rawdata["TotalRevenue"]/$rawdata["TotalAssets"]);
-			$vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["TotalRevenue"]/$prawdata["TotalAssets"]);
+			$vn = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($rawdata["TotalRevenue"]/$prawdata["TotalAssets"]);
+			if($pprawdata["ticker_id"] == $prawdata["ticker_id"]) {
+				$vv = (is_null($pprawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : ($prawdata["TotalRevenue"]/$pprawdata["TotalAssets"]);
+			} else {
+				$vv = 0;
+			}
 			$value = ($vn >= $vv ? 1 : 0);
 			$total += $value;
 			$query .= "'".($value)."',";
@@ -122,7 +131,7 @@ function update_quality_checks() {
 	                $query = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
         	        $query .= "'".$ppid."',";
                 	//Pio 1
-	                $value = (!is_null($trawdata["NetIncome"]) && $trawdata["NetIncome"] >= 0 ? 1 : 0);
+	                $value = (!is_null($trawdata["IncomebeforeExtraordinaryItems"]) && $trawdata["IncomebeforeExtraordinaryItems"] >= 0 ? 1 : 0);
         	        $total += $value;
                 	$query .= "'".($value)."',";
 	                //Pio 2
@@ -130,18 +139,18 @@ function update_quality_checks() {
                 	$total += $value;
 	                $query .= "'".($value)."',";
         	        //Pio 3
-                        $vn = (is_null($trawdata["TotalAssets"]) || $trawdata["TotalAssets"] == 0) ? 0 : ($trawdata["NetIncome"]/$trawdata["TotalAssets"]);
-                        $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["NetIncome"]/$prawdata["TotalAssets"]);
+                        $vn = (is_null($trawdata["TotalAssets"]) || $trawdata["TotalAssets"] == 0) ? 0 : ($trawdata["IncomebeforeExtraordinaryItems"]/$trawdata["TotalAssets"]);
+                        $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["IncomebeforeExtraordinaryItems"]/$prawdata["TotalAssets"]);
                         $value = ($vn >= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
 	                //Pio 4
-        	        $value = ($trawdata["CashfromOperatingActivities"] >= $trawdata["NetIncome"] ? 1 : 0);
+        	        $value = ($trawdata["CashfromOperatingActivities"] >= $trawdata["IncomebeforeExtraordinaryItems"] ? 1 : 0);
                 	$total += $value;
 	                $query .= "'".($value)."',";
                         //Pio 5
-                        $vn = (is_null($trawdata["TotalAssets"]) || $trawdata["TotalAssets"] == 0) ? 0 : (($trawdata["TotalLongtermDebt"] + $trawdata["NotesPayable"])/$trawdata["TotalAssets"]);
-                        $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/$prawdata["TotalAssets"]);
+                        $vn = (($trawdata["TotalAssets"]+$prawdata["TotalAssets"]) == 0) ? 0 : (($trawdata["TotalLongtermDebt"] + $trawdata["NotesPayable"])/(($trawdata["TotalAssets"]+$prawdata["TotalAssets"])/2));
+                        $vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
                         $value = ($vn <= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
@@ -162,8 +171,8 @@ function update_quality_checks() {
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 9
-                        $vn = (is_null($trawdata["TotalAssets"]) || $trawdata["TotalAssets"] == 0) ? 0 : ($trawdata["TotalRevenue"]/$trawdata["TotalAssets"]);
-                        $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($prawdata["TotalRevenue"]/$prawdata["TotalAssets"]);
+                        $vn = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($trawdata["TotalRevenue"]/$prawdata["TotalAssets"]);
+                        $vv = (is_null($pprawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : ($prawdata["TotalRevenue"]/$pprawdata["TotalAssets"]);
                         $value = ($vn >= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
