@@ -28,7 +28,7 @@ $sql = 'SELECT c.id, c.ticker, "" as cik, "" as company, "" as exchange, "" as f
 FROM `eol_control` c
 LEFT JOIN eol_reports r ON c.ticker = r.ticker
 LEFT JOIN eol_cik_ticker d ON c.ticker = d.ticker
-GROUP BY ticker,reporttype order by id,insdate desc';
+GROUP BY ticker,reporttype order by ticker,insdate desc';
 
 $res = mysql_query($sql) or die (mysql_error());
 $result = array();
