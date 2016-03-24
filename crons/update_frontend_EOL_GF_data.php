@@ -125,6 +125,11 @@ foreach ($result as $symbol) {
 		fseek($csvst, 0);
 		$rawdata = array();
 		while ($data = fgetcsv($csvst)) {
+                        for($i=1; $i<27;$i++) {
+                                if(!isset($data[$i])) {
+                                        $data[$i] = "null";
+                                }
+                        }
 			$rawdata[$data[0]] = $data;
 		}
 		array_walk_recursive($rawdata, 'nullValues');
@@ -168,6 +173,11 @@ foreach ($result2 as $symbol) {
                 fseek($csvst, 0);
                 $rawdata = array();
                 while ($data = fgetcsv($csvst)) {
+			for($i=1; $i<27;$i++) {
+				if(!isset($data[$i])) {
+					$data[$i] = "null";
+				}
+			}
                         $rawdata[$data[0]] = $data;
                 }
 		array_walk_recursive($rawdata, 'nullValues');
