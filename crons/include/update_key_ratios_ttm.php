@@ -1,9 +1,16 @@
 <?php
-function update_key_ratios_ttm() {
-	$query = "delete from ttm_key_ratios";
-	$res = mysql_query($query) or die (mysql_error());
-	$query = "SELECT * FROM `ttm_balanceconsolidated` a, ttm_balancefull b, ttm_cashflowconsolidated c, ttm_cashflowfull d, ttm_financialscustom e, ttm_incomeconsolidated f, ttm_incomefull g, ttm_gf_data h WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id=d.ticker_id AND a.ticker_id=e.ticker_id AND a.ticker_id=f.ticker_id AND a.ticker_id=g.ticker_id and a.ticker_id=h.ticker_id";
-	$res = mysql_query($query) or die (mysql_error());
+function update_key_ratios_ttm($ti = null) {
+	if (is_null($ti)) {
+		$query = "delete from ttm_key_ratios";
+		$res = mysql_query($query) or die (mysql_error());
+		$query = "SELECT * FROM `ttm_balanceconsolidated` a, ttm_balancefull b, ttm_cashflowconsolidated c, ttm_cashflowfull d, ttm_financialscustom e, ttm_incomeconsolidated f, ttm_incomefull g, ttm_gf_data h WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id=d.ticker_id AND a.ticker_id=e.ticker_id AND a.ticker_id=f.ticker_id AND a.ticker_id=g.ticker_id and a.ticker_id=h.ticker_id";
+		$res = mysql_query($query) or die (mysql_error());
+	} else {
+		$query = "delete from ttm_key_ratios where ticker_id = $ti";
+		$res = mysql_query($query) or die (mysql_error());
+		$query = "SELECT * FROM `ttm_balanceconsolidated` a, ttm_balancefull b, ttm_cashflowconsolidated c, ttm_cashflowfull d, ttm_financialscustom e, ttm_incomeconsolidated f, ttm_incomefull g, ttm_gf_data h WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id=d.ticker_id AND a.ticker_id=e.ticker_id AND a.ticker_id=f.ticker_id AND a.ticker_id=g.ticker_id and a.ticker_id=h.ticker_id and a.ticker_id = $ti";
+		$res = mysql_query($query) or die (mysql_error());
+	}
 	while ($rawdata = mysql_fetch_assoc($res)) {
                 $qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$rawdata["ticker_id"]."' order by report_date desc limit 1";
                 $rdate = date("Y-m-d");
