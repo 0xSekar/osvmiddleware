@@ -1,6 +1,10 @@
 <?php
 function update_ratings_ttm() {
 $values = array();
+$query = "delete from ttm_ratings_history where ratings_date = curdate()";
+$res = mysql_query($query) or die (mysql_error());
+$query = "insert into ttm_ratings_history (ticker_id, ratings_date, Q1, Q2, Q3, QT, V1, V2, V3, V4, VT, G1, G2, G3, G4, GT, `AS`, AS_grade, Q_grade, V_grade, G_grade) select ticker_id, curdate() as ratings_date, Q1, Q2, Q3, QT, V1, V2, V3, V4, VT, G1, G2, G3, G4, GT, `AS`, AS_grade, Q_grade, V_grade, G_grade from ttm_ratings";
+$res = mysql_query($query) or die (mysql_error());
 $query = "delete from ttm_ratings";
 $res = mysql_query($query) or die (mysql_error());
 $tickerCount = 0;
