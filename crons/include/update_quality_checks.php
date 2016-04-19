@@ -97,7 +97,7 @@ function update_quality_checks() {
 			$total += $value;
 			$query .= "'".($value)."',";
 			//Pio 7
-			$value = (toFloat($rawdata["SharesOutstandingDiluted"]) < toFloat($prawdata["SharesOutstandingDiluted"]) ? 1 : 0);
+			$value = (toFloat($rawdata["SharesOutstandingDiluted"]) <= toFloat($prawdata["SharesOutstandingDiluted"]) ? 1 : 0);
 			$total += $value;
 			$query .= "'".($value)."',";
 			//Pio 8
@@ -132,7 +132,7 @@ function update_quality_checks() {
 			$yres = mysql_query($yquery) or die (mysql_error());
                         $yrawdata = mysql_fetch_assoc($yres);
                         if(!is_null($yrawdata["SharesOutstanding"])) {
-                                $trawdata["SharesOutstandingDiluted"] = $yrawdata["SharesOutstanding"];
+                                $trawdata["SharesOutstandingDiluted"] = $yrawdata["SharesOutstanding"]/1000000;
                         }
 	                $query = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
         	        $query .= "'".$ppid."',";
@@ -167,7 +167,7 @@ function update_quality_checks() {
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 7
-                        $value = (toFloat($trawdata["SharesOutstandingDiluted"]) < toFloat($prawdata["SharesOutstandingDiluted"]) ? 1 : 0);
+                        $value = (toFloat($trawdata["SharesOutstandingDiluted"]) <= toFloat($prawdata["SharesOutstandingDiluted"]) ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
                         //Pio 8
