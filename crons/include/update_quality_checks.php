@@ -65,7 +65,7 @@ function update_quality_checks() {
 				$query .= "'1',";
 				$total++;
 			} else {
-				$value = ((($rawdata["TotalLongtermDebt"] + $rawdata["NotesPayable"])/$rawdata["TotalAssets"]) >= 0 ? 1 : 0);
+				$value = ((($rawdata["TotalLongtermDebt"])/$rawdata["TotalAssets"]) >= 0 ? 1 : 0);
 				$total += $value;
 				$query .= "'".($value)."',";
 			}
@@ -81,11 +81,11 @@ function update_quality_checks() {
 			$query .= "'0','0','0',";
 		} else {
 			//Pio 5
-			$vn = (($rawdata["TotalAssets"]+$prawdata["TotalAssets"]) == 0) ? 0 : (($rawdata["TotalLongtermDebt"] + $rawdata["NotesPayable"])/(($rawdata["TotalAssets"]+$prawdata["TotalAssets"])/2));
+			$vn = (($rawdata["TotalAssets"]+$prawdata["TotalAssets"]) == 0) ? 0 : (($rawdata["TotalLongtermDebt"])/(($rawdata["TotalAssets"]+$prawdata["TotalAssets"])/2));
 			if ($pprawdata["ticker_id"] == $prawdata["ticker_id"]) {
-				$vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
+				$vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
 			} else {
-				$vv = (is_null($prawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/$prawdata["TotalAssets"]);
+				$vv = (is_null($prawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/$prawdata["TotalAssets"]);
 			}
 			$value = ($vn <= $vv ? 1 : 0);
 			$total += $value;
@@ -155,8 +155,8 @@ function update_quality_checks() {
                 	$total += $value;
 	                $query .= "'".($value)."',";
                         //Pio 5
-                        $vn = (($trawdata["TotalAssets"]+$prawdata["TotalAssets"]) == 0) ? 0 : (($trawdata["TotalLongtermDebt"] + $trawdata["NotesPayable"])/(($trawdata["TotalAssets"]+$prawdata["TotalAssets"])/2));
-                        $vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"] + $prawdata["NotesPayable"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
+                        $vn = (($trawdata["TotalAssets"]+$prawdata["TotalAssets"]) == 0) ? 0 : (($trawdata["TotalLongtermDebt"])/(($trawdata["TotalAssets"]+$prawdata["TotalAssets"])/2));
+                        $vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
                         $value = ($vn <= $vv ? 1 : 0);
                         $total += $value;
                         $query .= "'".($value)."',";
