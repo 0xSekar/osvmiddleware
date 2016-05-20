@@ -3,3 +3,4 @@
 30 4 * * * root [ `ps -ef|grep -v grep | grep update_frontend_EOL_GF_data.php|wc -l` -eq 0 ] && cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_frontend_EOL_GF_data.php 2>/dev/null
 0 2 1 */3 * root [ `ps -ef|grep -v grep | grep update_frontend_yahoo_sectors.php|wc -l` -eq 0 ] && cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_frontend_yahoo_sectors.php 2>/dev/null
 30 5 * * * root [ `ps -ef|grep -v grep | grep update_frontend_yahoo_sectors_daily.php|wc -l` -eq 0 ] && cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_frontend_yahoo_sectors_daily.php 2>/dev/null
+12 * * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/check_yahoo_status.php
