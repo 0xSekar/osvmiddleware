@@ -18,6 +18,14 @@ set_time_limit(0);                   // ignore php timeout
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
+$query = "SELECT value FROM system WHERE parameter = 'query_yahoo'";
+$res = mysql_query($query) or die(mysql_error());
+$row = mysql_fetch_assoc($res);
+if($row["value"] == 0) {
+	echo "Skip process as yahoo queries are currently dissabled.\n";
+	exit;
+}
+
 //Using customized Yahoo Social SDK (The default version does not work)
 $yql = new YahooYQLQuery();
 
