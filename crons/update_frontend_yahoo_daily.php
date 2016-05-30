@@ -78,7 +78,6 @@ while ($row = mysql_fetch_assoc($res)) {
 	$sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
 
 	if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date)) {
-echo "Getting 10 years data\n";
 		for ($years = -12; $years < 0; $years++) {
 			$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime($years ." years"))."' and endDate = '".date("Y-m-d", strtotime(($years+1) ." years"))."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
 			if(isset($response->query) && isset($response->query->results)) {
@@ -106,9 +105,10 @@ echo "Getting 10 years data\n";
 		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
 		        $query_up = "UPDATE tickers_control SET last_split_date = '".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."' WHERE ticker_id = " . $row["id"];
         		mysql_query($query_up) or die(mysql_error());		
+			//report to webservice so backend updates his own data
+			$tmp = file_get_contents("http://www.oldschoolvalue.com/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI");
 		}
 	} else {
-echo "Getting 30 days data\n";
 		$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime("-1 month"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
 		if(isset($response->query) && isset($response->query->results)) {
 			foreach($response->query->results->quote as $element) {
