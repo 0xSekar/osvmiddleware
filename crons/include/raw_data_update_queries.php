@@ -264,7 +264,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	$query = "INSERT INTO `tickers_metadata_eol` (`ticker_id`, `TotalSharesOutstandingDate`, `BusinessDescription`, `CITY`, `Country`, `Formername`, `Industry`, `InvRelationsEmail`, `LastAnnualEPS`, `LastAnnualNetIncome`, `LastAnnualRevenue`, `LastAnnualTotalAssets`, `PhoneAreaCode`, `PhoneCountryCode`, `PhoneNumber`, `PublicFloat`, `PublicFloatDate`, `Sector`, `State`, `StateofIncorporation`, `StreetAddress1`, `StreetAddress2`, `TaxID`, `WebSiteURL`, `ZipCode`) VALUES (";
         $query .= "'".$dates->ticker_id."',";
         $query .= "'".date("Y-m-d",strtotime($rawdata["TotalSharesOutstandingDate"][26]))."',";
-        $query .= ($rawdata["BusinessDescription"][26]=='null' ? 'null,':"'".$rawdata["BusinessDescription"][26]."',");
+        $query .= ($rawdata["BusinessDescription"][26]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["BusinessDescription"][26])."',");
         $query .= ($rawdata["CITY"][26]=='null' ? 'null,':"'".$rawdata["CITY"][26]."',");
         $query .= ($rawdata["Country"][26]=='null' ? 'null,':"'".$rawdata["Country"][26]."',");
         $query .= ($rawdata["Formername"][26]=='null' ? 'null,':"'".$rawdata["Formername"][26]."',");
