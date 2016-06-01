@@ -568,7 +568,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	        	$query .= "'".$report_id."',";
         		$query .= $rawdata["CoverSheetTSO"][$i].",";
         		$query .= "'".date("Y-m-d",strtotime($rawdata["CoverSheetTSODate"][$i]))."',";
-        		$query .= ($rawdata["AuditorCode"][$i]=='null' ? 'null,':"'".$rawdata["AuditorCode"][$i]."',");
+        		$query .= ($rawdata["AuditorCode"][$i]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["AuditorCode"][$i])."',");
         		$query .= ($rawdata["AuditorOpinion"][$i]=='null' ? 'null,':"'".$rawdata["AuditorOpinion"][$i]."',");
         		$query .= ($rawdata["InventoryPolicy"][$i]=='null' ? 'null,':"'".$rawdata["InventoryPolicy"][$i]."',");
         		$query .= $rawdata["NumberofShareholders"][$i].",";
