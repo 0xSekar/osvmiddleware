@@ -135,14 +135,8 @@ function update_quality_checks() {
 				$total = 0;
 
 				$tquery = "SELECT * FROM `ttm_balanceconsolidated` a, ttm_balancefull b, ttm_cashflowconsolidated c, ttm_cashflowfull d, ttm_financialscustom e, ttm_incomeconsolidated f, ttm_incomefull g, ttm_gf_data h WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id=d.ticker_id AND a.ticker_id=e.ticker_id AND a.ticker_id=f.ticker_id AND a.ticker_id=g.ticker_id and a.ticker_id=h.ticker_id and a.ticker_id = $ppid";
-				$yquery = "SELECT SharesOutstanding from tickers_yahoo_keystats_2 WHERE ticker_id = $ppid";
         			$tres = mysql_query($tquery) or die (mysql_error());
 				$trawdata = mysql_fetch_assoc($tres);
-				$yres = mysql_query($yquery) or die (mysql_error());
-				$yrawdata = mysql_fetch_assoc($yres);
-				if(!is_null($yrawdata["SharesOutstanding"])) {
-					$trawdata["SharesOutstandingDiluted"] = $yrawdata["SharesOutstanding"]/1000000;
-				}
 		                $query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (";
         		        $query1 .= "'".$ppid."',";
                 		//Pio 1
