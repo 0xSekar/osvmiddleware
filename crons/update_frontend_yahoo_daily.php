@@ -112,7 +112,6 @@ while ($row = mysql_fetch_assoc($res)) {
 			if(isset($response->query) && isset($response->query->results)) {
 				$sharesOut = $response->query->results->quote->SharesOutstanding / 1000000;
 			}
-			echo ("http://www.oldschoolvalue.com/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut);
 			//report to webservice so backend updates his own data
 			$tmp = file_get_contents("http://www.oldschoolvalue.com/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut);
 
