@@ -105,8 +105,17 @@ while ($row = mysql_fetch_assoc($res)) {
 		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
 		        $query_up = "UPDATE tickers_control SET last_split_date = '".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."' WHERE ticker_id = " . $row["id"];
         		mysql_query($query_up) or die(mysql_error());		
+
+			//Need to get latest shares outstandings from yahoo quotes to compare on webservices
+			$response = $yql->execute("select * from osv.finance.quotes where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+			$sharesOut = 0;
+			if(isset($response->query) && isset($response->query->results)) {
+				$sharesOut = $response->query->results->quote->SharesOutstanding / 1000000;
+			}
+			echo ("http://www.oldschoolvalue.com/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut);
 			//report to webservice so backend updates his own data
-			$tmp = file_get_contents("http://www.oldschoolvalue.com/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI");
+			$tmp = file_get_contents("http://www.oldschoolvalue.com/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut);
+
 		}
 	} else {
 		$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime("-1 month"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
@@ -142,6 +151,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
         //UPDATE KEYSTATS
         //Try to get yahoo data for the ticker
+	$sharesOut = 0;
         $response = $yql->execute("select * from osv.finance.keystats where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
         if(isset($response->query) && isset($response->query->results)) {
                 //Check if the symbol exists
