@@ -75,7 +75,7 @@ if (!is_null($fixdate) && $fixtype != "Dummy") {
 }
 
 update_key_ratios_ttm($dates->ticker_id);
-/*update_quality_checks();
+/*update_pio_checks();
 update_ratings();
 update_ratings_ttm();*/
 

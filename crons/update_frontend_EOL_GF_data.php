@@ -91,7 +91,6 @@ foreach ($result2 as $symbol2) {
         }
 }
 
-
 echo "$count total rows. $inserted new rows<br>\n";
 
 //For each symbol in the database, check if there is new reports
@@ -198,8 +197,11 @@ echo "$count total rows. $updated stocks has new reports<br>\n";
 echo "Updating key ratios TTM... ";
 update_key_ratios_ttm();
 echo "done<br>\n";
-echo "Updating Quality Checks... ";
-update_quality_checks();
+echo "Updating Quality Checks (PIO)... ";
+update_pio_checks();
+echo "done<br>\n";
+echo "Updating Quality Checks (ALTMAN)... ";
+update_altman_checks();
 echo "done<br>\n";
 echo "Updating Ratings... ";
 update_ratings();

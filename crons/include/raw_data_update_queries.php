@@ -7,21 +7,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 
         //Delete all reports before updating to be sure we do not miss any manual update
         //as this is a batch process, it will not impact on the UE
-        foreach($report_tables as $table) {
-                $query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$dates->ticker_id.")";
-                mysql_query($query) or die (mysql_error());
-        }
-        $query = "DELETE FROM reports_header WHERE ticker_id = ".$dates->ticker_id;
-        mysql_query($query) or die (mysql_error());
         foreach($ticker_tables as $table) {
-                $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
-                mysql_query($query) or die (mysql_error());
-        }
-        foreach($ttm_tables as $table) {
-                $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
-                mysql_query($query) or die (mysql_error());
-        }
-        foreach($pttm_tables as $table) {
                 $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
                 mysql_query($query) or die (mysql_error());
         }
@@ -291,6 +277,13 @@ function update_raw_data_tickers($dates, $rawdata) {
         mysql_query($query) or die ($query."\n".mysql_error());
 
         //Update reports_* tables
+        foreach($report_tables as $table) {
+                $query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$dates->ticker_id.")";
+                mysql_query($query) or die (mysql_error());
+        }
+        $query = "DELETE FROM reports_header WHERE ticker_id = ".$dates->ticker_id;
+        mysql_query($query) or die (mysql_error());
+
 	for($i=1; $i<27; $i++) {
 	    if (!is_numeric($rawdata["duration"][$i])) {
         	//reports_header
@@ -743,6 +736,14 @@ function update_raw_data_tickers($dates, $rawdata) {
 	}
 
 	//Update TTM and PTTM data
+        foreach($ttm_tables as $table) {
+                $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
+                mysql_query($query) or die (mysql_error());
+        }
+        foreach($pttm_tables as $table) {
+                $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
+                mysql_query($query) or die (mysql_error());
+        }
 	//Determine if USA stock or ADR
 	$stock_type = "ADR";
 	$MRQRow = 10;
