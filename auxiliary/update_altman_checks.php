@@ -64,51 +64,56 @@ set_time_limit(0);                   // ignore php timeout
 
 		//Update TTM Data
 		if($idChange && !$first) {
-			$tquery = "SELECT * FROM ttm_incomeconsolidated a, ttm_balanceconsolidated b, ttm_gf_data c WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id= " . $ppid;
-       			$tres = mysql_query($tquery) or die (mysql_error());
-			$trawdata = mysql_fetch_assoc($tres);
-			array_walk_recursive($trawdata, 'nullValues');
-			$query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (";
-       		        $query1 .= "'".$ppid."',";
-
-			$query1 .= ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"]) . ",";
-			$query1 .= $trawdata["TotalAssets"] . ",";
-			$query1 .= $trawdata["TotalLiabilities"] . ",";
-			$query1 .= $trawdata["RetainedEarnings"] . ",";
-			$query1 .= $trawdata["EBIT"] . ",";
-			$query1 .= toFloat($trawdata["SharesOutstandingDiluted"]) * 1000000 . ",";
-			$query1 .= $trawdata["TotalRevenue"] . ",";
-			$x1 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? (($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])/$trawdata["TotalAssets"]) : 'null');
-			$x2 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["RetainedEarnings"]/$trawdata["TotalAssets"]) : 'null');
-			$x3 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["EBIT"]/$trawdata["TotalAssets"]) : 'null');
-			$x5 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["TotalRevenue"]/$trawdata["TotalAssets"]) : 'null');
-			$query1 .= $x1 . "," . $x2 . "," . $x3 . "," . $x5;
-	                $query1 .= ")";
-      			mysql_query($query1) or die (mysql_error());
-			//Update MRQ Data
-
-			$tquery = "SELECT * FROM `reports_header` a, reports_incomeconsolidated b, reports_balanceconsolidated c, reports_gf_data d WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.ticker_id= " . $ppid . " AND report_type='QTR' order by fiscal_year desc, fiscal_quarter desc limit 1";
-			$tres = mysql_query($tquery) or die (mysql_error());
-			$trawdata = mysql_fetch_assoc($tres);
-			array_walk_recursive($trawdata, 'nullValues');
-			$query1 = "INSERT INTO `mrq_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (";
-       		        $query1 .= "'".$ppid."',";
-
-			$query1 .= ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"]) . ",";
-			$query1 .= $trawdata["TotalAssets"] . ",";
-			$query1 .= $trawdata["TotalLiabilities"] . ",";
-			$query1 .= $trawdata["RetainedEarnings"] . ",";
-			$query1 .= $trawdata["EBIT"] . ",";
-			$query1 .= $trawdata["TotalRevenue"] . ",";
-			$x1 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? (($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])/$trawdata["TotalAssets"]) : 'null');
-			$x2 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["RetainedEarnings"]/$trawdata["TotalAssets"]) : 'null');
-			$x3 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["EBIT"]/$trawdata["TotalAssets"]) : 'null');
-			$x5 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["TotalRevenue"]/$trawdata["TotalAssets"]) : 'null');
-			$query1 .= $x1 . "," . $x2 . "," . $x3 . "," . $x5;
-	                $query1 .= ")";
-      			mysql_query($query1) or die ($query1.mysql_error());
+			altmanTTM($ppid);
 		}
 	}
+	altmanTTM($pid);
+
+function altmanTTM($ppid) {
+        $tquery = "SELECT * FROM ttm_incomeconsolidated a, ttm_balanceconsolidated b, ttm_gf_data c WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id= " . $ppid;
+        $tres = mysql_query($tquery) or die (mysql_error());
+        $trawdata = mysql_fetch_assoc($tres);
+        array_walk_recursive($trawdata, 'nullValues');
+        $query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (";
+        $query1 .= "'".$ppid."',";
+
+        $query1 .= ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"]) . ",";
+        $query1 .= $trawdata["TotalAssets"] . ",";
+        $query1 .= $trawdata["TotalLiabilities"] . ",";
+        $query1 .= $trawdata["RetainedEarnings"] . ",";
+        $query1 .= $trawdata["EBIT"] . ",";
+        $query1 .= toFloat($trawdata["SharesOutstandingDiluted"]) * 1000000 . ",";
+        $query1 .= $trawdata["TotalRevenue"] . ",";
+        $x1 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? (($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])/$trawdata["TotalAssets"]) : 'null');
+        $x2 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["RetainedEarnings"]/$trawdata["TotalAssets"]) : 'null');
+        $x3 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["EBIT"]/$trawdata["TotalAssets"]) : 'null');
+        $x5 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["TotalRevenue"]/$trawdata["TotalAssets"]) : 'null');
+        $query1 .= $x1 . "," . $x2 . "," . $x3 . "," . $x5;
+        $query1 .= ")";
+        mysql_query($query1) or die (mysql_error());
+        //Update MRQ Data
+
+        $tquery = "SELECT * FROM `reports_header` a, reports_incomeconsolidated b, reports_balanceconsolidated c, reports_gf_data d WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.ticker_id= " . $ppid . " AND report_type='QTR' order by fiscal_year desc, fiscal_quarter desc limit 1";
+        $tres = mysql_query($tquery) or die (mysql_error());
+        $trawdata = mysql_fetch_assoc($tres);
+        array_walk_recursive($trawdata, 'nullValues');
+        $query1 = "INSERT INTO `mrq_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (";
+        $query1 .= "'".$ppid."',";
+        $query1 .= ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"]) . ",";
+        $query1 .= $trawdata["TotalAssets"] . ",";
+        $query1 .= $trawdata["TotalLiabilities"] . ",";
+        $query1 .= $trawdata["RetainedEarnings"] . ",";
+        $query1 .= $trawdata["EBIT"] . ",";
+        $query1 .= $trawdata["TotalRevenue"] . ",";
+        $x1 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? (($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])/$trawdata["TotalAssets"]) : 'null');
+        $x2 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["RetainedEarnings"]/$trawdata["TotalAssets"]) : 'null');
+        $x3 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["EBIT"]/$trawdata["TotalAssets"]) : 'null');
+        $x5 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["TotalRevenue"]/$trawdata["TotalAssets"]) : 'null');
+        $query1 .= $x1 . "," . $x2 . "," . $x3 . "," . $x5;
+        $query1 .= ")";
+        mysql_query($query1) or die ($query1.mysql_error());
+}
+
 function toFloat($num) {
     if (is_null($num)) {
         return 'null';
