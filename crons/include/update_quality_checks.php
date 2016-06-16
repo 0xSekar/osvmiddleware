@@ -166,9 +166,8 @@ function update_altman_checks() {
                         $price = $price["adj_close"];
                 }
 
-                $query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `reportYear`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarquetValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (";
+                $query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarquetValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (";
                 $query1 .= "'".$rawdata["id"]."',";
-                $query1 .= "'".$rawdata["fiscal_year"]."',";
                 $query1 .= ($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"]) . ",";
                 $query1 .= $rawdata["TotalAssets"] . ",";
                 $query1 .= $rawdata["TotalLiabilities"] . ",";
