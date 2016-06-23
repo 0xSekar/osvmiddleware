@@ -1,6 +1,7 @@
 <?php
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+include_once('../config.php');
 include_once('../db/database.php');
 include_once('./../crons/include/raw_data_update_queries.php');
 include_once('./../crons/include/update_key_ratios_ttm.php');
@@ -17,6 +18,19 @@ set_time_limit(0);                   // ignore php timeout
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
+$areports = AREPORTS;
+$qreports = QREPORTS;
+$treports = $areports+$qreports;
+
+//Access on dev environment
+$username = 'osv';
+$password = 'test1234!';
+$context = stream_context_create(array(
+        'http' => array(
+                'header'  => "Authorization: Basic " . base64_encode("$username:$password")
+        )
+));
+
 if (!isset($_GET["ticker"])) {
 	echo "Missing Ticker parameter";
 	exit;
@@ -30,7 +44,7 @@ if ($counter->C == 0) {
 	exit;
 }
 
-$symbols = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_special.php?ticker=".$_GET['ticker']);
+$symbols = file_get_contents("http://".SERVERHOST."/webservice/get_ticker_list_frontend_special.php?ticker=".$_GET['ticker'], false, $context);
 $result = json_decode($symbols);
 $fixdate = $result[0]->insdate;
 $fixtype = $result[0]->reporttype;
@@ -47,14 +61,14 @@ if (!is_null($fixdate) && $fixtype != "Dummy") {
 	echo "Downloading new data... <br>";
         $dates = mysql_fetch_object($res);
 
-	$csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
+	$csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
 	$csvst = fopen('php://memory', 'r+');
 	fwrite($csvst, $csv);
 	unset($csv);
 	fseek($csvst, 0);
 	$rawdata = array();
 	while ($data = fgetcsv($csvst)) {
-                for($i=1; $i<27;$i++) {
+                for($i=1; $i<=$treports;$i++) {
                         if(!isset($data[$i])) {
                                 $data[$i] = "null";
                         }

@@ -11,6 +11,7 @@
 
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
+include_once('../config.php');
 include_once('../db/database.php');
 include_once('./update_reports_ttm_extra.php');
 
@@ -22,6 +23,10 @@ set_time_limit(0);                   // ignore php timeout
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
+
+$areports = AREPORTS;
+$qreports = QREPORTS;
+$treports = $areports+$qreports;
 
 //Get full list of symbols from backend
 $query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id group by a.id";
@@ -45,7 +50,7 @@ while($row = mysql_fetch_assoc($res)) {
 	$rawdata = array();
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='ANN' order by a.fiscal_year";
 	$res2 = mysql_query($query) or die (mysql_error());
-	$pos = 10 - $annCount;
+	$pos = $areports - $annCount;
 	while($row2 = mysql_fetch_assoc($res2)) {
 		$row2b = $row2;
 		$pos++;
@@ -54,7 +59,7 @@ while($row = mysql_fetch_assoc($res)) {
 			$rawdata[$v][$pos]=$y;
 		}
 	}
-	for ($i = 1; $i <= 10 - $annCount; $i++) {
+	for ($i = 1; $i <= $areports - $annCount; $i++) {
                 foreach ($row2b as $v=>$y) {
                         $rawdata[$v][$i] = null;
                 }
@@ -62,7 +67,7 @@ while($row = mysql_fetch_assoc($res)) {
 
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='QTR' order by a.fiscal_year, a.fiscal_quarter";
 	$res2 = mysql_query($query) or die (mysql_error());
-	$pos = 26 - $qtrCount;
+	$pos = $treports - $qtrCount;
 	while($row2 = mysql_fetch_assoc($res2)) {
 		$row2b = $row2;
 		$pos++;
@@ -70,9 +75,9 @@ while($row = mysql_fetch_assoc($res)) {
 			$rawdata[$v][$pos]=$y;
 		}
 	}
-	for($i = 1; $i <= 16 - $qtrCount; $i++) {
+	for($i = 1; $i <= $treports - $qtrCount; $i++) {
                 foreach ($row2b as $v=>$y) {
-                        $rawdata[$v][10+$i] = null;
+                        $rawdata[$v][$areports+$i] = null;
                 }
 	}
 	$dates->ticker_id = $row["id"];

@@ -11,6 +11,7 @@
 
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+include_once('../config.php');
 include_once('../db/database.php');
 include_once('./include/raw_data_update_queries.php');
 include_once('./include/update_key_ratios_ttm.php');
@@ -27,12 +28,24 @@ set_time_limit(0);                   // ignore php timeout
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
+//Access on dev environment
+$username = 'osv';
+$password = 'test1234!';
+$context = stream_context_create(array(
+        'http' => array(
+                'header'  => "Authorization: Basic " . base64_encode("$username:$password")
+        )
+));
+
 //Get full list of symbols from backend
-$symbols = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend.php");
+$symbols = file_get_contents("http://".SERVERHOST."/webservice/get_ticker_list_frontend.php", false, $context);
 $result = json_decode($symbols);
 $count = 0;
 $inserted = 0;
 $updated = 0;
+$areports = AREPORTS;
+$qreports = QREPORTS;
+$treports = $areports+$qreports;
 $update_array = array(".","'");
 echo "Updating ticker lists....<br>\n";
 //Process the tickers and add any missing ticket to the tables (only basic ticker data)
@@ -55,7 +68,7 @@ foreach ($result as $symbol) {
 }
 
 
-$symbols2 = file_get_contents("http://www.oldschoolvalue.com/webservice/get_ticker_list_frontend_extra.php");
+$symbols2 = file_get_contents("http://".SERVERHOST."/webservice/get_ticker_list_frontend_extra.php", false, $context);
 $result2 = json_decode($symbols2);
 foreach ($result2 as $key => $symbol) {
 	$result2[$key]->ticker = str_replace($update_array, "-", $result2[$key]->ticker);
@@ -71,7 +84,7 @@ foreach ($result2 as $symbol2) {
 		$fixtype = $symbol2->reporttype;
 		if (!is_null($fixdate) && $fixtype != "Dummy") {
                 	$inserted ++;
-	                $csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
+	                $csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
                 	$csvst = fopen('php://memory', 'r+');
 	                fwrite($csvst, $csv);
         	        unset($csv);
@@ -80,7 +93,7 @@ foreach ($result2 as $symbol2) {
         	        while ($data = fgetcsv($csvst)) {
                 	        $rawdata[$data[0]] = $data;
 	                }
-	                $query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol2->ticker)."', '".mysql_real_escape_string($rawdata["CIK"][26])."', '".mysql_real_escape_string($rawdata["COMPANYNAME"][26])."', '".mysql_real_escape_string($rawdata["PrimaryExchange"][26])."', '".mysql_real_escape_string($rawdata["SICCode"][26])."', '".mysql_real_escape_string($rawdata["entityid"][26])."', '".mysql_real_escape_string($rawdata["Formername"][26])."', '".mysql_real_escape_string($rawdata["Industry"][26])."', '".mysql_real_escape_string($rawdata["Sector"][26])."', '".mysql_real_escape_string($rawdata["Country"][26])."')";
+	                $query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol2->ticker)."', '".mysql_real_escape_string($rawdata["CIK"][$treports])."', '".mysql_real_escape_string($rawdata["COMPANYNAME"][$treports])."', '".mysql_real_escape_string($rawdata["PrimaryExchange"][$treports])."', '".mysql_real_escape_string($rawdata["SICCode"][$treports])."', '".mysql_real_escape_string($rawdata["entityid"][$treports])."', '".mysql_real_escape_string($rawdata["Formername"][$treports])."', '".mysql_real_escape_string($rawdata["Industry"][$treports])."', '".mysql_real_escape_string($rawdata["Sector"][$treports])."', '".mysql_real_escape_string($rawdata["Country"][$treports])."')";
         	        $res = mysql_query($query) or die(mysql_error());
                 	$id = mysql_insert_id();
 	                $query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
@@ -116,7 +129,7 @@ foreach ($result as $symbol) {
 		//If the remote report is newer, download the new report and update data points
 		$updated++;
 		echo "Downloading data for ".$fixticker."... ";
-		$csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
+		$csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
 		echo "Updating ticker ".$symbol->ticker."\n";
 		$csvst = fopen('php://memory', 'r+');
 		fwrite($csvst, $csv);
@@ -124,7 +137,7 @@ foreach ($result as $symbol) {
 		fseek($csvst, 0);
 		$rawdata = array();
 		while ($data = fgetcsv($csvst)) {
-                        for($i=1; $i<27;$i++) {
+                        for($i=1; $i<=$treports;$i++) {
                                 if(!isset($data[$i])) {
                                         $data[$i] = "null";
                                 }
@@ -164,7 +177,7 @@ foreach ($result2 as $symbol) {
                 //If the remote report is newer, download the new report and update data points
                 $updated++;
 		echo "Downloading data for ".$fixticker."... ";
-                $csv = file_get_contents("http://job.oldschoolvalue.com/webservice/createcsv.php?ticker=".$fixticker);
+                $csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
 		echo "Updating ticker ".$symbol->ticker."\n";
                 $csvst = fopen('php://memory', 'r+');
                 fwrite($csvst, $csv);
@@ -172,7 +185,7 @@ foreach ($result2 as $symbol) {
                 fseek($csvst, 0);
                 $rawdata = array();
                 while ($data = fgetcsv($csvst)) {
-			for($i=1; $i<27;$i++) {
+			for($i=1; $i<=$treports;$i++) {
 				if(!isset($data[$i])) {
 					$data[$i] = "null";
 				}

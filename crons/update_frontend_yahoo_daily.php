@@ -3,6 +3,7 @@
 
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
+include_once('../config.php');
 include_once('../db/database.php');
 include_once('./include/raw_data_update_yahoo_keystats.php');
 require_once("../include/yahoo/common.inc.php");
@@ -25,6 +26,15 @@ if($row["value"] == 0) {
 	echo "Skip process as yahoo queries are currently dissabled.\n";
 	exit;
 }
+
+//Access on dev environment
+$username = 'osv';
+$password = 'test1234!';
+$context = stream_context_create(array(
+        'http' => array(
+                'header'  => "Authorization: Basic " . base64_encode("$username:$password")
+        )
+));
 
 //Using customized Yahoo Social SDK (The default version does not work)
 $yql = new YahooYQLQuery();
@@ -113,7 +123,7 @@ while ($row = mysql_fetch_assoc($res)) {
 				$sharesOut = $response->query->results->quote->SharesOutstanding / 1000000;
 			}
 			//report to webservice so backend updates his own data
-			$tmp = file_get_contents("http://www.oldschoolvalue.com/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut);
+			$tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
 
 		}
 	} else {
