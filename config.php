@@ -8,7 +8,7 @@ if (file_exists($extConfig) && is_file($extConfig)) {
 }
 
 if (!defined('AREPORTS')) {
-	define('AREPORTS', 14);
+	define('AREPORTS', 15);
 	define('QREPORTS', 20);
 }
 
