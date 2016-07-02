@@ -1,12 +1,18 @@
 <?php
-function update_pio_checks() {
-	$query = "delete from reports_pio_checks";
-	$res = mysql_query($query) or die (mysql_error());
-        $query = "DELETE from ttm_pio_checks";
-        mysql_query($query) or die (mysql_error());
-
-	$query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
-	$res = mysql_query($query) or die (mysql_error());
+function update_pio_checks($ti = null) {
+	if (is_null($ti)) {
+		$query = "delete from reports_pio_checks";
+		$res = mysql_query($query) or die (mysql_error());
+        	$query = "DELETE from ttm_pio_checks";
+        	mysql_query($query) or die (mysql_error());
+		$query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
+		$res = mysql_query($query) or die (mysql_error());
+	} else {
+        	$query = "DELETE from ttm_pio_checks where ticker_id = $ti";
+        	mysql_query($query) or die (mysql_error());
+		$query = "SELECT * FROM reports_header where report_type='ANN' and ticker_id = $ti order by ticker_id, fiscal_year";
+		$res = mysql_query($query) or die (mysql_error());
+	}
         $pid = 0;
 	$ppid = 0;
         $idChange = true;
@@ -130,16 +136,25 @@ function update_pio_checks() {
 	pioTTM($pid,$rawdata,$query2,$prawdata);
 }
 
-function update_altman_checks() {
-        $query = "delete from reports_alt_checks";
-        $res = mysql_query($query) or die (mysql_error());
-        $query = "DELETE from ttm_alt_checks";
-        mysql_query($query) or die (mysql_error());
-        $query = "DELETE from mrq_alt_checks";
-        mysql_query($query) or die (mysql_error());
+function update_altman_checks($ti = null) {
+        if (is_null($ti)) {
+	        $query = "delete from reports_alt_checks";
+        	$res = mysql_query($query) or die (mysql_error());
+	        $query = "DELETE from ttm_alt_checks";
+        	mysql_query($query) or die (mysql_error());
+	        $query = "DELETE from mrq_alt_checks";
+        	mysql_query($query) or die (mysql_error());
+	        $query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
+        	$res = mysql_query($query) or die (mysql_error());
+        } else {
+                $query = "DELETE from ttm_alt_checks where ticker_id = $ti";
+                mysql_query($query) or die (mysql_error());
+                $query = "DELETE from mrq_alt_checks where ticker_id = $ti";
+                mysql_query($query) or die (mysql_error());
+                $query = "SELECT * FROM reports_header where report_type='ANN' and ticker_id = $ti order by ticker_id, fiscal_year";
+                $res = mysql_query($query) or die (mysql_error());
+        }
 
-        $query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
-        $res = mysql_query($query) or die (mysql_error());
         $pid = 0;
         $ppid = 0;
         $idChange = true;
@@ -194,14 +209,22 @@ function update_altman_checks() {
 	altmanTTM($pid);
 }
 
-function update_beneish_checks() {
-        $query = "delete from reports_beneish_checks";
-        $res = mysql_query($query) or die (mysql_error());
-        $query = "DELETE from ttm_beneish_checks";
-        mysql_query($query) or die (mysql_error());
+function update_beneish_checks($ti = null) {
+        if (is_null($ti)) {
+	        $query = "delete from reports_beneish_checks";
+        	$res = mysql_query($query) or die (mysql_error());
+	        $query = "DELETE from ttm_beneish_checks";
+        	mysql_query($query) or die (mysql_error());
 
-        $query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
-        $res = mysql_query($query) or die (mysql_error());
+	        $query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
+        	$res = mysql_query($query) or die (mysql_error());
+        } else {
+                $query = "DELETE from ttm_beneish_checks where ticker_id = $ti";
+                mysql_query($query) or die (mysql_error());
+                $query = "SELECT * FROM reports_header where report_type='ANN' and ticker_id = $ti order by ticker_id, fiscal_year";
+                $res = mysql_query($query) or die (mysql_error());
+        }
+
         $pid = 0;
         $ppid = 0;
         $idChange = true;

@@ -151,6 +151,14 @@ foreach ($result as $symbol) {
 			update_raw_data_tickers($dates, $rawdata);
 		}
 		
+		//Update Key ratios TTM
+		update_key_ratios_ttm($dates->ticker_id);
+
+		//Update Quality Checks
+		update_pio_checks($dates->ticker_id);
+		update_altman_checks($dates->ticker_id);
+		update_beneish_checks($dates->ticker_id);
+
 		//Finally update local report date
 		$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
 		mysql_query($query) or die (mysql_error());
@@ -199,6 +207,13 @@ foreach ($result2 as $symbol) {
 	                update_raw_data_tickers($dates, $rawdata);
 		}
 
+		//Update Key ratios TTM
+		update_key_ratios_ttm($dates->ticker_id);
+
+		//Update Quality Checks
+		update_pio_checks($dates->ticker_id);
+		update_altman_checks($dates->ticker_id);
+		update_beneish_checks($dates->ticker_id);
 
                 //Finally update local report date
                 $query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
@@ -207,17 +222,17 @@ foreach ($result2 as $symbol) {
 	}
 }
 echo "$count total rows. $updated stocks has new reports<br>\n";
-echo "Updating key ratios TTM... ";
-update_key_ratios_ttm();
+echo "Removing old Quality Checks (PIO)... ";
+$query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+mysql_query($query) or die (mysql_error());
 echo "done<br>\n";
-echo "Updating Quality Checks (PIO)... ";
-update_pio_checks();
+echo "Removing old Quality Checks (ALTMAN)... ";
+$query = "delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+mysql_query($query) or die (mysql_error());
 echo "done<br>\n";
-echo "Updating Quality Checks (ALTMAN)... ";
-update_altman_checks();
-echo "done<br>\n";
-echo "Updating Quality Checks (BENEISH)... ";
-update_beneish_checks();
+echo "Removing old Quality Checks (BENEISH)... ";
+$query = "delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+mysql_query($query) or die (mysql_error());
 echo "done<br>\n";
 echo "Updating Ratings... ";
 update_ratings();

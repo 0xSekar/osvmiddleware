@@ -183,6 +183,9 @@ while ($row = mysql_fetch_assoc($res)) {
                 $kerrors ++;
         }
 
+	//Update key ratios ttm
+	update_key_ratios_ttm($row["id"]);
+
 	// UPDATE DATES
 	$query_up = "UPDATE tickers_control SET last_yahoo_date = NOW() WHERE ticker_id = " . $row["id"];
 	mysql_query($query_up) or die(mysql_error());
@@ -202,9 +205,6 @@ echo "Key Stats:\n";
 echo "\t".$kupdated." tickers updates\n";
 echo "\t".$knotfound." tickers not found on yahoo\n";
 echo "\t".$kerrors." errors updating tickers\n";
-echo "Updating key ratios TTM... ";
-update_key_ratios_ttm();
-echo "done\n";
 echo "Updating Ratings TTM... ";
 update_ratings_ttm();
 echo "done\n";
