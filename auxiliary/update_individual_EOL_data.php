@@ -5,9 +5,9 @@ include_once('../config.php');
 include_once('../db/database.php');
 include_once('./../crons/include/raw_data_update_queries.php');
 include_once('./../crons/include/update_key_ratios_ttm.php');
-/*include_once('./include/update_quality_checks.php');
-include_once('./include/update_ratings.php');
-include_once('./include/update_ratings_ttm.php');*/
+include_once('./../crons/include/update_quality_checks.php');
+include_once('./../crons/include/update_ratings.php');
+include_once('./../crons/include/update_ratings_ttm.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -89,11 +89,30 @@ if (!is_null($fixdate) && $fixtype != "Dummy") {
 }
 
 update_key_ratios_ttm($dates->ticker_id);
-/*update_pio_checks();
-update_ratings();
-update_ratings_ttm();*/
+update_pio_checks($dates->ticker_id);
+update_altman_checks($dates->ticker_id);
+update_beneish_checks($dates->ticker_id);
 
 echo "Done <br>";
+echo "Removing old Quality Checks (PIO)... ";
+$query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+mysql_query($query) or die (mysql_error());
+echo "done<br>\n";
+echo "Removing old Quality Checks (ALTMAN)... ";
+$query = "delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+mysql_query($query) or die (mysql_error());
+echo "done<br>\n";
+echo "Removing old Quality Checks (BENEISH)... ";
+$query = "delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+mysql_query($query) or die (mysql_error());
+echo "done<br>\n";
+echo "Updating Ratings... ";
+update_ratings();
+echo "done<br>\n";
+echo "Updating Ratings TTM... ";
+update_ratings_ttm();
+echo "done<br>\n";
+
 exit;
 
 function nullValues(&$item, $key) {
