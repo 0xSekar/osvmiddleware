@@ -2044,7 +2044,6 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
         $va = $price_a;
         $vv = $price_v;
 	$query .= updateCAGR_concat($vv, $va, $years);
-echo $ticker_id."-".$rdate_a."-".$price_a."-".$price_v."-".updateCAGR_concat($vv, $va, $years)."<br>";
         $va = ((($rawdata["GrossProfit"][$i]=='null'&&$rawdata["OperatingExpenses"][$i]=='null' && is_null($CapEx_a)) || $rawdata["TaxRatePercent"][$i]=='null')?'null':(($rawdata["GrossProfit"][$i]-$rawdata["OperatingExpenses"][$i]-$CapEx_a)*(1-$rawdata["TaxRatePercent"][$i])));
         $vv = ((($rawdata["GrossProfit"][$i-$years]=='null'&&$rawdata["OperatingExpenses"][$i-$years]=='null' && is_null($CapEx_v)) || $rawdata["TaxRatePercent"][$i-$years]=='null')?'null':(($rawdata["GrossProfit"][$i-$years]-$rawdata["OperatingExpenses"][$i-$years]-$CapEx_v)*(1-$rawdata["TaxRatePercent"][$i-$years])));
 	$query .= updateCAGR_concat($vv, $va, $years);
