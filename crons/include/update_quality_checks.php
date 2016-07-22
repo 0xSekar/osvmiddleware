@@ -302,7 +302,9 @@ function update_beneish_checks($ti = null) {
                 mysql_query($query1.$query2) or die (mysql_error());
 
         }
-        beneishTTM($pid,$rawdata,$query2);
+	if (!$first) {
+	        beneishTTM($pid,$rawdata,$query2);
+	}
 }
 
 function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
