@@ -133,7 +133,9 @@ function update_pio_checks($ti = null) {
 			pioTTM($ppid,$prawdata,$querypre,$pprawdata);
 		}
 	}
-	pioTTM($pid,$rawdata,$query2,$prawdata);
+	if (!$first) {
+		pioTTM($pid,$rawdata,$query2,$prawdata);
+	}
 }
 
 function update_altman_checks($ti = null) {
@@ -206,7 +208,9 @@ function update_altman_checks($ti = null) {
 			altmanTTM($ppid);
                 }
         }
-	altmanTTM($pid);
+	if (!$first) {
+		altmanTTM($pid);
+	}
 }
 
 function update_beneish_checks($ti = null) {
