@@ -5,7 +5,7 @@ function connect()
 	//database connection
 	$db_host = "localhost";
 	$db_user = "wsuser";
-	$db_pass = "jjun0366";
+	$db_pass = "ng2Xfy2SAu";
 	$db_name = "jjun0366_osvmember";
 
 	mysql_connect($db_host, $db_user , $db_pass) or die(mysql_error());
@@ -19,7 +19,7 @@ function connectfe()
         //database connection
         $db_host = "localhost";
         $db_user = "wsuser";
-        $db_pass = "jjun0366";
+        $db_pass = "ng2Xfy2SAu";
         $db_name = "jjun0366_frontend";
 
         mysql_connect($db_host, $db_user , $db_pass) or die(mysql_error());
@@ -31,7 +31,7 @@ function connectfe()
 function connectli()
 {
 
-	$mysqli = new mysqli("localhost", "wsuser", "jjun0366", "jjun0366_osvmember");
+	$mysqli = new mysqli("localhost", "wsuser", "ng2Xfy2SAu", "jjun0366_osvmember");
 	if ($mysqli->connect_errno) {
 	    echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 	}
