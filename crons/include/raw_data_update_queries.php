@@ -578,7 +578,10 @@ function update_raw_data_tickers($dates, $rawdata) {
 			//reports_incomeconsolidated
 			$query = "INSERT INTO `reports_incomeconsolidated` (`report_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (";
 	        	$query .= "'".$report_id."',";
-        		$query .= $rawdata["EBIT"][$i].",";
+			if ($rawdata["EBIT"][$i] === "null" && $rawdata["OperatingProfit"][$i] !== "null") {
+				$rawdata["EBIT"][$i] = $rawdata["OperatingProfit"][$i];
+			}
+	        	$query .= $rawdata["EBIT"][$i].",";
         		$query .= $rawdata["CostofRevenue"][$i].",";
         		$query .= $rawdata["DepreciationAmortizationExpense"][$i].",";
         		$query .= $rawdata["DilutedEPSNetIncome"][$i].",";
@@ -629,6 +632,9 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["AdjustedEBITDA"][$i].",";
         		$query .= $rawdata["AdjustedNetIncome"][$i].",";
         		$query .= $rawdata["AftertaxMargin"][$i].",";
+			if ($rawdata["EBITDA"][$i] === "null" && $rawdata["OperatingProfit"][$i] !== "null") {
+                                $rawdata["EBITDA"][$i] = $rawdata["OperatingProfit"][$i] + $rawdata["DepreciationAmortizationExpense"][$i];
+                        }
         		$query .= $rawdata["EBITDA"][$i].",";
         		$query .= $rawdata["GrossMargin"][$i].",";
         		$query .= $rawdata["NetOperatingProfitafterTax"][$i].",";
