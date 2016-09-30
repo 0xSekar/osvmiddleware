@@ -36,7 +36,7 @@ if ($counter->C == 0) {
 	exit;
 }
 
-$query = "SELECT * as C FROM tickers WHERE ticker = '".$_GET['ticker']."'";
+$query = "SELECT * FROM tickers WHERE ticker = '".$_GET['ticker']."'";
 $res = mysql_query($query) or die(mysql_error());
 $row = mysql_fetch_assoc($res);
 $ticker_id = $row["id"];
@@ -86,7 +86,7 @@ mysql_query($query) or die (mysql_error());
 echo "Done<br>";
 
 echo "Deleting from tickers table... ";
-$query = "DELETE FROM tickers_control WHERE id = ".$ticker_id;
+$query = "DELETE FROM tickers WHERE id = ".$ticker_id;
 mysql_query($query) or die (mysql_error());
 echo "Done<br>";
 
