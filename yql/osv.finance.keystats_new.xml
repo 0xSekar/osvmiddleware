@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+    <meta>
+        <author>
+            Ryan Hoium
+        </author>
+        <description>
+            Yahoo Finance - Key Statistics by Stock Symbol
+        </description>
+        <sampleQuery>
+            SELECT * FROM {table} WHERE symbol='T'
+        </sampleQuery>
+    </meta>
+    <bindings>
+        <select itemPath="" produces="XML">
+            <urls>
+                <url>
+                </url>
+            </urls>
+            <inputs>
+                <key id="symbol" type="xs:string" paramType="variable" required="true" />
+            </inputs>
+            <execute>
+                <![CDATA[
+				function merge_options(obj1,obj2){
+    				var obj3 = {};
+    				for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+    				for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+    				return obj3;
+				}
+
+	            // Setup Query from finance.yahoo.com
+    	        var url="http://finance.yahoo.com/q/ks?s=" + symbol;
+                var restquery = y.rest( url );
+                var rawresult = restquery.accept( "text/html" ).get().response.toString();
+				var q1 = rawresult.match("(?=\"QuoteSummaryStore\"\:)(.*),\"FinanceConfigStore");
+				var q1s = "{" + q1[1] + "}";
+				var r1 = JSON.parse(q1s);
+				var r1f = merge_options(r1.QuoteSummaryStore.summaryDetail, r1.QuoteSummaryStore.price);
+
+            	// Setup Second Query from finance.yahoo.com
+				var url2 = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/"+symbol+
+				"?formatted=true&crumb=&lang=en-US&region=US&modules=defaultKeyStatistics%2CfinancialData%2CcalendarEvents&corsDomain=finance.yahoo.com";
+                var restquery2 = y.rest( url2 );
+                var r2 = restquery2.accept( "application/json" ).get().response;
+				r2 = y.xmlToJson(r2);
+				var r2i = merge_options(r2.quoteSummary.result.defaultKeyStatistics, r2.quoteSummary.result.calendarEvents);
+				var r2f = merge_options(r2i, r2.quoteSummary.result.financialData);
+
+				response.object = merge_options(r1f,r2f);
+                ]]>
+            </execute>
+        </select>
+    </bindings>
+</table>
+

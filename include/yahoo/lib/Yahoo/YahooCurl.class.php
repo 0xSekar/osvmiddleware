@@ -65,7 +65,7 @@ class YahooCurl
       'timeout'         => '10',
       'connect_timeout' => '10',
       'compression'     => true,
-      'debug'           => true,
+      'debug'           => false,
       'log'             => sys_get_temp_dir().'/curl_debug.log',
     ), $options);
 

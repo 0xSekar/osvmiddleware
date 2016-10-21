@@ -161,18 +161,11 @@ while ($row = mysql_fetch_assoc($res)) {
         //UPDATE KEYSTATS
         //Try to get yahoo data for the ticker
 	$sharesOut = 0;
-        $response = $yql->execute("select * from osv.finance.keystats where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+        $response = $yql->execute("select * from osv.finance.keystats_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
         if(isset($response->query) && isset($response->query->results)) {
                 //Check if the symbol exists
-                if(isset($response->query->results->stats->MarketCap)) {
-			if(is_array($response->query->results->stats->MarketCap)) {
-				foreach($response->query->results->stats as $key=>$value) {
-					if($key != "symbol" && count($value) == 2) {
-						$response->query->results->stats->{$key} = $value[0];
-					} 
-				}
-			}
-                        update_raw_data_yahoo_keystats($row["id"], $response->query->results->stats);
+                if(isset($response->query->results->result->marketCap)) {
+                        update_raw_data_yahoo_keystats($row["id"], $response->query->results->result);
                         $kupdated ++;
                 } else {
                         $knotfound ++;
