@@ -16,3 +16,11 @@ if (!defined('SERVERHOST')) {
         define('SERVERHOST', 'www.oldschoolvalue.com');
 }
 
+if (!defined('YAHOO_INTEGRATION_DEBUG')) {
+    define('YAHOO_INTEGRATION_DEBUG', false);
+}
+
+if (!defined('YAHOO_INTEGRATION_URL')) {
+    define('YAHOO_INTEGRATION_URL', 'http://query.yahooapis.com');
+}
+

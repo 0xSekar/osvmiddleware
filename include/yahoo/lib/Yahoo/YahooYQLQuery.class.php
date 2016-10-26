@@ -42,15 +42,15 @@ class YahooYQLQuery
 {
 
   # Yahoo! YQL API
-  const PUBLIC_API_URL  = 'http://query.yahooapis.com/v1/public/yql';
-  const OAUTH_API_URL   = 'http://query.yahooapis.com/v1/yql';
   const DATATABLES_URL  = 'http://datatables.org/alltables.env';
 
   public function execute($yql, $parameters = array(), $method = YahooCurl::GET, $endpoint = "default", $env = null)
   {
+    $PUBLIC_API_URL  = YAHOO_INTEGRATION_URL . '/v1/public/yql';
+    $OAUTH_API_URL   = YAHOO_INTEGRATION_URL . '/v1/yql';
     $env = (is_null($env)) ? self::DATATABLES_URL : $env;
     $parameters = array_merge(array('q' => $yql, 'format' => 'json', 'env' => $env), $parameters);
-    $url = ( $endpoint == "oauth" ) ? self::OAUTH_API_URL : self::PUBLIC_API_URL;
+    $url = ( $endpoint == "oauth" ) ? $OAUTH_API_URL : $PUBLIC_API_URL;
 
     if ($endpoint == "oauth") {
         $signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();

@@ -6,6 +6,7 @@
 
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
+include_once('../config.php');
 include_once('../db/database.php');
 include_once('./include/raw_data_update_yahoo_estimates.php');
 require_once("../include/yahoo/common.inc.php");
