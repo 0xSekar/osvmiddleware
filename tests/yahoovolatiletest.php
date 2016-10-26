@@ -2,6 +2,7 @@
 
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
+include_once('../config.php');
 include_once('../db/database.php');
 require_once("../include/yahoo/common.inc.php");
 include_once('../include/get_yahoo_volatile_data.php');

@@ -24,3 +24,6 @@ if (!defined('YAHOO_INTEGRATION_URL')) {
     define('YAHOO_INTEGRATION_URL', 'http://query.yahooapis.com');
 }
 
+if (!defined('YAHOO_INTEGRATION_PROXY')) {
+    define('YAHOO_INTEGRATION_PROXY', null);
+}

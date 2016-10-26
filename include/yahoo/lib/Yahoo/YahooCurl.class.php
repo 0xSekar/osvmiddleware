@@ -85,6 +85,10 @@ class YahooCurl
     // set headers
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
+    if(defined('YAHOO_INTEGRATION_PROXY')) {
+	curl_setopt($ch, CURLOPT_PROXY, YAHOO_INTEGRATION_PROXY);
+    }
+
     // merge headers $request_headers["Content-Type"], "application/x-www-form-urlencoded"
 
     // handle http methods
