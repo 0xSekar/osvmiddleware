@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+    <meta>
+        <author>
+            Sergio Karsvnie
+        </author>
+        <description>
+            Yahoo Finance - Analyst Estimates by Stock Symbol
+        </description>
+        <sampleQuery>
+            SELECT * FROM {table} WHERE symbol='T'
+        </sampleQuery>
+    </meta>
+    <bindings>
+        <select itemPath="" produces="XML">
+            <urls>
+                <url>
+                </url>
+            </urls>
+            <inputs>
+                <key id="symbol" type="xs:string" paramType="variable" required="true" />
+            </inputs>
+            <execute>
+                <![CDATA[
+	            // Setup Query from finance.yahoo.com
+    	        var url="http://finance.yahoo.com/q/ae?s=" + symbol;
+                var restquery = y.rest( url );
+                var rawresult = restquery.accept( "text/html" ).get().response.toString();
+            	// Setup Second Query from finance.yahoo.com
+				var url2 = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"+symbol+
+				"?formatted=true&crumb=&lang=en-US&region=US&modules=upgradeDowngradeHistory%2CrecommendationTrend%2CfinancialData%2CearningsHistory%2CearningsTrend%2CindustryTrend&corsDomain=finance.yahoo.com";
+                var restquery2 = y.rest( url2 );
+                var r2 = restquery2.accept( "application/json" ).get().response;
+				r2 = y.xmlToJson(r2);
+				var rf = {};
+				rf["earningsTrend"] = r2.quoteSummary.result.earningsTrend;
+				rf["industryTrend"] = r2.quoteSummary.result.industryTrend;
+				rf["earningsHistory"] = r2.quoteSummary.result.earningsHistory;
+
+				response.object = rf;
+                ]]>
+            </execute>
+        </select>
+    </bindings>
+</table>
