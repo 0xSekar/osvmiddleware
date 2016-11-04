@@ -13,6 +13,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 include_once('../config.php');
 include_once('../db/database.php');
+include_once('../db/db.php'); // agregar esto en cada database que vea
 include_once('./include/raw_data_update_queries.php');
 include_once('./include/update_key_ratios_ttm.php');
 include_once('./include/update_quality_checks.php');
@@ -23,6 +24,7 @@ include_once('./include/update_is_old_field.php');
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 connectfe();
+$db = Database::GetInstance(); 
 
 set_time_limit(0);                   // ignore php timeout
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
@@ -55,16 +57,28 @@ foreach ($result as $key => $symbol) {
 }
 foreach ($result as $symbol) {
 	$count ++;
-	$query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol->ticker'";
-	$res = mysql_query($query) or die(mysql_error());
-	$counter = mysql_fetch_object($res);
+	//$query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol->ticker'";
+	//$res = mysql_query($query) or die(mysql_error());
+	//$counter = mysql_fetch_object($res);
+	$res = $db->query('SELECT count(*) as C FROM tickers WHERE ticker = '$symbol->ticker'');
+	$counter = $res->rowCount();
+	//echo $counter.' rows selected';
+
 	if ($counter->C == 0) {
 		$inserted ++;
-		$query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol->ticker)."', '".mysql_real_escape_string($symbol->cik)."', '".mysql_real_escape_string($symbol->company)."', '".mysql_real_escape_string($symbol->exchange)."', '".mysql_real_escape_string($symbol->siccode)."', '".mysql_real_escape_string($symbol->entityid)."', '".mysql_real_escape_string($symbol->formername)."', '".mysql_real_escape_string($symbol->industry)."', '".mysql_real_escape_string($symbol->sector)."', '".mysql_real_escape_string($symbol->country)."')";
-		$res = mysql_query($query) or die(mysql_error());
-		$id = mysql_insert_id();
-		$query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
-		$res = mysql_query($query) or die(mysql_error());
+		//$query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol->ticker)."', '".mysql_real_escape_string($symbol->cik)."', '".mysql_real_escape_string($symbol->company)."', '".mysql_real_escape_string($symbol->exchange)."', '".mysql_real_escape_string($symbol->siccode)."', '".mysql_real_escape_string($symbol->entityid)."', '".mysql_real_escape_string($symbol->formername)."', '".mysql_real_escape_string($symbol->industry)."', '".mysql_real_escape_string($symbol->sector)."', '".mysql_real_escape_string($symbol->country)."')";
+		//$res = mysql_query($query) or die(mysql_error());
+		//$id = mysql_insert_id();
+		$res = $db->exec("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol->ticker)."', '".mysql_real_escape_string($symbol->cik)."', '".mysql_real_escape_string($symbol->company)."', '".mysql_real_escape_string($symbol->exchange)."', '".mysql_real_escape_string($symbol->siccode)."', '".mysql_real_escape_string($symbol->entityid)."', '".mysql_real_escape_string($symbol->formername)."', '".mysql_real_escape_string($symbol->industry)."', '".mysql_real_escape_string($symbol->sector)."', '".mysql_real_escape_string($symbol->country)."')");
+		$id = $db->lastInsertId();
+		//$query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
+		//$res = mysql_query($query) or die(mysql_error());
+		$res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
+	}
+	try {
+	getData($db);
+	} catch(PDOException $ex) {
+	   		echo "Database Error!";
 	}
 }
 
@@ -76,9 +90,11 @@ foreach ($result2 as $key => $symbol) {
 }
 foreach ($result2 as $symbol2) {
         $count ++;
-        $query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol2->ticker'";
-        $res = mysql_query($query) or die(mysql_error());
-        $counter = mysql_fetch_object($res);
+        //$query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol2->ticker'";
+        //$res = mysql_query($query) or die(mysql_error());
+        //$counter = mysql_fetch_object($res);
+        $res = $db->query('SELECT count(*) as C FROM tickers WHERE ticker = '$symbol2->ticker'');
+		$counter = $res->rowCount();
         if ($counter->C == 0) {
 		$fixdate = $symbol2->insdate;
 		$fixticker = $symbol2->ticker;
