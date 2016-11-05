@@ -35,7 +35,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->currQtr->epsRevisions->downLast30days->raw) || !is_numeric($rawdata->currQtr->epsRevisions->downLast30days->raw)?"NULL":$rawdata->currQtr->epsRevisions->downLast30days->raw).",";
         $query .= (!isset($rawdata->currQtr->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->currQtr->epsRevisions->downLast90days->raw)?"NULL":$rawdata->currQtr->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->currQtr->growth->raw) || !is_numeric($rawdata->currQtr->growth->raw)?"NULL":($rawdata->currQtr->growth->raw * 100)).",";
-        $query .= (!isset($rawdata->currQtr->industryTrend->growth->raw) || !is_numeric($rawdata->currQtr->industryTrend->growth->raw)?"NULL":$rawdata->currQtr->industryTrend->growth->raw).",";
+        $query .= (!isset($rawdata->currQtr->industryTrend->growth->raw) || !is_numeric($rawdata->currQtr->industryTrend->growth->raw)?"NULL":($rawdata->currQtr->industryTrend->growth->raw * 100)).",";
         $query .= "NULL,";
         $query .= "NULL";
         $query .= ")";
@@ -66,7 +66,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->nextQtr->epsRevisions->downLast30days->raw) || !is_numeric($rawdata->nextQtr->epsRevisions->downLast30days->raw)?"NULL":$rawdata->nextQtr->epsRevisions->downLast30days->raw).",";
         $query .= (!isset($rawdata->nextQtr->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->nextQtr->epsRevisions->downLast90days->raw)?"NULL":$rawdata->nextQtr->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->nextQtr->growth->raw) || !is_numeric($rawdata->nextQtr->growth->raw)?"NULL":($rawdata->nextQtr->growth->raw * 100)).",";
-        $query .= (!isset($rawdata->nextQtr->industryTrend->growth->raw) || !is_numeric($rawdata->nextQtr->industryTrend->growth->raw)?"NULL":$rawdata->nextQtr->industryTrend->growth->raw).",";
+        $query .= (!isset($rawdata->nextQtr->industryTrend->growth->raw) || !is_numeric($rawdata->nextQtr->industryTrend->growth->raw)?"NULL":($rawdata->nextQtr->industryTrend->growth->raw * 100)).",";
         $query .= "NULL,";
         $query .= "NULL";
         $query .= ")";
@@ -97,7 +97,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->currYear->epsRevisions->downLast30days->raw) || !is_numeric($rawdata->currYear->epsRevisions->downLast30days->raw)?"NULL":$rawdata->currYear->epsRevisions->downLast30days->raw).",";
         $query .= (!isset($rawdata->currYear->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->currYear->epsRevisions->downLast90days->raw)?"NULL":$rawdata->currYear->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->currYear->growth->raw) || !is_numeric($rawdata->currYear->growth->raw)?"NULL":($rawdata->currYear->growth->raw * 100)).",";
-        $query .= (!isset($rawdata->currYear->industryTrend->growth->raw) || !is_numeric($rawdata->currYear->industryTrend->growth->raw)?"NULL":$rawdata->currYear->industryTrend->growth->raw).",";
+        $query .= (!isset($rawdata->currYear->industryTrend->growth->raw) || !is_numeric($rawdata->currYear->industryTrend->growth->raw)?"NULL":($rawdata->currYear->industryTrend->growth->raw * 100)).",";
         $query .= "NULL,";
         $query .= "NULL";
         $query .= ")";
@@ -128,7 +128,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->nextYear->epsRevisions->downLast30days->raw) || !is_numeric($rawdata->nextYear->epsRevisions->downLast30days->raw)?"NULL":$rawdata->nextYear->epsRevisions->downLast30days->raw).",";
         $query .= (!isset($rawdata->nextYear->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->nextYear->epsRevisions->downLast90days->raw)?"NULL":$rawdata->nextYear->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->nextYear->growth->raw) || !is_numeric($rawdata->nextYear->growth->raw)?"NULL":($rawdata->nextYear->growth->raw * 100)).",";
-        $query .= (!isset($rawdata->nextYear->industryTrend->growth->raw) || !is_numeric($rawdata->nextYear->industryTrend->growth->raw)?"NULL":$rawdata->nextYear->industryTrend->growth->raw).",";
+        $query .= (!isset($rawdata->nextYear->industryTrend->growth->raw) || !is_numeric($rawdata->nextYear->industryTrend->growth->raw)?"NULL":($rawdata->nextYear->industryTrend->growth->raw * 100)).",";
         $query .= "NULL,";
         $query .= "NULL";
         $query .= ")";
@@ -164,11 +164,11 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$query = "INSERT INTO `tickers_yahoo_estimates_others` (`ticker_id` ,`GrowthEstPast5YearTicker` ,`GrowthEstPast5YearIndustry` ,`GrowthEstPast5YearSector` ,`GrowthEstPast5YearSP500` ,`GrowthEstNext5YearTicker` ,`GrowthEstNext5YearIndustry` ,`GrowthEstNext5YearSector` ,`GrowthEstNext5YearSP500` ,`GrowthEstPriceEarnTicker` ,`GrowthEstPriceEarnIndustry` ,`GrowthEstPriceEarnSector` ,`GrowthEstPriceEarnSP500` ,`GrowthEstPEGRatioTicker` ,`GrowthEstPEGRatioIndustry` ,`GrowthEstPEGRatioSector` ,`GrowthEstPEGRatioSP500`) VALUES (";
         $query .= "'".$ticker_id."',";
         $query .= (!isset($rawdata->minus5Year->growth->raw) || !is_numeric($rawdata->minus5Year->growth->raw)?"NULL":($rawdata->minus5Year->growth->raw * 100)).",";
-        $query .= (!isset($rawdata->minus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->minus5Year->industryTrend->growth->raw)?"NULL":$rawdata->minus5Year->industryTrend->growth->raw).",";
+        $query .= (!isset($rawdata->minus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->minus5Year->industryTrend->growth->raw)?"NULL":($rawdata->minus5Year->industryTrend->growth->raw * 100)).",";
 	$query .= "NULL,";
 	$query .= "NULL,";
         $query .= (!isset($rawdata->plus5Year->growth->raw) || !is_numeric($rawdata->plus5Year->growth->raw)?"NULL":($rawdata->plus5Year->growth->raw * 100)).",";
-        $query .= (!isset($rawdata->plus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->plus5Year->industryTrend->growth->raw)?"NULL":$rawdata->plus5Year->industryTrend->growth->raw).",";
+        $query .= (!isset($rawdata->plus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->plus5Year->industryTrend->growth->raw)?"NULL":($rawdata->plus5Year->industryTrend->growth->raw * 100)).",";
 	$query .= "NULL,";
 	$query .= "NULL,";
 	$query .= "NULL,";
