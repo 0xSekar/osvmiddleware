@@ -57,31 +57,37 @@ foreach ($result as $key => $symbol) {
 }
 foreach ($result as $symbol) {
 	$count ++;
-	//$query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol->ticker'";
-	//$res = mysql_query($query) or die(mysql_error());
-	//$counter = mysql_fetch_object($res);
-	$res = $db->query('SELECT count(*) as C FROM tickers WHERE ticker = '$symbol->ticker'');
-	$counter = $res->rowCount();
-	//echo $counter.' rows selected';
-
+	try {
+		$res = $db->query("SELECT count(*) as C FROM tickers WHERE ticker = '$symbol->ticker'");
+		$counter = $res->fetch(PDO::FETCH_OBJ);
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+		die($ex->getMessage());
+	}
 	if ($counter->C == 0) {
 		$inserted ++;
-		//$query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol->ticker)."', '".mysql_real_escape_string($symbol->cik)."', '".mysql_real_escape_string($symbol->company)."', '".mysql_real_escape_string($symbol->exchange)."', '".mysql_real_escape_string($symbol->siccode)."', '".mysql_real_escape_string($symbol->entityid)."', '".mysql_real_escape_string($symbol->formername)."', '".mysql_real_escape_string($symbol->industry)."', '".mysql_real_escape_string($symbol->sector)."', '".mysql_real_escape_string($symbol->country)."')";
-		//$res = mysql_query($query) or die(mysql_error());
-		//$id = mysql_insert_id();
-		$res = $db->exec("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol->ticker)."', '".mysql_real_escape_string($symbol->cik)."', '".mysql_real_escape_string($symbol->company)."', '".mysql_real_escape_string($symbol->exchange)."', '".mysql_real_escape_string($symbol->siccode)."', '".mysql_real_escape_string($symbol->entityid)."', '".mysql_real_escape_string($symbol->formername)."', '".mysql_real_escape_string($symbol->industry)."', '".mysql_real_escape_string($symbol->sector)."', '".mysql_real_escape_string($symbol->country)."')");
-		$id = $db->lastInsertId();
-		//$query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
-		//$res = mysql_query($query) or die(mysql_error());
-		$res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
-	}
-	try {
-	getData($db);
-	} catch(PDOException $ex) {
-	   		echo "Database Error!";
-	}
+		try {
+			$res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
+			$res->execute(array(
+				':ticker' => (is_null($symbol->ticker)?'':$symbol->ticker),
+				':cik' => (is_null($symbol->cik)?'':$symbol->cik), 
+				':company' => (is_null($symbol->company)?'':$symbol->company), 
+				':exchange' => (is_null($symbol->exchange)?'':$symbol->exchange), 
+				':sic' => (is_null($symbol->siccode)?'':$symbol->siccode), 
+				':entityid' => (is_null($symbol->entityid)?'':$symbol->entityid), 
+				':formername' => (is_null($symbol->formername)?'':$symbol->formername), 
+				':industry' => (is_null($symbol->industry)?'':$symbol->industry), 
+				':sector' => (is_null($symbol->sector)?'':$symbol->sector),
+				':country' => (is_null($symbol->country)?'':$symbol->country)
+				));
+			$id = $db->lastInsertId();
+			$res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
+		} catch(PDOException $ex) {
+			echo "\nDatabase Error"; //user message
+	    	die($ex->getMessage());
+		}
+	}	
 }
-
 
 $symbols2 = file_get_contents("http://".SERVERHOST."/webservice/get_ticker_list_frontend_extra.php", false, $context);
 $result2 = json_decode($symbols2);
@@ -89,36 +95,47 @@ foreach ($result2 as $key => $symbol) {
 	$result2[$key]->ticker = str_replace($update_array, "-", $result2[$key]->ticker);
 }
 foreach ($result2 as $symbol2) {
-        $count ++;
-        //$query = "SELECT count(*) as C FROM tickers WHERE ticker = '$symbol2->ticker'";
-        //$res = mysql_query($query) or die(mysql_error());
-        //$counter = mysql_fetch_object($res);
-        $res = $db->query('SELECT count(*) as C FROM tickers WHERE ticker = '$symbol2->ticker'');
-		$counter = $res->rowCount();
-        if ($counter->C == 0) {
+    $count ++;
+    try {
+    	$res = $db->query("SELECT count(*) as C FROM tickers WHERE ticker = '$symbol2->ticker'");
+		$counter = $res->fetch(PDO::FETCH_OBJ);
+	} catch(PDOException $ex) {
+   		echo "\nDatabase Error"; //user message
+		die($ex->getMessage());
+	}
+    if ($counter->C == 0) {
 		$fixdate = $symbol2->insdate;
 		$fixticker = $symbol2->ticker;
 		$fixtype = $symbol2->reporttype;
 		if (!is_null($fixdate) && $fixtype != "Dummy") {
-                	$inserted ++;
-	                $csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
-                	$csvst = fopen('php://memory', 'r+');
-	                fwrite($csvst, $csv);
-        	        unset($csv);
-                	fseek($csvst, 0);
-	                $rawdata = array();
-        	        while ($data = fgetcsv($csvst)) {
-                	        $rawdata[$data[0]] = $data;
-	                }
-	                $query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol2->ticker)."', '".mysql_real_escape_string($rawdata["CIK"][$treports])."', '".mysql_real_escape_string($rawdata["COMPANYNAME"][$treports])."', '".mysql_real_escape_string($rawdata["PrimaryExchange"][$treports])."', '".mysql_real_escape_string($rawdata["SICCode"][$treports])."', '".mysql_real_escape_string($rawdata["entityid"][$treports])."', '".mysql_real_escape_string($rawdata["Formername"][$treports])."', '".mysql_real_escape_string($rawdata["Industry"][$treports])."', '".mysql_real_escape_string($rawdata["Sector"][$treports])."', '".mysql_real_escape_string($rawdata["Country"][$treports])."')";
-        	        $res = mysql_query($query) or die(mysql_error());
-                	$id = mysql_insert_id();
-	                $query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
-        	        $res = mysql_query($query) or die(mysql_error());
+        	$inserted ++;
+            $csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
+        	$csvst = fopen('php://memory', 'r+');
+            fwrite($csvst, $csv);
+	        unset($csv);
+        	fseek($csvst, 0);
+            $rawdata = array();
+	        while ($data = fgetcsv($csvst)) {
+        	        $rawdata[$data[0]] = $data;
+            }
+            //$query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol2->ticker)."', '".mysql_real_escape_string($rawdata["CIK"][$treports])."', '".mysql_real_escape_string($rawdata["COMPANYNAME"][$treports])."', '".mysql_real_escape_string($rawdata["PrimaryExchange"][$treports])."', '".mysql_real_escape_string($rawdata["SICCode"][$treports])."', '".mysql_real_escape_string($rawdata["entityid"][$treports])."', '".mysql_real_escape_string($rawdata["Formername"][$treports])."', '".mysql_real_escape_string($rawdata["Industry"][$treports])."', '".mysql_real_escape_string($rawdata["Sector"][$treports])."', '".mysql_real_escape_string($rawdata["Country"][$treports])."')";
+	        //$res = mysql_query($query) or die(mysql_error());
+        	//$id = mysql_insert_id();
+			try {
+        		$res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
+				$res->execute(array(':ticker' => $symbol2->ticker, ':cik' => $rawdata["CIK"][$treports], ':company' => $rawdata["COMPANYNAME"][$treports], ':exchange' => $rawdata["PrimaryExchange"][$treports], ':sic' => $$rawdata["SICCode"][$treports], ':entityid' => $rawdata["entityid"][$treports], ':formername' => $rawdata["Formername"][$treports], ':industry' => $rawdata["Industry"][$treports], ':sector' => $rawdata["Sector"][$treports],':country' => $rawdata["Country"][$treports]));
+				$id = $db->lastInsertId();					
+
+            	//$query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
+	        	//$res = mysql_query($query) or die(mysql_error());
+	        	$res = $db->query("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
+			} catch(PDOException $ex) {
+		   		echo "\nDatabase Error"; //user message
+	    		die($ex->getMessage());
+			}
 			fclose($csvst);
 		}
-
-        }
+	}
 }
 
 echo "$count total rows. $inserted new rows<br>\n";
@@ -131,10 +148,18 @@ $ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios",
 foreach ($result as $symbol) {
 	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
 	//Get last local report date and compare with remote
-	$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
-	$res = mysql_query($query) or die(mysql_error());
-	if(mysql_num_rows($res) == 0) continue;
-	$dates = mysql_fetch_object($res);
+	//$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
+	//$res = mysql_query($query) or die(mysql_error());
+	try { 
+		$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'");        
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+    	die($ex->getMessage());
+	}
+	$counter = $res->rowCount();
+	if($counter == 0) continue;
+	//$dates = mysql_fetch_object($res);
+	$dates = $res->fetch(PDO::FETCH_OBJ);
 
 	//Fix for different tickers names on different databases
 	$fixdate = $symbol->insdate;
@@ -177,8 +202,14 @@ foreach ($result as $symbol) {
 		update_beneish_checks($dates->ticker_id);
 
 		//Finally update local report date
-		$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
-		mysql_query($query) or die (mysql_error());
+		//$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
+		//mysql_query($query) or die (mysql_error());
+		try {
+			$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
+		} catch(PDOException $ex) {
+	   		echo "\nDatabase Error"; //user message
+    		die($ex->getMessage());
+		}
 		fclose($csvst);
 	}
 }
@@ -187,10 +218,18 @@ echo "Updating data points... (run 2) <br>\n";
 foreach ($result2 as $symbol) {
 	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
         //Get last local report date and compare with remote
-        $query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
-        $res = mysql_query($query) or die(mysql_error());
-	if(mysql_num_rows($res) == 0) continue;
-        $dates = mysql_fetch_object($res);
+        //$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
+        //$res = mysql_query($query) or die(mysql_error());
+        try { 
+        	$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'");
+ 		} catch(PDOException $ex) {
+	   		echo "\nDatabase Error"; //user message
+    		die($ex->getMessage());
+		}
+		$counter = $res->rowCount();
+	if($counter == 0) continue;
+        //$dates = mysql_fetch_object($res);
+		$dates = $res->fetch(PDO::FETCH_OBJ);
 
         //Fix for different tickers names on different databases
         $fixdate = $symbol->insdate;
@@ -232,24 +271,48 @@ foreach ($result2 as $symbol) {
 		update_altman_checks($dates->ticker_id);
 		update_beneish_checks($dates->ticker_id);
 
-                //Finally update local report date
-                $query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
-                mysql_query($query) or die (mysql_error());
-                fclose($csvst);
+        //Finally update local report date
+        //$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
+        //mysql_query($query) or die (mysql_error());
+        try {
+        	$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
+		} catch(PDOException $ex) {
+	   		echo "\nDatabase Error"; //user message
+    		die($ex->getMessage());
+		}
+        fclose($csvst);
 	}
 }
 echo "$count total rows. $updated stocks has new reports<br>\n";
 echo "Removing old Quality Checks (PIO)... ";
-$query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-mysql_query($query) or die (mysql_error());
+//$query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+//mysql_query($query) or die (mysql_error());
+try {
+	$res = $db->query("delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+} catch(PDOException $ex) {
+   		echo "\nDatabase Error"; //user message
+		die($ex->getMessage());
+}
 echo "done<br>\n";
 echo "Removing old Quality Checks (ALTMAN)... ";
-$query = "delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-mysql_query($query) or die (mysql_error());
+//$query = "delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+//mysql_query($query) or die (mysql_error());
+try {
+	$res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+	die($ex->getMessage());
+}
 echo "done<br>\n";
 echo "Removing old Quality Checks (BENEISH)... ";
-$query = "delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-mysql_query($query) or die (mysql_error());
+//$query = "delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
+//mysql_query($query) or die (mysql_error());
+try {
+	$res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+	die($ex->getMessage());
+}
 echo "done<br>\n";
 echo "Updating Ratings... ";
 update_ratings();
@@ -260,7 +323,6 @@ echo "done<br>\n";
 echo "Updating is_old tickers table field... ";
 update_is_old_field();
 echo "done<br>\n";
-
 function nullValues(&$item, $key) {
         if(strlen(trim($item)) == 0) {
                 $item = 'null';

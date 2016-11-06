@@ -24,17 +24,14 @@ $yql = new YahooYQLQuery();
 $count = 0;
 $output = "Checking up to 10 tickets...\n";
 echo "Checking up to 10 tickets...\n";
-//$query = "SELECT g.* FROM tickers g JOIN (SELECT id FROM tickers WHERE RAND() < (SELECT ((10 / COUNT(*)) * 10) FROM tickers) ORDER BY RAND() LIMIT 10) AS z ON z.id = g.id";
-//$res = mysql_query($query) or die(mysql_error());
 try {
 	$res = $db->query("SELECT g.* FROM tickers g JOIN (SELECT id FROM tickers WHERE RAND() < (SELECT ((10 / COUNT(*)) * 10) FROM tickers) ORDER BY RAND() LIMIT 10) AS z ON z.id = g.id");
 } catch(PDOException $ex) {
-    echo "Database Error!"; //user message
-    //some_logging_function($ex->getMessage());
+    echo "\nDatabase Error"; //user message
+    die($ex->getMessage());
 }
 
-//while (($row = mysql_fetch_assoc($res)) && $count < 4) {
-while ($row = $res->fetch(PDO::FETCH_ASSOC)) && $count < 4) {
+while (($row = $res->fetch(PDO::FETCH_ASSOC)) && $count < 4) {
 	echo "Checking ".$row["ticker"]."...";
 	$output .= "Checking ".$row["ticker"]."...";
 	//Try to get yahoo data for the ticker
@@ -51,15 +48,11 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) && $count < 4) {
 echo ("\nFound $count errors... ");
 $output .= "\nFound $count errors... ";
 
-//$query = "SELECT value FROM system WHERE parameter = 'query_yahoo'";
-//$res = mysql_query($query) or die(mysql_error());
-//$row = mysql_fetch_assoc($res);
-
 try {
 	$res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
 } catch(PDOException $ex) {
-    echo "Database Error!"; //user message
-    //ome_logging_function($ex->getMessage());
+    echo "\nDatabase Error"; //user message
+    die($ex->getMessage());
 }
 $row = $res->fetch(PDO::FETCH_ASSOC);
 
@@ -78,7 +71,10 @@ if ($count > 3) {
 		mail ("yahooalert.i9xgk@zapiermail.com" , "OSV Yahoo Status Checker" , $output);
 	}
 }
-//$res = mysql_query($query) or die(mysql_error());
-$res = $db->exec($query);
-
+try {
+	$res = $db->exec($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die($ex->getMessage());
+}
 ?>
