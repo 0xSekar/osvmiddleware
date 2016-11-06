@@ -45,33 +45,62 @@ while ($row = mysql_fetch_assoc($res)) {
 	echo "Updating ".$row["ticker"]." Estimates...";
 	//UPDATE ESTIMATES
 	//Try to get yahoo data for the ticker
-	$response = $yql->execute("select * from osv.finance.analystestimate where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
+	$response = $yql->execute("select * from osv.finance.analystestimate_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
 	if(isset($response->query) && isset($response->query->results)) {
 		//Check if the symbol exists
-		if(isset($response->query->results->results->EarningsEst)) {
-			$dates = new stdClass();
+		if(isset($response->query->results->result->earningsTrend)) {
+			$rawdata = new stdClass();
+			$rawdata->earningsHistory = new stdClass();
+			$rawdata->currQtr = new stdClass();
+			$rawdata->nextQtr = new stdClass();
+			$rawdata->currYear = new stdClass();
+			$rawdata->nextYear = new stdClass();
+			$rawdata->plus5Year = new stdClass();
+			$rawdata->minus5Year = new stdClass();
+			$rawdata->industryPegRatio = $response->query->results->result->industryTrend->pegRatio;
 			//Get dates from fetched ticker
-			foreach($response->query->results->results->EarningsEst->AvgEstimate as $property => $value) {
-				//Get dates
-				if(substr($property, 0, 10) == "CurrentQtr") {
-					$dates->currQtrDate = date("Y-m-d", strtotime("1 ".substr($property,-5)));
-					$dates->currQtrDateText = substr($property,-5);
-				} elseif (substr($property, 0, 7) == "NextQtr") {
-					$dates->nextQtrDate = date("Y-m-d", strtotime("1 ".substr($property,-5)));
-					$dates->nextQtrDateText = substr($property,-5);
-				} elseif (substr($property, 0, 11) == "CurrentYear") {
-					$dates->currYearDate = date("Y-m-d", strtotime("1 ".substr($property,-5)));
-					$dates->currYearDateText = substr($property,-5);
-				} elseif (substr($property, 0, 8) == "NextYear") {
-					$dates->nextYearDate = date("Y-m-d", strtotime("1 ".substr($property,-5)));
-					$dates->nextYearDateText = substr($property,-5);
+			foreach($response->query->results->result->earningsHistory->history as $value) {
+				if($value->period == "-4q") {
+					$rawdata->earningsHistory->minus4q = $value;
+				} elseif($value->period == "-3q") {
+					$rawdata->earningsHistory->minus3q = $value;
+				} elseif($value->period == "-2q") {
+					$rawdata->earningsHistory->minus2q = $value;
+				} elseif($value->period == "-1q") {
+					$rawdata->earningsHistory->minus1q = $value;
 				}
 			}
-			foreach($response->query->results->results->EarningsHistory->EPSEst as $property => $value) {
-                                $dates->hDate[] = date("Y-m-d", strtotime("1 ".$property));
-                                $dates->hDateText[] = $property;
+			foreach($response->query->results->result->earningsTrend->trend as $value) {
+				if($value->period == "0q") {
+					$rawdata->currQtr = $value;
+				} elseif ($value->period == "+1q") {
+					$rawdata->nextQtr = $value;
+				} elseif ($value->period == "0y") {
+					$rawdata->currYear = $value;
+				} elseif ($value->period == "+1y") {
+					$rawdata->nextYear = $value;
+				} elseif ($value->period == "+5y") {
+					$rawdata->plus5Year = $value;
+				} elseif ($value->period == "-5y") {
+					$rawdata->minus5Year = $value;
+				}
 			}
-			update_raw_data_yahoo_estimates($row["id"], $dates, $response->query->results->results);
+			foreach($response->query->results->result->industryTrend->estimates as $value) {
+				if($value->period == "0q") {
+					$rawdata->currQtr->industryTrend = $value;
+				} elseif($value->period == "+1q") {
+					$rawdata->nextQtr->industryTrend = $value;
+				} elseif($value->period == "0y") {
+					$rawdata->currYear->industryTrend = $value;
+				} elseif($value->period == "+1y") {
+					$rawdata->nextYear->industryTrend = $value;
+				} elseif($value->period == "+5y") {
+					$rawdata->plus5Year->industryTrend = $value;
+				} elseif($value->period == "-5y") {
+					$rawdata->minus5Year->industryTrend = $value;
+				}
+			}
+			update_raw_data_yahoo_estimates($row["id"], $rawdata);
 			$eupdated ++;
 		} else {
 			$enotfound ++;
