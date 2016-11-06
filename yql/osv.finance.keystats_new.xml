@@ -2,7 +2,7 @@
 <table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
     <meta>
         <author>
-            Ryan Hoium
+            Sergio Karsvnie
         </author>
         <description>
             Yahoo Finance - Key Statistics by Stock Symbol
@@ -40,17 +40,17 @@
 
             	// Setup Second Query from finance.yahoo.com
 				var url2 = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/"+symbol+
-				"?formatted=true&crumb=&lang=en-US&region=US&modules=defaultKeyStatistics%2CfinancialData%2CcalendarEvents&corsDomain=finance.yahoo.com";
+				"?formatted=true&crumb=&lang=en-US&region=US&modules=defaultKeyStatistics%2CfinancialData%2CcalendarEvents%2CassetProfile&corsDomain=finance.yahoo.com";
                 var restquery2 = y.rest( url2 );
                 var r2 = restquery2.accept( "application/json" ).get().response;
 				r2 = y.xmlToJson(r2);
 				var r2i = merge_options(r2.quoteSummary.result.defaultKeyStatistics, r2.quoteSummary.result.calendarEvents);
 				var r2f = merge_options(r2i, r2.quoteSummary.result.financialData);
+				r2f.assetProfile = r2.quoteSummary.result.assetProfile;
 
-				response.object = merge_options(r1f,r2f);
+				response.object = merge_options(r2f,r1f);
                 ]]>
             </execute>
         </select>
     </bindings>
 </table>
-

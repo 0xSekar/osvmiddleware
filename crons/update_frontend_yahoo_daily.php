@@ -49,6 +49,10 @@ $herrors = 0;
 $kupdated = 0;
 $knotfound = 0;
 $kerrors = 0;
+$supdated = 0;
+$snotfound = 0;
+$supdated2 = 0;
+$snotfound2 = 0;
 echo "Updating Tickers...\n";
 
 //Select all tickers not updated for at least a day
@@ -158,18 +162,41 @@ while ($row = mysql_fetch_assoc($res)) {
 	        }
 	}
 
-        //UPDATE KEYSTATS
+        //UPDATE KEYSTATS, SECTOR, INDUSTRY AND DESCRIPTION
         //Try to get yahoo data for the ticker
 	$sharesOut = 0;
         $response = $yql->execute("select * from osv.finance.keystats_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
         if(isset($response->query) && isset($response->query->results)) {
                 //Check if the symbol exists
+		//Keystats
                 if(isset($response->query->results->result->marketCap)) {
                         update_raw_data_yahoo_keystats($row["id"], $response->query->results->result);
                         $kupdated ++;
                 } else {
                         $knotfound ++;
                 }
+
+		//Sector and Industry
+		if(isset($response->query->results->result->assetProfile->sector)) {
+			$supdated ++;
+                        $query_div = "UPDATE `tickers` SET industry = '" . mysql_real_escape_string($response->query->results->result->assetProfile->industry) ."', ";
+                        $query_div .= "sector = '" . mysql_real_escape_string($response->query->results->result->assetProfile->sector) ."' ";
+                        $query_div .= "WHERE id = " . $row["id"];
+                        mysql_query($query_div) or die(mysql_error());
+		} else {
+			$snotfound ++;
+		}
+
+		//Description
+		if(isset($response->query->results->result->assetProfile->longBusinessSummary)) {
+			$supdated2 ++;
+                        $query_div = "UPDATE `tickers` SET description = '" . mysql_real_escape_string($response->query->results->result->assetProfile->longBusinessSummary) ."' ";
+                        $query_div .= "WHERE id = " . $row["id"];
+                        mysql_query($query_div) or die(mysql_error());
+		} else {
+			$snotfound2 ++;
+		}
+
         } elseif(isset($response->error)) {
                 $kerrors ++;
         } else {
@@ -197,6 +224,14 @@ echo "\t".$herrors." errors updating tickers\n";
 echo "Key Stats:\n";
 echo "\t".$kupdated." tickers updates\n";
 echo "\t".$knotfound." tickers not found on yahoo\n";
+echo "\t".$kerrors." errors updating tickers\n";
+echo "Sector & Industry:\n";
+echo "\t".$supdated." tickers updates\n";
+echo "\t".$snotfound." tickers not found on yahoo\n";
+echo "\t".$kerrors." errors updating tickers\n";
+echo "Description:\n";
+echo "\t".$supdated2." tickers updates\n";
+echo "\t".$snotfound2." tickers not found on yahoo\n";
 echo "\t".$kerrors." errors updating tickers\n";
 echo "Updating Ratings TTM... ";
 update_ratings_ttm();
