@@ -118,9 +118,6 @@ foreach ($result2 as $symbol2) {
 	        while ($data = fgetcsv($csvst)) {
         	        $rawdata[$data[0]] = $data;
             }
-            //$query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol2->ticker)."', '".mysql_real_escape_string($rawdata["CIK"][$treports])."', '".mysql_real_escape_string($rawdata["COMPANYNAME"][$treports])."', '".mysql_real_escape_string($rawdata["PrimaryExchange"][$treports])."', '".mysql_real_escape_string($rawdata["SICCode"][$treports])."', '".mysql_real_escape_string($rawdata["entityid"][$treports])."', '".mysql_real_escape_string($rawdata["Formername"][$treports])."', '".mysql_real_escape_string($rawdata["Industry"][$treports])."', '".mysql_real_escape_string($rawdata["Sector"][$treports])."', '".mysql_real_escape_string($rawdata["Country"][$treports])."')";
-	        //$res = mysql_query($query) or die(mysql_error());
-        	//$id = mysql_insert_id();
 			try {
         		$res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
 				$res->execute(array(':ticker' => $symbol2->ticker,
@@ -135,8 +132,6 @@ foreach ($result2 as $symbol2) {
 					':country' => $rawdata["Country"][$treports]));
 				$id = $db->lastInsertId();					
 
-            	//$query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
-	        	//$res = mysql_query($query) or die(mysql_error());
 	        	$res = $db->query("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
 			} catch(PDOException $ex) {
 		   		echo "\nDatabase Error"; //user message
@@ -150,15 +145,13 @@ foreach ($result2 as $symbol2) {
 echo "$count total rows. $inserted new rows<br>\n";
 
 //For each symbol in the database, check if there is new reports
-//vased on the last report date in the resultset
+//based on the last report date in the resultset
 echo "Updating data points... (run 1) <br>\n";
 $report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios");
 $ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
 foreach ($result as $symbol) {
 	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
 	//Get last local report date and compare with remote
-	//$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
-	//$res = mysql_query($query) or die(mysql_error());
 	try { 
 		$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'");        
 	} catch(PDOException $ex) {
@@ -167,7 +160,6 @@ foreach ($result as $symbol) {
 	}
 	$counter = $res->rowCount();
 	if($counter == 0) continue;
-	//$dates = mysql_fetch_object($res);
 	$dates = $res->fetch(PDO::FETCH_OBJ);
 
 	//Fix for different tickers names on different databases
@@ -211,8 +203,6 @@ foreach ($result as $symbol) {
 		update_beneish_checks($dates->ticker_id);
 
 		//Finally update local report date
-		//$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
-		//mysql_query($query) or die (mysql_error());
 		try {
 			$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
 		} catch(PDOException $ex) {
@@ -226,50 +216,47 @@ foreach ($result as $symbol) {
 echo "Updating data points... (run 2) <br>\n";
 foreach ($result2 as $symbol) {
 	if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
-        //Get last local report date and compare with remote
-        //$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'";
-        //$res = mysql_query($query) or die(mysql_error());
-        try { 
-        	$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'");
- 		} catch(PDOException $ex) {
-	   		echo "\nDatabase Error"; //user message
-    		die($ex->getMessage());
-		}
-		$counter = $res->rowCount();
+    //Get last local report date and compare with remote
+    try { 
+    	$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'");
+	} catch(PDOException $ex) {
+   		echo "\nDatabase Error"; //user message
+		die($ex->getMessage());
+	}
+	$counter = $res->rowCount();
 	if($counter == 0) continue;
-        //$dates = mysql_fetch_object($res);
-		$dates = $res->fetch(PDO::FETCH_OBJ);
+	$dates = $res->fetch(PDO::FETCH_OBJ);
 
-        //Fix for different tickers names on different databases
-        $fixdate = $symbol->insdate;
-        $fixticker = $symbol->ticker;
-        $fixtype = $symbol->reporttype;
-        //End fix for different tickers
+    //Fix for different tickers names on different databases
+    $fixdate = $symbol->insdate;
+    $fixticker = $symbol->ticker;
+    $fixtype = $symbol->reporttype;
+    //End fix for different tickers
 
-        if (!is_null($fixdate) && $dates->last_eol_date < $fixdate && $fixtype != "Dummy") {
-                //If the remote report is newer, download the new report and update data points
-                $updated++;
+    if (!is_null($fixdate) && $dates->last_eol_date < $fixdate && $fixtype != "Dummy") {
+        //If the remote report is newer, download the new report and update data points
+        $updated++;
 		echo "Downloading data for ".$fixticker."... ";
-                $csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
+        $csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
 		echo "Updating ticker ".$symbol->ticker."\n";
-                $csvst = fopen('php://memory', 'r+');
-                fwrite($csvst, $csv);
-                unset($csv);
-                fseek($csvst, 0);
-                $rawdata = array();
-                while ($data = fgetcsv($csvst)) {
+        $csvst = fopen('php://memory', 'r+');
+        fwrite($csvst, $csv);
+        unset($csv);
+        fseek($csvst, 0);
+        $rawdata = array();
+        while ($data = fgetcsv($csvst)) {
 			for($i=1; $i<=$treports;$i++) {
 				if(!isset($data[$i])) {
 					$data[$i] = "null";
 				}
 			}
-                        $rawdata[$data[0]] = $data;
-                }
+            $rawdata[$data[0]] = $data;
+        }
 		array_walk_recursive($rawdata, 'nullValues');
 
-                //Update Raw data
+        //Update Raw data
 		if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
-	                update_raw_data_tickers($dates, $rawdata);
+            update_raw_data_tickers($dates, $rawdata);
 		}
 
 		//Update Key ratios TTM
@@ -280,22 +267,18 @@ foreach ($result2 as $symbol) {
 		update_altman_checks($dates->ticker_id);
 		update_beneish_checks($dates->ticker_id);
 
-        //Finally update local report date
-        //$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
-        //mysql_query($query) or die (mysql_error());
+    	//Finally update local report date
         try {
-        	$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
+	    	$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
 		} catch(PDOException $ex) {
-	   		echo "\nDatabase Error"; //user message
+   			echo "\nDatabase Error"; //user message
     		die($ex->getMessage());
 		}
-        fclose($csvst);
+    	fclose($csvst);
 	}
 }
 echo "$count total rows. $updated stocks has new reports<br>\n";
 echo "Removing old Quality Checks (PIO)... ";
-//$query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-//mysql_query($query) or die (mysql_error());
 try {
 	$res = $db->query("delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
@@ -304,8 +287,6 @@ try {
 }
 echo "done<br>\n";
 echo "Removing old Quality Checks (ALTMAN)... ";
-//$query = "delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-//mysql_query($query) or die (mysql_error());
 try {
 	$res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
@@ -314,8 +295,6 @@ try {
 }
 echo "done<br>\n";
 echo "Removing old Quality Checks (BENEISH)... ";
-//$query = "delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-//mysql_query($query) or die (mysql_error());
 try {
 	$res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
@@ -332,11 +311,12 @@ echo "done<br>\n";
 echo "Updating is_old tickers table field... ";
 update_is_old_field();
 echo "done<br>\n";
+
 function nullValues(&$item, $key) {
-        if(strlen(trim($item)) == 0) {
-                $item = 'null';
-        } else if($item == "-") {
-                $item = 'null';
-        }
+    if(strlen(trim($item)) == 0) {
+        $item = 'null';
+    } else if($item == "-") {
+        $item = 'null';
+    }
 }
 ?>
