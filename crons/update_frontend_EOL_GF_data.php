@@ -123,7 +123,16 @@ foreach ($result2 as $symbol2) {
         	//$id = mysql_insert_id();
 			try {
         		$res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
-				$res->execute(array(':ticker' => $symbol2->ticker, ':cik' => $rawdata["CIK"][$treports], ':company' => $rawdata["COMPANYNAME"][$treports], ':exchange' => $rawdata["PrimaryExchange"][$treports], ':sic' => $$rawdata["SICCode"][$treports], ':entityid' => $rawdata["entityid"][$treports], ':formername' => $rawdata["Formername"][$treports], ':industry' => $rawdata["Industry"][$treports], ':sector' => $rawdata["Sector"][$treports],':country' => $rawdata["Country"][$treports]));
+				$res->execute(array(':ticker' => $symbol2->ticker,
+					':cik' => $rawdata["CIK"][$treports], 
+					':company' => $rawdata["COMPANYNAME"][$treports], 
+					':exchange' => $rawdata["PrimaryExchange"][$treports], 
+					':sic' => $rawdata["SICCode"][$treports], 
+					':entityid' => $rawdata["entityid"][$treports], 
+					':formername' => $rawdata["Formername"][$treports], 
+					':industry' => $rawdata["Industry"][$treports], 
+					':sector' => $rawdata["Sector"][$treports],
+					':country' => $rawdata["Country"][$treports]));
 				$id = $db->lastInsertId();					
 
             	//$query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
