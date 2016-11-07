@@ -58,6 +58,7 @@ while ($row = mysql_fetch_assoc($res)) {
 			$rawdata->plus5Year = new stdClass();
 			$rawdata->minus5Year = new stdClass();
 			$rawdata->industryPegRatio = $response->query->results->result->industryTrend->pegRatio;
+			$rawdata->sectorPegRatio = $response->query->results->result->sectorTrend->pegRatio;
 			//Get dates from fetched ticker
 			foreach($response->query->results->result->earningsHistory->history as $value) {
 				if($value->period == "-4q") {
