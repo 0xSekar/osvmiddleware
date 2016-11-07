@@ -36,7 +36,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->currQtr->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->currQtr->epsRevisions->downLast90days->raw)?"NULL":$rawdata->currQtr->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->currQtr->growth->raw) || !is_numeric($rawdata->currQtr->growth->raw)?"NULL":($rawdata->currQtr->growth->raw * 100)).",";
         $query .= (!isset($rawdata->currQtr->industryTrend->growth->raw) || !is_numeric($rawdata->currQtr->industryTrend->growth->raw)?"NULL":($rawdata->currQtr->industryTrend->growth->raw * 100)).",";
-        $query .= "NULL,";
+        $query .= (!isset($rawdata->currQtr->sectorTrend->growth->raw) || !is_numeric($rawdata->currQtr->sectorTrend->growth->raw)?"NULL":($rawdata->currQtr->sectorTrend->growth->raw * 100)).",";
         $query .= "NULL";
         $query .= ")";
         mysql_query($query) or die ("tickers_yahoo_estimates_curr_qtr:" . $query ."\n" .mysql_error());
@@ -67,7 +67,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->nextQtr->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->nextQtr->epsRevisions->downLast90days->raw)?"NULL":$rawdata->nextQtr->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->nextQtr->growth->raw) || !is_numeric($rawdata->nextQtr->growth->raw)?"NULL":($rawdata->nextQtr->growth->raw * 100)).",";
         $query .= (!isset($rawdata->nextQtr->industryTrend->growth->raw) || !is_numeric($rawdata->nextQtr->industryTrend->growth->raw)?"NULL":($rawdata->nextQtr->industryTrend->growth->raw * 100)).",";
-        $query .= "NULL,";
+        $query .= (!isset($rawdata->nextQtr->sectorTrend->growth->raw) || !is_numeric($rawdata->nextQtr->sectorTrend->growth->raw)?"NULL":($rawdata->nextQtr->sectorTrend->growth->raw * 100)).",";
         $query .= "NULL";
         $query .= ")";
         mysql_query($query) or die ("tickers_yahoo_estimates_next_qtr:" . $query ."\n" .mysql_error());
@@ -98,7 +98,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->currYear->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->currYear->epsRevisions->downLast90days->raw)?"NULL":$rawdata->currYear->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->currYear->growth->raw) || !is_numeric($rawdata->currYear->growth->raw)?"NULL":($rawdata->currYear->growth->raw * 100)).",";
         $query .= (!isset($rawdata->currYear->industryTrend->growth->raw) || !is_numeric($rawdata->currYear->industryTrend->growth->raw)?"NULL":($rawdata->currYear->industryTrend->growth->raw * 100)).",";
-        $query .= "NULL,";
+        $query .= (!isset($rawdata->currYear->sectorTrend->growth->raw) || !is_numeric($rawdata->currYear->sectorTrend->growth->raw)?"NULL":($rawdata->currYear->sectorTrend->growth->raw * 100)).",";
         $query .= "NULL";
         $query .= ")";
         mysql_query($query) or die ("tickers_yahoo_estimates_curr_year:" . $query ."\n" .mysql_error());
@@ -129,7 +129,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= (!isset($rawdata->nextYear->epsRevisions->downLast90days->raw) || !is_numeric($rawdata->nextYear->epsRevisions->downLast90days->raw)?"NULL":$rawdata->nextYear->epsRevisions->downLast90days->raw).",";
         $query .= (!isset($rawdata->nextYear->growth->raw) || !is_numeric($rawdata->nextYear->growth->raw)?"NULL":($rawdata->nextYear->growth->raw * 100)).",";
         $query .= (!isset($rawdata->nextYear->industryTrend->growth->raw) || !is_numeric($rawdata->nextYear->industryTrend->growth->raw)?"NULL":($rawdata->nextYear->industryTrend->growth->raw * 100)).",";
-        $query .= "NULL,";
+        $query .= (!isset($rawdata->nextYear->sectorTrend->growth->raw) || !is_numeric($rawdata->nextYear->sectorTrend->growth->raw)?"NULL":($rawdata->nextYear->sectorTrend->growth->raw * 100)).",";
         $query .= "NULL";
         $query .= ")";
         mysql_query($query) or die ("tickers_yahoo_estimates_next_year:" . $query ."\n" .mysql_error());
@@ -165,11 +165,11 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         $query .= "'".$ticker_id."',";
         $query .= (!isset($rawdata->minus5Year->growth->raw) || !is_numeric($rawdata->minus5Year->growth->raw)?"NULL":($rawdata->minus5Year->growth->raw * 100)).",";
         $query .= (!isset($rawdata->minus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->minus5Year->industryTrend->growth->raw)?"NULL":($rawdata->minus5Year->industryTrend->growth->raw * 100)).",";
-	$query .= "NULL,";
+        $query .= (!isset($rawdata->minus5Year->sectorTrend->growth->raw) || !is_numeric($rawdata->minus5Year->sectorTrend->growth->raw)?"NULL":($rawdata->minus5Year->sectorTrend->growth->raw * 100)).",";
 	$query .= "NULL,";
         $query .= (!isset($rawdata->plus5Year->growth->raw) || !is_numeric($rawdata->plus5Year->growth->raw)?"NULL":($rawdata->plus5Year->growth->raw * 100)).",";
         $query .= (!isset($rawdata->plus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->plus5Year->industryTrend->growth->raw)?"NULL":($rawdata->plus5Year->industryTrend->growth->raw * 100)).",";
-	$query .= "NULL,";
+        $query .= (!isset($rawdata->plus5Year->sectorTrend->growth->raw) || !is_numeric($rawdata->plus5Year->sectorTrend->growth->raw)?"NULL":($rawdata->plus5Year->sectorTrend->growth->raw * 100)).",";
 	$query .= "NULL,";
 	$query .= "NULL,";
 	$query .= "NULL,";
@@ -177,7 +177,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$query .= "NULL,";
 	$query .= "NULL,";
         $query .= (!isset($rawdata->industryPegRatio->raw) || !is_numeric($rawdata->industryPegRatio->raw)?"NULL":$rawdata->industryPegRatio->raw).",";
-	$query .= "NULL,";
+        $query .= (!isset($rawdata->sectorPegRatio->raw) || !is_numeric($rawdata->sectorPegRatio->raw)?"NULL":$rawdata->sectorPegRatio->raw).",";
 	$query .= "NULL";
         $query .= ")";
         mysql_query($query) or die ("tickers_yahoo_estimates_others:" . $query ."\n" .mysql_error());
