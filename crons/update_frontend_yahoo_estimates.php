@@ -101,6 +101,21 @@ while ($row = mysql_fetch_assoc($res)) {
 					$rawdata->minus5Year->industryTrend = $value;
 				}
 			}
+			foreach($response->query->results->result->sectorTrend->estimates as $value) {
+				if($value->period == "0q") {
+					$rawdata->currQtr->sectorTrend = $value;
+				} elseif($value->period == "+1q") {
+					$rawdata->nextQtr->sectorTrend = $value;
+				} elseif($value->period == "0y") {
+					$rawdata->currYear->sectorTrend = $value;
+				} elseif($value->period == "+1y") {
+					$rawdata->nextYear->sectorTrend = $value;
+				} elseif($value->period == "+5y") {
+					$rawdata->plus5Year->sectorTrend = $value;
+				} elseif($value->period == "-5y") {
+					$rawdata->minus5Year->sectorTrend = $value;
+				}
+			}
 			update_raw_data_yahoo_estimates($row["id"], $rawdata);
 			$eupdated ++;
 		} else {
