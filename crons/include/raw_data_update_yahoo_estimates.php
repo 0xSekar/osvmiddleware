@@ -13,7 +13,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         //tickers_yahoo_estimates_curr_qtr
 	$query = "INSERT INTO `tickers_yahoo_estimates_curr_qtr` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (";
         $query .= "'".$ticker_id."',";
-        $query .= "'".date("Y-m-d", strtotime($rawdata->currQtr->endDate))."',";
+        $query .= (!isset($rawdata->currQtr->endDate)?"NULL":"'".date("Y-m-d", strtotime($rawdata->currQtr->endDate))."'").",";
         $query .= (!isset($rawdata->currQtr->earningsEstimate->avg->raw) || !is_numeric($rawdata->currQtr->earningsEstimate->avg->raw)?"NULL":$rawdata->currQtr->earningsEstimate->avg->raw).",";
         $query .= (!isset($rawdata->currQtr->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->currQtr->earningsEstimate->numberOfAnalysts->raw)?"NULL":$rawdata->currQtr->earningsEstimate->numberOfAnalysts->raw).",";
         $query .= (!isset($rawdata->currQtr->earningsEstimate->low->raw) || !is_numeric($rawdata->currQtr->earningsEstimate->low->raw)?"NULL":$rawdata->currQtr->earningsEstimate->low->raw).",";
@@ -44,7 +44,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         //tickers_yahoo_estimates_next_qtr
 	$query = "INSERT INTO `tickers_yahoo_estimates_next_qtr` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (";
         $query .= "'".$ticker_id."',";
-        $query .= "'".date("Y-m-d", strtotime($rawdata->nextQtr->endDate))."',";
+        $query .= (!isset($rawdata->nextQtr->endDate)?"NULL":"'".date("Y-m-d", strtotime($rawdata->nextQtr->endDate))."'").",";
         $query .= (!isset($rawdata->nextQtr->earningsEstimate->avg->raw) || !is_numeric($rawdata->nextQtr->earningsEstimate->avg->raw)?"NULL":$rawdata->nextQtr->earningsEstimate->avg->raw).",";
         $query .= (!isset($rawdata->nextQtr->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->nextQtr->earningsEstimate->numberOfAnalysts->raw)?"NULL":$rawdata->nextQtr->earningsEstimate->numberOfAnalysts->raw).",";
         $query .= (!isset($rawdata->nextQtr->earningsEstimate->low->raw) || !is_numeric($rawdata->nextQtr->earningsEstimate->low->raw)?"NULL":$rawdata->nextQtr->earningsEstimate->low->raw).",";
@@ -75,7 +75,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         //tickers_yahoo_estimates_curr_year
 	$query = "INSERT INTO `tickers_yahoo_estimates_curr_year` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (";
         $query .= "'".$ticker_id."',";
-        $query .= "'".date("Y-m-d", strtotime($rawdata->currYear->endDate))."',";
+        $query .= (!isset($rawdata->currYear->endDate)?"NULL":"'".date("Y-m-d", strtotime($rawdata->currYear->endDate))."'").",";
         $query .= (!isset($rawdata->currYear->earningsEstimate->avg->raw) || !is_numeric($rawdata->currYear->earningsEstimate->avg->raw)?"NULL":$rawdata->currYear->earningsEstimate->avg->raw).",";
         $query .= (!isset($rawdata->currYear->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->currYear->earningsEstimate->numberOfAnalysts->raw)?"NULL":$rawdata->currYear->earningsEstimate->numberOfAnalysts->raw).",";
         $query .= (!isset($rawdata->currYear->earningsEstimate->low->raw) || !is_numeric($rawdata->currYear->earningsEstimate->low->raw)?"NULL":$rawdata->currYear->earningsEstimate->low->raw).",";
@@ -106,7 +106,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
         //tickers_yahoo_estimates_next_year
 	$query = "INSERT INTO `tickers_yahoo_estimates_next_year` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (";
         $query .= "'".$ticker_id."',";
-        $query .= "'".date("Y-m-d", strtotime($rawdata->nextYear->endDate))."',";
+        $query .= (!isset($rawdata->nextYear->endDate)?"NULL":"'".date("Y-m-d", strtotime($rawdata->nextYear->endDate))."'").",";
         $query .= (!isset($rawdata->nextYear->earningsEstimate->avg->raw) || !is_numeric($rawdata->nextYear->earningsEstimate->avg->raw)?"NULL":$rawdata->nextYear->earningsEstimate->avg->raw).",";
         $query .= (!isset($rawdata->nextYear->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->nextYear->earningsEstimate->numberOfAnalysts->raw)?"NULL":$rawdata->nextYear->earningsEstimate->numberOfAnalysts->raw).",";
         $query .= (!isset($rawdata->nextYear->earningsEstimate->low->raw) || !is_numeric($rawdata->nextYear->earningsEstimate->low->raw)?"NULL":$rawdata->nextYear->earningsEstimate->low->raw).",";
