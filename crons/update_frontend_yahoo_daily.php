@@ -5,6 +5,7 @@
 error_reporting(E_ALL & ~E_NOTICE);
 include_once('../config.php');
 include_once('../db/database.php');
+include_once('../db/db.php');
 include_once('./include/raw_data_update_yahoo_keystats.php');
 require_once("../include/yahoo/common.inc.php");
 include_once('./include/update_key_ratios_ttm.php');
@@ -13,15 +14,23 @@ include_once('./include/update_ratings_ttm.php');
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 connectfe();
+$db = Database::GetInstance(); 
 
 set_time_limit(0);                   // ignore php timeout
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
-$query = "SELECT value FROM system WHERE parameter = 'query_yahoo'";
-$res = mysql_query($query) or die(mysql_error());
-$row = mysql_fetch_assoc($res);
+//$query = "SELECT value FROM system WHERE parameter = 'query_yahoo'";
+//$res = mysql_query($query) or die(mysql_error());
+try {
+	$res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("Line: ".__LINE__." - ".$ex->getMessage());
+}
+//$row = mysql_fetch_assoc($res);
+$row = $res->fetch(PDO::FETCH_ASSOC);
 if($row["value"] == 0) {
 	echo "Skip process as yahoo queries are currently dissabled.\n";
 	exit;
@@ -56,9 +65,16 @@ $snotfound2 = 0;
 echo "Updating Tickers...\n";
 
 //Select all tickers not updated for at least a day
-$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380";
-$res = mysql_query($query) or die(mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+//$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380";
+//$res = mysql_query($query) or die(mysql_error());
+try {
+	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380");
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {	
 	$count ++;
 	echo "Updating ".$row["ticker"]."...";
 
@@ -73,7 +89,13 @@ while ($row = mysql_fetch_assoc($res)) {
 				$query_div .= (is_null($element->Dividends)?"NULL":$element->Dividends);
 				$query_div .= ") ON DUPLICATE KEY UPDATE dividends = ";
 				$query_div .= (is_null($element->Dividends)?"NULL":$element->Dividends);
-				mysql_query($query_div) or die(mysql_error());
+				//mysql_query($query_div) or die(mysql_error());
+				try {
+					$res1 = $db->exec($query_div);
+				} catch(PDOException $ex) {
+					    echo "\nDatabase Error"; //user message
+					    die("Line: ".__LINE__." - ".$ex->getMessage());
+				}
 			}
 		}
 		$dupdated ++;
@@ -84,9 +106,17 @@ while ($row = mysql_fetch_assoc($res)) {
         }
 
 	//UPDATE HISTORICAL DATA
-	$q_count = "select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["id"]."'";
-	$r_count = mysql_query($q_count) or die (mysql_error());
-	$r_row = mysql_fetch_assoc($r_count);
+	//$q_count = "select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["id"]."'";
+	//$r_count = mysql_query($q_count) or die (mysql_error());
+	try {
+		$r_count = $db->query("select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["id"]."'"); 
+		//$r_row = mysql_fetch_assoc($r_count);
+		$r_row = $r_count->fetch(PDO::FETCH_ASSOC);
+	} catch(PDOException $ex) {
+	    echo "\nDatabase Error"; //user message
+	    die("Line: ".__LINE__." - ".$ex->getMessage());
+	}
+	
 
 	$split_date = date("Ymd",strtotime($row["last_split_date"]));
 	$sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
@@ -112,13 +142,26 @@ while ($row = mysql_fetch_assoc($res)) {
 					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
 					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
 					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-					mysql_query($query_div) or die(mysql_error());
+					//mysql_query($query_div) or die(mysql_error());
+					try {
+					$res1 = $db->exec($query_div);
+					} catch(PDOException $ex) {
+					    echo "\nDatabase Error"; //user message
+					    die("Line: ".__LINE__." - ".$ex->getMessage());
+					}
 				}
 			}
 		}
 		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
-		        $query_up = "UPDATE tickers_control SET last_split_date = '".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."' WHERE ticker_id = " . $row["id"];
-        		mysql_query($query_up) or die(mysql_error());		
+		        //$query_up = "UPDATE tickers_control SET last_split_date = '".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."' WHERE ticker_id = " . $row["id"];
+        		//mysql_query($query_up) or die(mysql_error());	
+        		try {
+        			$res1 = $db->prepare("UPDATE tickers_control SET last_split_date = ? WHERE ticker_id = ?");
+					$res1->execute(array((date("Y-m-d",strtotime($sresponse->query->results->SplitDate))), $row["id"])); 
+					} catch(PDOException $ex) {
+					    echo "\nDatabase Error"; //user message
+					    die("Line: ".__LINE__." - ".$ex->getMessage());
+					}
 
 			//Need to get latest shares outstandings from yahoo quotes to compare on webservices
 			$response = $yql->execute("select * from osv.finance.quotes where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
@@ -151,17 +194,22 @@ while ($row = mysql_fetch_assoc($res)) {
 					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
 					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
 					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-					mysql_query($query_div) or die(mysql_error());
+					//mysql_query($query_div) or die(mysql_error());
+					try {
+						$res1 = $db->exec($query_div);
+					} catch(PDOException $ex) {
+						    echo "\nDatabase Error"; //user message
+						    die("Line: ".__LINE__." - ".$ex->getMessage());
+					}
 				}
 			}
 			$hupdated ++;
-	        } elseif(isset($response->error)) {
-        	        $herrors ++;
-	        } else {
-        	        $hnotfound ++;
-	        }
+        } elseif(isset($response->error)) {
+    	        $herrors ++;
+        } else {
+    	        $hnotfound ++;
+        }
 	}
-
         //UPDATE KEYSTATS, SECTOR, INDUSTRY AND DESCRIPTION
         //Try to get yahoo data for the ticker
 	$sharesOut = 0;
@@ -179,10 +227,18 @@ while ($row = mysql_fetch_assoc($res)) {
 		//Sector and Industry
 		if(isset($response->query->results->result->assetProfile->sector)) {
 			$supdated ++;
-                        $query_div = "UPDATE `tickers` SET industry = '" . mysql_real_escape_string($response->query->results->result->assetProfile->industry) ."', ";
-                        $query_div .= "sector = '" . mysql_real_escape_string($response->query->results->result->assetProfile->sector) ."' ";
-                        $query_div .= "WHERE id = " . $row["id"];
-                        mysql_query($query_div) or die(mysql_error());
+                        //$query_div = "UPDATE `tickers` SET industry = '" . mysql_real_escape_string($response->query->results->result->assetProfile->industry) ."', ";
+                        //$query_div .= "sector = '" . mysql_real_escape_string($response->query->results->result->assetProfile->sector) ."' ";
+                        //$query_div .= "WHERE id = " . $row["id"];
+                        //mysql_query($query_div) or die(mysql_error());
+                        try {
+							$res1 = $db->prepare("UPDATE `tickers` SET industry = ?, sector = ? WHERE id = ?");
+							$res1->execute(array((is_null($response->query->results->result->assetProfile->industry)?'':$response->query->results->result->assetProfile->industry), (is_null($response->query->results->result->assetProfile->sector)?'':$response->query->results->result->assetProfile->sector), $row["id"]));					
+						} catch(PDOException $ex) {
+							echo "\nDatabase Error"; //user message
+					    	die("Line: ".__LINE__." - ".$ex->getMessage());
+						}
+
 		} else {
 			$snotfound ++;
 		}
@@ -190,9 +246,16 @@ while ($row = mysql_fetch_assoc($res)) {
 		//Description
 		if(isset($response->query->results->result->assetProfile->longBusinessSummary)) {
 			$supdated2 ++;
-                        $query_div = "UPDATE `tickers` SET description = '" . mysql_real_escape_string($response->query->results->result->assetProfile->longBusinessSummary) ."' ";
-                        $query_div .= "WHERE id = " . $row["id"];
-                        mysql_query($query_div) or die(mysql_error());
+                        //$query_div = "UPDATE `tickers` SET description = '" . mysql_real_escape_string($response->query->results->result->assetProfile->longBusinessSummary) ."' ";
+                        //$query_div .= "WHERE id = " . $row["id"];
+                        //mysql_query($query_div) or die(mysql_error());
+                        try {
+							$res1 = $db->prepare("UPDATE `tickers` SET description = ? WHERE id = ?");
+							$res1->execute(array((is_null($response->query->results->result->assetProfile->longBusinessSummary)?'':$response->query->results->result->assetProfile->longBusinessSummary), $row["id"]));					
+						} catch(PDOException $ex) {
+							echo "\nDatabase Error"; //user message
+					    	die("Line: ".__LINE__." - ".$ex->getMessage());
+						}
 		} else {
 			$snotfound2 ++;
 		}
@@ -207,8 +270,18 @@ while ($row = mysql_fetch_assoc($res)) {
 	update_key_ratios_ttm($row["id"]);
 
 	// UPDATE DATES
-	$query_up = "UPDATE tickers_control SET last_yahoo_date = NOW() WHERE ticker_id = " . $row["id"];
-	mysql_query($query_up) or die(mysql_error());
+	//$query_up = "UPDATE tickers_control SET last_yahoo_date = NOW() WHERE ticker_id = " . $row["id"];
+	$query_up = "UPDATE tickers_control SET last_yahoo_date = NOW() WHERE ticker_id = ? ";
+	$params = array();
+	$params[] = $row["id"];
+	//mysql_query($query_up) or die(mysql_error());
+	try {
+		$res1 = $db->prepare($query_up);
+        $res1->execute($params);
+	} catch(PDOException $ex) {
+		    echo "\nDatabase Error"; //user message
+		    die("Line: ".__LINE__." - ".$ex->getMessage());
+	}
 	echo " Done\n";
 }
 

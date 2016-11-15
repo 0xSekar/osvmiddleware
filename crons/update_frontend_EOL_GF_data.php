@@ -13,7 +13,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 include_once('../config.php');
 include_once('../db/database.php');
-include_once('../db/db.php'); // agregar esto en cada database que vea
+include_once('../db/db.php');
 include_once('./include/raw_data_update_queries.php');
 include_once('./include/update_key_ratios_ttm.php');
 include_once('./include/update_quality_checks.php');
@@ -62,7 +62,7 @@ foreach ($result as $symbol) {
 		$counter = $res->fetch(PDO::FETCH_OBJ);
 	} catch(PDOException $ex) {
 		echo "\nDatabase Error"; //user message
-		die($ex->getMessage());
+		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	if ($counter->C == 0) {
 		$inserted ++;
@@ -84,7 +84,7 @@ foreach ($result as $symbol) {
 			$res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
 		} catch(PDOException $ex) {
 			echo "\nDatabase Error"; //user message
-	    	die($ex->getMessage());
+	    	die("Line: ".__LINE__." - ".$ex->getMessage());
 		}
 	}	
 }
@@ -101,7 +101,7 @@ foreach ($result2 as $symbol2) {
 		$counter = $res->fetch(PDO::FETCH_OBJ);
 	} catch(PDOException $ex) {
    		echo "\nDatabase Error"; //user message
-		die($ex->getMessage());
+		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
     if ($counter->C == 0) {
 		$fixdate = $symbol2->insdate;
@@ -120,22 +120,22 @@ foreach ($result2 as $symbol2) {
             }
 			try {
         		$res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
-				$res->execute(array(':ticker' => $symbol2->ticker,
-					':cik' => $rawdata["CIK"][$treports], 
-					':company' => $rawdata["COMPANYNAME"][$treports], 
-					':exchange' => $rawdata["PrimaryExchange"][$treports], 
-					':sic' => $rawdata["SICCode"][$treports], 
-					':entityid' => $rawdata["entityid"][$treports], 
-					':formername' => $rawdata["Formername"][$treports], 
-					':industry' => $rawdata["Industry"][$treports], 
-					':sector' => $rawdata["Sector"][$treports],
-					':country' => $rawdata["Country"][$treports]));
+				$res->execute(array(':ticker' => (is_null($symbol2->ticker)?'':$symbol2->ticker),
+					':cik' => (is_null($rawdata["CIK"][$treports])?'':$rawdata["CIK"][$treports]), 
+					':company' => (is_null($rawdata["COMPANYNAME"][$treports])?'':$rawdata["COMPANYNAME"][$treports]), 
+					':exchange' => (is_null($rawdata["PrimaryExchange"][$treports])?'':$rawdata["PrimaryExchange"][$treports]), 
+					':sic' => (is_null($rawdata["SICCode"][$treports])?'':$rawdata["SICCode"][$treports]), 
+					':entityid' => (is_null($rawdata["entityid"][$treports])?'':$rawdata["entityid"][$treports]), 
+					':formername' => (is_null($rawdata["Formername"][$treports])?'':$rawdata["Formername"][$treports]), 
+					':industry' => (is_null($rawdata["Industry"][$treports])?'':$rawdata["Industry"][$treports]), 
+					':sector' => (is_null($rawdata["Sector"][$treports])?'':$rawdata["Sector"][$treports]),
+					':country' => (is_null($rawdata["Country"][$treports])?'':$rawdata["Country"][$treports])));
 				$id = $db->lastInsertId();					
 
 	        	$res = $db->query("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
 			} catch(PDOException $ex) {
 		   		echo "\nDatabase Error"; //user message
-	    		die($ex->getMessage());
+	    		die("Line: ".__LINE__." - ".$ex->getMessage());
 			}
 			fclose($csvst);
 		}
@@ -156,7 +156,7 @@ foreach ($result as $symbol) {
 		$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'");        
 	} catch(PDOException $ex) {
 		echo "\nDatabase Error"; //user message
-    	die($ex->getMessage());
+    	die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$counter = $res->rowCount();
 	if($counter == 0) continue;
@@ -207,7 +207,7 @@ foreach ($result as $symbol) {
 			$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
 		} catch(PDOException $ex) {
 	   		echo "\nDatabase Error"; //user message
-    		die($ex->getMessage());
+    		die("Line: ".__LINE__." - ".$ex->getMessage());
 		}
 		fclose($csvst);
 	}
@@ -221,7 +221,7 @@ foreach ($result2 as $symbol) {
     	$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$symbol->ticker'");
 	} catch(PDOException $ex) {
    		echo "\nDatabase Error"; //user message
-		die($ex->getMessage());
+		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$counter = $res->rowCount();
 	if($counter == 0) continue;
@@ -272,7 +272,7 @@ foreach ($result2 as $symbol) {
 	    	$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
 		} catch(PDOException $ex) {
    			echo "\nDatabase Error"; //user message
-    		die($ex->getMessage());
+    		die("Line: ".__LINE__." - ".$ex->getMessage());
 		}
     	fclose($csvst);
 	}
@@ -283,7 +283,7 @@ try {
 	$res = $db->query("delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
    		echo "\nDatabase Error"; //user message
-		die($ex->getMessage());
+		die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "done<br>\n";
 echo "Removing old Quality Checks (ALTMAN)... ";
@@ -291,7 +291,7 @@ try {
 	$res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
 		echo "\nDatabase Error"; //user message
-	die($ex->getMessage());
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "done<br>\n";
 echo "Removing old Quality Checks (BENEISH)... ";
@@ -299,7 +299,7 @@ try {
 	$res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
 		echo "\nDatabase Error"; //user message
-	die($ex->getMessage());
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "done<br>\n";
 echo "Updating Ratings... ";

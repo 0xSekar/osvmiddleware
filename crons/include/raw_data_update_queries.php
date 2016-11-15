@@ -1,5 +1,6 @@
 <?php
 function update_raw_data_tickers($dates, $rawdata) {
+        $db = Database::GetInstance(); 
 	$areports = AREPORTS;
 	$qreports = QREPORTS;
 	$treports = $areports+$qreports;
@@ -13,92 +14,188 @@ function update_raw_data_tickers($dates, $rawdata) {
         //as this is a batch process, it will not impact on the UE
         foreach($ticker_tables as $table) {
                 $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
-                mysql_query($query) or die (mysql_error());
+                //mysql_query($query) or die (mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
         }
 
         //Update tickers_* tables (tables that hold only 1 data point per symbol)
         //tickers_activity_daily_ratios
-        $query = "INSERT INTO `tickers_activity_daily_ratios` (`ticker_id`, `AccountsPayableTurnoverDaysFY`, `TradeCycleDaysFY`, `TradeCycleDaysTTM`, `AccountsPayableTurnoverDaysTTM`, `InventoryTurnoverDaysFY`, `InventoryTurnoverDaysTTM`, `NetOperatingProfitafterTaxFQ`, `NetOperatingProfitafterTaxFY`, `NetOperatingProfitafterTaxTTM`, `ReceivablesCollectionPeriodDaysFY`, `ReceivablesCollectionPeriodDaysTTM`, `TaxRatePctFQ`, `TaxRatePctFY`, `TaxRatePctTTM`, `Volume`, `AverageVolume`, `Beta1Year`, `Beta3Year`, `Beta5Year`, `Date52WeekHigh`, `Date52WeekLow`, `DatePreviousClose`, `DatePriceClose`, `PreviousVolume`, `Price52WeekHigh`, `Price52WeekLow`, `PriceClose`, `PricePctChange13Week`, `PricePctChange1Day`, `PricePctChange1Week`, `PricePctChange26Week`, `PricePctChange4Week`, `PricePctChange52Week`, `PricePctChangeYTD`, `PricePreviousClose`) VALUES (";
-        $query .= "'".$dates->ticker_id."',";
-        $query .= $rawdata["AccountsPayableTurnoverDaysFY"][$treports].",";
-        $query .= $rawdata["TradeCycleDaysFY"][$treports].",";
-        $query .= $rawdata["TradeCycleDaysTTM"][$treports].",";
-        $query .= $rawdata["AccountsPayableTurnoverDaysTTM"][$treports].",";
-        $query .= $rawdata["InventoryTurnoverDaysFY"][$treports].",";
-        $query .= $rawdata["InventoryTurnoverDaysTTM"][$treports].",";
-        $query .= $rawdata["NetOperatingProfitafterTaxFQ"][$treports].",";
-        $query .= $rawdata["NetOperatingProfitafterTaxFY"][$treports].",";
-        $query .= $rawdata["NetOperatingProfitafterTaxTTM"][$treports].",";
-        $query .= $rawdata["ReceivablesCollectionPeriodDaysFY"][$treports].",";
-        $query .= $rawdata["ReceivablesCollectionPeriodDaysTTM"][$treports].",";
-        $query .= $rawdata["TaxRatePctFQ"][$treports].",";
-        $query .= $rawdata["TaxRatePctFY"][$treports].",";
-        $query .= $rawdata["TaxRatePctTTM"][$treports].",";
-        $query .= $rawdata["Volume"][$treports].",";
-        $query .= $rawdata["AverageVolume"][$treports].",";
-        $query .= $rawdata["Beta1Year"][$treports].",";
-        $query .= $rawdata["Beta3Year"][$treports].",";
-        $query .= $rawdata["Beta5Year"][$treports].",";
-        $query .= "'".date("Y-m-d",strtotime($rawdata["Date52WeekHigh"][$treports]))."',";
-        $query .= "'".date("Y-m-d",strtotime($rawdata["Date52WeekLow"][$treports]))."',";
-        $query .= "'".date("Y-m-d",strtotime($rawdata["DatePreviousClose"][$treports]))."',";
-        $query .= "'".date("Y-m-d",strtotime($rawdata["DatePriceClose"][$treports]))."',";
-        $query .= $rawdata["PreviousVolume"][$treports].",";
-        $query .= $rawdata["Price52WeekHigh"][$treports].",";
-        $query .= $rawdata["Price52WeekLow"][$treports].",";
-        $query .= $rawdata["PriceClose"][$treports].",";
-        $query .= $rawdata["PricePctChange13Week"][$treports].",";
-        $query .= $rawdata["PricePctChange1Day"][$treports].",";
-        $query .= $rawdata["PricePctChange1Week"][$treports].",";
-        $query .= $rawdata["PricePctChange26Week"][$treports].",";
-        $query .= $rawdata["PricePctChange4Week"][$treports].",";
-        $query .= $rawdata["PricePctChange52Week"][$treports].",";
-        $query .= $rawdata["PricePctChangeYTD"][$treports].",";
-        $query .= $rawdata["PricePreviousClose"][$treports];
-        $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        //$query = "INSERT INTO `tickers_activity_daily_ratios` (`ticker_id`, `AccountsPayableTurnoverDaysFY`, `TradeCycleDaysFY`, `TradeCycleDaysTTM`, `AccountsPayableTurnoverDaysTTM`, `InventoryTurnoverDaysFY`, `InventoryTurnoverDaysTTM`, `NetOperatingProfitafterTaxFQ`, `NetOperatingProfitafterTaxFY`, `NetOperatingProfitafterTaxTTM`, `ReceivablesCollectionPeriodDaysFY`, `ReceivablesCollectionPeriodDaysTTM`, `TaxRatePctFQ`, `TaxRatePctFY`, `TaxRatePctTTM`, `Volume`, `AverageVolume`, `Beta1Year`, `Beta3Year`, `Beta5Year`, `Date52WeekHigh`, `Date52WeekLow`, `DatePreviousClose`, `DatePriceClose`, `PreviousVolume`, `Price52WeekHigh`, `Price52WeekLow`, `PriceClose`, `PricePctChange13Week`, `PricePctChange1Day`, `PricePctChange1Week`, `PricePctChange26Week`, `PricePctChange4Week`, `PricePctChange52Week`, `PricePctChangeYTD`, `PricePreviousClose`) VALUES (";
+        $query = "INSERT INTO `tickers_activity_daily_ratios` (`ticker_id`, `AccountsPayableTurnoverDaysFY`, `TradeCycleDaysFY`, `TradeCycleDaysTTM`, `AccountsPayableTurnoverDaysTTM`, `InventoryTurnoverDaysFY`, `InventoryTurnoverDaysTTM`, `NetOperatingProfitafterTaxFQ`, `NetOperatingProfitafterTaxFY`, `NetOperatingProfitafterTaxTTM`, `ReceivablesCollectionPeriodDaysFY`, `ReceivablesCollectionPeriodDaysTTM`, `TaxRatePctFQ`, `TaxRatePctFY`, `TaxRatePctTTM`, `Volume`, `AverageVolume`, `Beta1Year`, `Beta3Year`, `Beta5Year`, `Date52WeekHigh`, `Date52WeekLow`, `DatePreviousClose`, `DatePriceClose`, `PreviousVolume`, `Price52WeekHigh`, `Price52WeekLow`, `PriceClose`, `PricePctChange13Week`, `PricePctChange1Day`, `PricePctChange1Week`, `PricePctChange26Week`, `PricePctChange4Week`, `PricePctChange52Week`, `PricePctChangeYTD`, `PricePreviousClose`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $params = array();
+        //$query .= "'".$dates->ticker_id."',";
+        $params[] = $dates->ticker_id;
+        //$query .= $rawdata["AccountsPayableTurnoverDaysFY"][$treports].",";
+        $params[] = $rawdata["AccountsPayableTurnoverDaysFY"][$treports];
+        //$query .= $rawdata["TradeCycleDaysFY"][$treports].",";
+        $params[] = $rawdata["TradeCycleDaysFY"][$treports];
+        //$query .= $rawdata["TradeCycleDaysTTM"][$treports].",";
+        $params[] = $rawdata["TradeCycleDaysTTM"][$treports];
+        //$query .= $rawdata["AccountsPayableTurnoverDaysTTM"][$treports].",";
+        $params[] = $rawdata["AccountsPayableTurnoverDaysTTM"][$treports];
+        //$query .= $rawdata["InventoryTurnoverDaysFY"][$treports].",";
+        $params[] = $rawdata["InventoryTurnoverDaysFY"][$treports];
+        //$query .= $rawdata["InventoryTurnoverDaysTTM"][$treports].",";
+        $params[] = $rawdata["InventoryTurnoverDaysTTM"][$treports];
+        //$query .= $rawdata["NetOperatingProfitafterTaxFQ"][$treports].",";
+        $params[] = $rawdata["NetOperatingProfitafterTaxFQ"][$treports];
+        //$query .= $rawdata["NetOperatingProfitafterTaxFY"][$treports].",";
+        $params[] = $rawdata["NetOperatingProfitafterTaxFY"][$treports];
+        //$query .= $rawdata["NetOperatingProfitafterTaxTTM"][$treports].",";
+        $params[] = $rawdata["NetOperatingProfitafterTaxTTM"][$treports];
+        //$query .= $rawdata["ReceivablesCollectionPeriodDaysFY"][$treports].",";
+        $params[] = $rawdata["ReceivablesCollectionPeriodDaysFY"][$treports];
+        //$query .= $rawdata["ReceivablesCollectionPeriodDaysTTM"][$treports].",";
+        $params[] = $rawdata["ReceivablesCollectionPeriodDaysTTM"][$treports];
+        //$query .= $rawdata["TaxRatePctFQ"][$treports].",";
+        $params[] = $rawdata["TaxRatePctFQ"][$treports];
+        //$query .= $rawdata["TaxRatePctFY"][$treports].",";
+        $params[] = $rawdata["TaxRatePctFY"][$treports];
+        //$query .= $rawdata["TaxRatePctTTM"][$treports].",";
+        $params[] = $rawdata["TaxRatePctTTM"][$treports];
+        //$query .= $rawdata["Volume"][$treports].",";
+        $params[] = $rawdata["Volume"][$treports];
+        //$query .= $rawdata["AverageVolume"][$treports].",";
+        $params[] = $rawdata["AverageVolume"][$treports];
+        //$query .= $rawdata["Beta1Year"][$treports].",";
+        $params[] = $rawdata["Beta1Year"][$treports];
+        //$query .= $rawdata["Beta3Year"][$treports].",";
+        $params[] = $rawdata["Beta3Year"][$treports];
+        //$query .= $rawdata["Beta5Year"][$treports].",";
+        $params[] = $rawdata["Beta5Year"][$treports];
+        //$query .= "'".date("Y-m-d",strtotime($rawdata["Date52WeekHigh"][$treports]))."',";
+        $params[] = date("Y-m-d",strtotime($rawdata["Date52WeekHigh"][$treports]));
+        //$query .= "'".date("Y-m-d",strtotime($rawdata["Date52WeekLow"][$treports]))."',";
+        $params[] = date("Y-m-d",strtotime($rawdata["Date52WeekLow"][$treports]));
+        //$query .= "'".date("Y-m-d",strtotime($rawdata["DatePreviousClose"][$treports]))."',";
+        $params[] = date("Y-m-d",strtotime($rawdata["DatePreviousClose"][$treports]));
+        //$query .= "'".date("Y-m-d",strtotime($rawdata["DatePriceClose"][$treports]))."',";
+        $params[] = date("Y-m-d",strtotime($rawdata["DatePriceClose"][$treports]));
+        //$query .= $rawdata["PreviousVolume"][$treports].",";
+        $params[] = $rawdata["PreviousVolume"][$treports];
+        //$query .= $rawdata["Price52WeekHigh"][$treports].",";
+        $params[] = $rawdata["Price52WeekHigh"][$treports];
+        //$query .= $rawdata["Price52WeekLow"][$treports].",";
+        $params[] = $rawdata["Price52WeekLow"][$treports];
+        //$query .= $rawdata["PriceClose"][$treports].",";
+        $params[] = $rawdata["PriceClose"][$treports];
+        //$query .= $rawdata["PricePctChange13Week"][$treports].",";
+        $params[] = $rawdata["PricePctChange13Week"][$treports];
+        //$query .= $rawdata["PricePctChange1Day"][$treports].",";
+        $params[] = $rawdata["PricePctChange1Day"][$treports];
+        //$query .= $rawdata["PricePctChange1Week"][$treports].",";
+        $params[] = $rawdata["PricePctChange1Week"][$treports];
+        //$query .= $rawdata["PricePctChange26Week"][$treports].",";
+        $params[] = $rawdata["PricePctChange26Week"][$treports];
+        //$query .= $rawdata["PricePctChange4Week"][$treports].",";
+        $params[] = $rawdata["PricePctChange4Week"][$treports];
+        //$query .= $rawdata["PricePctChange52Week"][$treports].",";
+        $params[] = $rawdata["PricePctChange52Week"][$treports];
+        //$query .= $rawdata["PricePctChangeYTD"][$treports].",";
+        $params[] = $rawdata["PricePctChangeYTD"][$treports];
+        //$query .= $rawdata["PricePreviousClose"][$treports];
+        $params[] = $rawdata["PricePreviousClose"][$treports];
+        //$query .= ")";
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $res = $db->prepare($query);
+                $res->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
         //tickers_growth_ratios
-        $query = "INSERT INTO `tickers_growth_ratios` (`ticker_id`, `AdjustedEBITDAPctGrowth3YearCAGRFY`, `AdjustedEBITDAPctGrowth5YearCAGRFY`, `AdjustedEBITDAPctGrowthFY`, `AdjustedEBITDAPctGrowthTTM`, `EBITDAPctGrowth3YearCAGRFY`, `EBITDAPctGrowth5YearCAGRFY`, `EBITDAPctGrowthFY`, `EBITDAPctGrowthTTM`, `EBITPctGrowth3YearCAGRFY`, `EBITPctGrowth5YearCAGRFY`, `EBITPctGrowthFY`, `EBITPctGrowthTTM`, `FreeCashFlowPctGrowth3YearCAGRFY`, `FreeCashFlowPctGrowth5YearCAGRFY`, `FreeCashFlowPctGrowthFY`, `FreeCashFlowPctGrowthTTM`, `NetIncomePctGrowth3YearCAGRFY`, `NetIncomePctGrowth5YearCAGRFY`, `NetIncomePctGrowthFY`, `NetIncomePctGrowthTTM`, `OperatingCashFlowPctGrowth3YearCAGRFY`, `OperatingCashFlowPctGrowth5YearCAGRFY`, `OperatingCashFlowPctGrowthFY`, `OperatingCashFlowPctGrowthTTM`, `OperatingProfitPctGrowth3YearCAGRFY`, `OperatingProfitPctGrowth5YearCAGRFY`, `OperatingProfitPctGrowthFY`, `OperatingProfitPctGrowthTTM`, `PriceEarningstoGrowthFY`, `PriceEarningstoGrowthTTM`, `RevenuePctGrowth3YearCAGRFY`, `RevenuePctGrowth5YearCAGRFY`, `RevenuePctGrowthFY`, `RevenuePctGrowthTTM`) VALUES (";
-        $query .= "'".$dates->ticker_id."',";
-        $query .= $rawdata["AdjustedEBITDAPctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["AdjustedEBITDAPctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["AdjustedEBITDAPctGrowthFY"][$treports].",";
-        $query .= $rawdata["AdjustedEBITDAPctGrowthTTM"][$treports].",";
-        $query .= $rawdata["EBITDAPctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["EBITDAPctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["EBITDAPctGrowthFY"][$treports].",";
-        $query .= $rawdata["EBITDAPctGrowthTTM"][$treports].",";
-        $query .= $rawdata["EBITPctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["EBITPctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["EBITPctGrowthFY"][$treports].",";
-        $query .= $rawdata["EBITPctGrowthTTM"][$treports].",";
-        $query .= $rawdata["FreeCashFlowPctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["FreeCashFlowPctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["FreeCashFlowPctGrowthFY"][$treports].",";
-        $query .= $rawdata["FreeCashFlowPctGrowthTTM"][$treports].",";
-        $query .= $rawdata["NetIncomePctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["NetIncomePctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["NetIncomePctGrowthFY"][$treports].",";
-        $query .= $rawdata["NetIncomePctGrowthTTM"][$treports].",";
-        $query .= $rawdata["OperatingCashFlowPctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["OperatingCashFlowPctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["OperatingCashFlowPctGrowthFY"][$treports].",";
-        $query .= $rawdata["OperatingCashFlowPctGrowthTTM"][$treports].",";
-        $query .= $rawdata["OperatingProfitPctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["OperatingProfitPctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["OperatingProfitPctGrowthFY"][$treports].",";
-        $query .= $rawdata["OperatingProfitPctGrowthTTM"][$treports].",";
-        $query .= $rawdata["PriceEarningstoGrowthFY"][$treports].",";
-        $query .= $rawdata["PriceEarningstoGrowthTTM"][$treports].",";
-        $query .= $rawdata["RevenuePctGrowth3YearCAGRFY"][$treports].",";
-        $query .= $rawdata["RevenuePctGrowth5YearCAGRFY"][$treports].",";
-        $query .= $rawdata["RevenuePctGrowthFY"][$treports].",";
-        $query .= $rawdata["RevenuePctGrowthTTM"][$treports];
-        $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        //$query = "INSERT INTO `tickers_growth_ratios` (`ticker_id`, `AdjustedEBITDAPctGrowth3YearCAGRFY`, `AdjustedEBITDAPctGrowth5YearCAGRFY`, `AdjustedEBITDAPctGrowthFY`, `AdjustedEBITDAPctGrowthTTM`, `EBITDAPctGrowth3YearCAGRFY`, `EBITDAPctGrowth5YearCAGRFY`, `EBITDAPctGrowthFY`, `EBITDAPctGrowthTTM`, `EBITPctGrowth3YearCAGRFY`, `EBITPctGrowth5YearCAGRFY`, `EBITPctGrowthFY`, `EBITPctGrowthTTM`, `FreeCashFlowPctGrowth3YearCAGRFY`, `FreeCashFlowPctGrowth5YearCAGRFY`, `FreeCashFlowPctGrowthFY`, `FreeCashFlowPctGrowthTTM`, `NetIncomePctGrowth3YearCAGRFY`, `NetIncomePctGrowth5YearCAGRFY`, `NetIncomePctGrowthFY`, `NetIncomePctGrowthTTM`, `OperatingCashFlowPctGrowth3YearCAGRFY`, `OperatingCashFlowPctGrowth5YearCAGRFY`, `OperatingCashFlowPctGrowthFY`, `OperatingCashFlowPctGrowthTTM`, `OperatingProfitPctGrowth3YearCAGRFY`, `OperatingProfitPctGrowth5YearCAGRFY`, `OperatingProfitPctGrowthFY`, `OperatingProfitPctGrowthTTM`, `PriceEarningstoGrowthFY`, `PriceEarningstoGrowthTTM`, `RevenuePctGrowth3YearCAGRFY`, `RevenuePctGrowth5YearCAGRFY`, `RevenuePctGrowthFY`, `RevenuePctGrowthTTM`) VALUES (";
+        $query = "INSERT INTO `tickers_growth_ratios` (`ticker_id`, `AdjustedEBITDAPctGrowth3YearCAGRFY`, `AdjustedEBITDAPctGrowth5YearCAGRFY`, `AdjustedEBITDAPctGrowthFY`, `AdjustedEBITDAPctGrowthTTM`, `EBITDAPctGrowth3YearCAGRFY`, `EBITDAPctGrowth5YearCAGRFY`, `EBITDAPctGrowthFY`, `EBITDAPctGrowthTTM`, `EBITPctGrowth3YearCAGRFY`, `EBITPctGrowth5YearCAGRFY`, `EBITPctGrowthFY`, `EBITPctGrowthTTM`, `FreeCashFlowPctGrowth3YearCAGRFY`, `FreeCashFlowPctGrowth5YearCAGRFY`, `FreeCashFlowPctGrowthFY`, `FreeCashFlowPctGrowthTTM`, `NetIncomePctGrowth3YearCAGRFY`, `NetIncomePctGrowth5YearCAGRFY`, `NetIncomePctGrowthFY`, `NetIncomePctGrowthTTM`, `OperatingCashFlowPctGrowth3YearCAGRFY`, `OperatingCashFlowPctGrowth5YearCAGRFY`, `OperatingCashFlowPctGrowthFY`, `OperatingCashFlowPctGrowthTTM`, `OperatingProfitPctGrowth3YearCAGRFY`, `OperatingProfitPctGrowth5YearCAGRFY`, `OperatingProfitPctGrowthFY`, `OperatingProfitPctGrowthTTM`, `PriceEarningstoGrowthFY`, `PriceEarningstoGrowthTTM`, `RevenuePctGrowth3YearCAGRFY`, `RevenuePctGrowth5YearCAGRFY`, `RevenuePctGrowthFY`, `RevenuePctGrowthTTM`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $params = array();
+        //$query .= "'".$dates->ticker_id."',";
+        $params[] = $dates->ticker_id;
+        //$query .= $rawdata["AdjustedEBITDAPctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["AdjustedEBITDAPctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["AdjustedEBITDAPctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["AdjustedEBITDAPctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["AdjustedEBITDAPctGrowthFY"][$treports].",";
+        $params[] = $rawdata["AdjustedEBITDAPctGrowthFY"][$treports];
+        //$query .= $rawdata["AdjustedEBITDAPctGrowthTTM"][$treports].",";
+        $params[] = $rawdata["AdjustedEBITDAPctGrowthTTM"][$treports];
+        //$query .= $rawdata["EBITDAPctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["EBITDAPctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["EBITDAPctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["EBITDAPctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["EBITDAPctGrowthFY"][$treports].",";
+        $params[] = $rawdata["EBITDAPctGrowthFY"][$treports];
+        //$query .= $rawdata["EBITDAPctGrowthTTM"][$treports].",";
+        $params[] = $rawdata["EBITDAPctGrowthTTM"][$treports];
+        //$query .= $rawdata["EBITPctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["EBITPctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["EBITPctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["EBITPctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["EBITPctGrowthFY"][$treports].",";
+        $params[] = $rawdata["EBITPctGrowthFY"][$treports];
+        //$query .= $rawdata["EBITPctGrowthTTM"][$treports].",";
+        $params[] = $rawdata["EBITPctGrowthTTM"][$treports];
+        //$query .= $rawdata["FreeCashFlowPctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["FreeCashFlowPctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["FreeCashFlowPctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["FreeCashFlowPctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["FreeCashFlowPctGrowthFY"][$treports].",";
+        $params[] = $rawdata["FreeCashFlowPctGrowthFY"][$treports];
+        //$query .= $rawdata["FreeCashFlowPctGrowthTTM"][$treports].",";
+        $params[] = $rawdata["FreeCashFlowPctGrowthTTM"][$treports];
+        //$query .= $rawdata["NetIncomePctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["NetIncomePctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["NetIncomePctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["NetIncomePctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["NetIncomePctGrowthFY"][$treports].",";
+        $params[] = $rawdata["NetIncomePctGrowthFY"][$treports];
+        //$query .= $rawdata["NetIncomePctGrowthTTM"][$treports].",";
+        $params[] = $rawdata["NetIncomePctGrowthTTM"][$treports];
+        //$query .= $rawdata["OperatingCashFlowPctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["OperatingCashFlowPctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["OperatingCashFlowPctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["OperatingCashFlowPctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["OperatingCashFlowPctGrowthFY"][$treports].",";
+        $params[] = $rawdata["OperatingCashFlowPctGrowthFY"][$treports];
+        //$query .= $rawdata["OperatingCashFlowPctGrowthTTM"][$treports].",";
+        $params[] = $rawdata["OperatingCashFlowPctGrowthTTM"][$treports];
+        //$query .= $rawdata["OperatingProfitPctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["OperatingProfitPctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["OperatingProfitPctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["OperatingProfitPctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["OperatingProfitPctGrowthFY"][$treports].",";
+        $params[] = $rawdata["OperatingProfitPctGrowthFY"][$treports];
+        //$query .= $rawdata["OperatingProfitPctGrowthTTM"][$treports].",";
+        $params[] = $rawdata["OperatingProfitPctGrowthTTM"][$treports];
+        //$query .= $rawdata["PriceEarningstoGrowthFY"][$treports].",";
+        $params[] = $rawdata["PriceEarningstoGrowthFY"][$treports];
+        //$query .= $rawdata["PriceEarningstoGrowthTTM"][$treports].",";
+        $params[] = $rawdata["PriceEarningstoGrowthTTM"][$treports];
+        //$query .= $rawdata["RevenuePctGrowth3YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["RevenuePctGrowth3YearCAGRFY"][$treports];
+        //$query .= $rawdata["RevenuePctGrowth5YearCAGRFY"][$treports].",";
+        $params[] = $rawdata["RevenuePctGrowth5YearCAGRFY"][$treports];
+        //$query .= $rawdata["RevenuePctGrowthFY"][$treports].",";
+        $params[] = $rawdata["RevenuePctGrowthFY"][$treports];
+        //$query .= $rawdata["RevenuePctGrowthTTM"][$treports];
+        $params[] = $rawdata["RevenuePctGrowthTTM"][$treports];
+        //$query .= ")";
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $res = $db->prepare($query);
+                $res->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
         //tickers_leverage_ratios
-	$query = "INSERT INTO `tickers_leverage_ratios` (`ticker_id`, `TotalCapitalFY`, `TotalDebtFQ`, `TotalDebtFY`, `AltmanZscoreFY`, `AltmanZscoreTTM`, `BookEquityFQ`, `BookEquityFY`, `DebttoAssetsFQ`, `DebttoAssetsFY`, `DegreeofCombinedLeverageFY`, `DegreeofCombinedLeverageTTM`, `DegreeofFinancialLeverageFY`, `DegreeofFinancialLeverageTTM`, `DegreeofOperationalLeverageFY`, `DegreeofOperationalLeverageTTM`, `FreeCashFlowFQ`, `FreeCashFlowFY`, `FreeCashFlowtoEquityPctFY`, `FreeCashFlowtoEquityPctTTM`, `FreeCashFlowTTM`, `LongTermCapitalFQ`, `LongTermCapitalFY`, `LongTermDebttoLongTermCapitalFQ`, `LongTermDebttoLongTermCapitalFY`, `LongTermDebttoTotalCapitalFQ`, `LongTermDebttoTotalCapitalFY`, `NetDebtFQ`, `NetDebtFY`, `OperatingCashFlowFQ`, `OperatingCashFlowFY`, `OperatingCashFlowTTM`, `TotalCapitalFQ`) VALUES (";
-        $query .= "'".$dates->ticker_id."',";
+	//$query = "INSERT INTO `tickers_leverage_ratios` (`ticker_id`, `TotalCapitalFY`, `TotalDebtFQ`, `TotalDebtFY`, `AltmanZscoreFY`, `AltmanZscoreTTM`, `BookEquityFQ`, `BookEquityFY`, `DebttoAssetsFQ`, `DebttoAssetsFY`, `DegreeofCombinedLeverageFY`, `DegreeofCombinedLeverageTTM`, `DegreeofFinancialLeverageFY`, `DegreeofFinancialLeverageTTM`, `DegreeofOperationalLeverageFY`, `DegreeofOperationalLeverageTTM`, `FreeCashFlowFQ`, `FreeCashFlowFY`, `FreeCashFlowtoEquityPctFY`, `FreeCashFlowtoEquityPctTTM`, `FreeCashFlowTTM`, `LongTermCapitalFQ`, `LongTermCapitalFY`, `LongTermDebttoLongTermCapitalFQ`, `LongTermDebttoLongTermCapitalFY`, `LongTermDebttoTotalCapitalFQ`, `LongTermDebttoTotalCapitalFY`, `NetDebtFQ`, `NetDebtFY`, `OperatingCashFlowFQ`, `OperatingCashFlowFY`, `OperatingCashFlowTTM`, `TotalCapitalFQ`) VALUES (";
+        $query = "INSERT INTO `tickers_leverage_ratios` (`ticker_id`, `TotalCapitalFY`, `TotalDebtFQ`, `TotalDebtFY`, `AltmanZscoreFY`, `AltmanZscoreTTM`, `BookEquityFQ`, `BookEquityFY`, `DebttoAssetsFQ`, `DebttoAssetsFY`, `DegreeofCombinedLeverageFY`, `DegreeofCombinedLeverageTTM`, `DegreeofFinancialLeverageFY`, `DegreeofFinancialLeverageTTM`, `DegreeofOperationalLeverageFY`, `DegreeofOperationalLeverageTTM`, `FreeCashFlowFQ`, `FreeCashFlowFY`, `FreeCashFlowtoEquityPctFY`, `FreeCashFlowtoEquityPctTTM`, `FreeCashFlowTTM`, `LongTermCapitalFQ`, `LongTermCapitalFY`, `LongTermDebttoLongTermCapitalFQ`, `LongTermDebttoLongTermCapitalFY`, `LongTermDebttoTotalCapitalFQ`, `LongTermDebttoTotalCapitalFY`, `NetDebtFQ`, `NetDebtFY`, `OperatingCashFlowFQ`, `OperatingCashFlowFY`, `OperatingCashFlowTTM`, `TotalCapitalFQ`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        /*$query .= "'".$dates->ticker_id."',";
         $query .= $rawdata["TotalCapitalFY"][$treports].",";
         $query .= $rawdata["TotalDebtFQ"][$treports].",";
         $query .= $rawdata["TotalDebtFY"][$treports].",";
@@ -131,11 +228,53 @@ function update_raw_data_tickers($dates, $rawdata) {
         $query .= $rawdata["OperatingCashFlowFY"][$treports].",";
         $query .= $rawdata["OperatingCashFlowTTM"][$treports].",";
         $query .= $rawdata["TotalCapitalFQ"][$treports];
-        $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        $query .= ")";*/
+        $params = array();
+        $params[] = $dates->ticker_id;
+        $params[] = $rawdata["TotalCapitalFY"][$treports];
+        $params[] = $rawdata["TotalDebtFQ"][$treports];
+        $params[] = $rawdata["TotalDebtFY"][$treports];
+        $params[] = $rawdata["AltmanZscoreFY"][$treports];
+        $params[] = $rawdata["AltmanZscoreTTM"][$treports];
+        $params[] = $rawdata["BookEquityFQ"][$treports];
+        $params[] = $rawdata["BookEquityFY"][$treports];
+        $params[] = $rawdata["DebttoAssetsFQ"][$treports];
+        $params[] = $rawdata["DebttoAssetsFY"][$treports];
+        $params[] = $rawdata["DegreeofCombinedLeverageFY"][$treports];
+        $params[] = $rawdata["DegreeofCombinedLeverageTTM"][$treports];
+        $params[] = $rawdata["DegreeofFinancialLeverageFY"][$treports];
+        $params[] = $rawdata["DegreeofFinancialLeverageTTM"][$treports];
+        $params[] = $rawdata["DegreeofOperationalLeverageFY"][$treports];
+        $params[] = $rawdata["DegreeofOperationalLeverageTTM"][$treports];
+        $params[] = $rawdata["FreeCashFlowFQ"][$treports];
+        $params[] = $rawdata["FreeCashFlowFY"][$treports];
+        $params[] = $rawdata["FreeCashFlowtoEquityPctFY"][$treports];
+        $params[] = $rawdata["FreeCashFlowtoEquityPctTTM"][$treports];
+        $params[] = $rawdata["FreeCashFlowTTM"][$treports];
+        $params[] = $rawdata["LongTermCapitalFQ"][$treports];
+        $params[] = $rawdata["LongTermCapitalFY"][$treports];
+        $params[] = $rawdata["LongTermDebttoLongTermCapitalFQ"][$treports];
+        $params[] = $rawdata["LongTermDebttoLongTermCapitalFY"][$treports];
+        $params[] = $rawdata["LongTermDebttoTotalCapitalFQ"][$treports];
+        $params[] = $rawdata["LongTermDebttoTotalCapitalFY"][$treports];
+        $params[] = $rawdata["NetDebtFQ"][$treports];
+        $params[] = $rawdata["NetDebtFY"][$treports];
+        $params[] = $rawdata["OperatingCashFlowFQ"][$treports];
+        $params[] = $rawdata["OperatingCashFlowFY"][$treports];
+        $params[] = $rawdata["OperatingCashFlowTTM"][$treports];
+        $params[] = $rawdata["TotalCapitalFQ"][$treports];
+
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $res = $db->prepare($query);
+                $res->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 	//tickers_mini_ratios
-	$query = "INSERT INTO `tickers_mini_ratios` (`ticker_id`, `DebttoEquityFQ`, `DebttoEquityFY`, `MarketCapBasic`, `MarketCapDiluted`, `MarketCapTSO`, `PriceBookFQ`, `PriceBookFY`, `PriceEarningsFY`, `PriceEarningsTTM`, `GrossMarginPctFQ`, `GrossMarginPctFY`, `GrossMarginPctTTM`, `OperatingMarginPctFQ`, `OperatingMarginPctFY`, `OperatingMarginPctTTM`, `CashRatioFQ`, `CashRatioFY`, `NetWorkingCapitalFQ`, `NetWorkingCapitalFY`, `CurrentRatioFQ`, `CurrentRatioFY`, `QuickRatioFQ`, `QuickRatioFY`) VALUES (";
-        $query .= "'".$dates->ticker_id."',";
+	$query = "INSERT INTO `tickers_mini_ratios` (`ticker_id`, `DebttoEquityFQ`, `DebttoEquityFY`, `MarketCapBasic`, `MarketCapDiluted`, `MarketCapTSO`, `PriceBookFQ`, `PriceBookFY`, `PriceEarningsFY`, `PriceEarningsTTM`, `GrossMarginPctFQ`, `GrossMarginPctFY`, `GrossMarginPctTTM`, `OperatingMarginPctFQ`, `OperatingMarginPctFY`, `OperatingMarginPctTTM`, `CashRatioFQ`, `CashRatioFY`, `NetWorkingCapitalFQ`, `NetWorkingCapitalFY`, `CurrentRatioFQ`, `CurrentRatioFY`, `QuickRatioFQ`, `QuickRatioFY`) VALUES (?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?)";
+        /*$query .= "'".$dates->ticker_id."',";
         $query .= $rawdata["DebttoEquityFQ"][$treports].",";
         $query .= $rawdata["DebttoEquityFY"][$treports].",";
         $query .= $rawdata["MarketCapBasic"][$treports].",";
@@ -159,11 +298,44 @@ function update_raw_data_tickers($dates, $rawdata) {
         $query .= $rawdata["CurrentRatioFY"][$treports].",";
         $query .= $rawdata["QuickRatioFQ"][$treports].",";
         $query .= $rawdata["QuickRatioFY"][$treports];
-        $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        $query .= ")";*/
+        $params = array();
+        $params[] = $dates->ticker_id;
+        $params[] = $rawdata["DebttoEquityFQ"][$treports];
+        $params[] = $rawdata["DebttoEquityFY"][$treports];
+        $params[] = $rawdata["MarketCapBasic"][$treports];
+        $params[] = $rawdata["MarketCapDiluted"][$treports];
+        $params[] = $rawdata["MarketCapTSO"][$treports];
+        $params[] = $rawdata["PriceBookFQ"][$treports];
+        $params[] = $rawdata["PriceBookFY"][$treports];
+        $params[] = $rawdata["PriceEarningsFY"][$treports];
+        $params[] = $rawdata["PriceEarningsTTM"][$treports];
+        $params[] = $rawdata["GrossMarginPctFQ"][$treports];
+        $params[] = $rawdata["GrossMarginPctFY"][$treports];
+        $params[] = $rawdata["GrossMarginPctTTM"][$treports];
+        $params[] = $rawdata["OperatingMarginPctFQ"][$treports];
+        $params[] = $rawdata["OperatingMarginPctFY"][$treports];
+        $params[] = $rawdata["OperatingMarginPctTTM"][$treports];
+        $params[] = $rawdata["CashRatioFQ"][$treports];
+        $params[] = $rawdata["CashRatioFY"][$treports];
+        $params[] = $rawdata["NetWorkingCapitalFQ"][$treports];
+        $params[] = $rawdata["NetWorkingCapitalFY"][$treports];
+        $params[] = $rawdata["CurrentRatioFQ"][$treports];
+        $params[] = $rawdata["CurrentRatioFY"][$treports];
+        $params[] = $rawdata["QuickRatioFQ"][$treports];
+        $params[] = $rawdata["QuickRatioFY"][$treports];
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $res = $db->prepare($query);
+                $res->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 	//tickers_profitability_ratios
-	$query = "INSERT INTO `tickers_profitability_ratios` (`ticker_id`, `AdjustedEBITDAFQ`, `AdjustedEBITDAFY`, `AdjustedEBITDATTM`, `AdjustedEBITFQ`, `AdjustedEBITFY`, `AdjustedEBITPctGrowth3YearCAGRFY`, `AdjustedEBITPctGrowth5YearCAGRFY`, `AdjustedEBITPctGrowthFY`, `AdjustedEBITPctGrowthTTM`, `AdjustedEBITTTM`, `AdjustedNetIncomeFQ`, `AdjustedNetIncomeFY`, `AdjustedNetIncomePctGrowth3YearCAGRFY`, `AdjustedNetIncomePctGrowth5YearCAGRFY`, `AdjustedNetIncomePctGrowthFY`, `AdjustedNetIncomePctGrowthTTM`, `AdjustedNetIncomeTTM`, `AftertaxMarginPctFQ`, `AftertaxMarginPctFY`, `AftertaxMarginPctTTM`, `EBITDAFQ`, `EBITDAFY`, `EBITDATTM`, `EBITFQ`, `EBITFY`, `EBITTTM`, `FreeCashFlowMarginPctFQ`, `FreeCashFlowMarginPctFY`, `FreeCashFlowMarginPctTTM`, `FreeCashFlowReturnonAssetsPctFY`, `FreeCashFlowReturnonAssetsPctTTM`, `NetIncomeperEmployeeFY`, `NetIncomeperEmployeeTTM`, `PretaxMarginPctFQ`, `PretaxMarginPctFY`, `PretaxMarginPctTTM`, `ReturnonAssetsPctFY`, `ReturnonAssetsPctTTM`, `ReturnonEquityPctFY`, `ReturnonEquityPctTTM`, `ReturnonInvestedCapitalPctFY`, `ReturnonInvestedCapitalPctTTM`, `RevenueperEmployeeFY`, `RevenueperEmployeeTTM`) VALUES (";
-        $query .= "'".$dates->ticker_id."',";
+	//$query = "INSERT INTO `tickers_profitability_ratios` (`ticker_id`, `AdjustedEBITDAFQ`, `AdjustedEBITDAFY`, `AdjustedEBITDATTM`, `AdjustedEBITFQ`, `AdjustedEBITFY`, `AdjustedEBITPctGrowth3YearCAGRFY`, `AdjustedEBITPctGrowth5YearCAGRFY`, `AdjustedEBITPctGrowthFY`, `AdjustedEBITPctGrowthTTM`, `AdjustedEBITTTM`, `AdjustedNetIncomeFQ`, `AdjustedNetIncomeFY`, `AdjustedNetIncomePctGrowth3YearCAGRFY`, `AdjustedNetIncomePctGrowth5YearCAGRFY`, `AdjustedNetIncomePctGrowthFY`, `AdjustedNetIncomePctGrowthTTM`, `AdjustedNetIncomeTTM`, `AftertaxMarginPctFQ`, `AftertaxMarginPctFY`, `AftertaxMarginPctTTM`, `EBITDAFQ`, `EBITDAFY`, `EBITDATTM`, `EBITFQ`, `EBITFY`, `EBITTTM`, `FreeCashFlowMarginPctFQ`, `FreeCashFlowMarginPctFY`, `FreeCashFlowMarginPctTTM`, `FreeCashFlowReturnonAssetsPctFY`, `FreeCashFlowReturnonAssetsPctTTM`, `NetIncomeperEmployeeFY`, `NetIncomeperEmployeeTTM`, `PretaxMarginPctFQ`, `PretaxMarginPctFY`, `PretaxMarginPctTTM`, `ReturnonAssetsPctFY`, `ReturnonAssetsPctTTM`, `ReturnonEquityPctFY`, `ReturnonEquityPctTTM`, `ReturnonInvestedCapitalPctFY`, `ReturnonInvestedCapitalPctTTM`, `RevenueperEmployeeFY`, `RevenueperEmployeeTTM`) VALUES (";
+        $query = "INSERT INTO `tickers_profitability_ratios` (`ticker_id`, `AdjustedEBITDAFQ`, `AdjustedEBITDAFY`, `AdjustedEBITDATTM`, `AdjustedEBITFQ`, `AdjustedEBITFY`, `AdjustedEBITPctGrowth3YearCAGRFY`, `AdjustedEBITPctGrowth5YearCAGRFY`, `AdjustedEBITPctGrowthFY`, `AdjustedEBITPctGrowthTTM`, `AdjustedEBITTTM`, `AdjustedNetIncomeFQ`, `AdjustedNetIncomeFY`, `AdjustedNetIncomePctGrowth3YearCAGRFY`, `AdjustedNetIncomePctGrowth5YearCAGRFY`, `AdjustedNetIncomePctGrowthFY`, `AdjustedNetIncomePctGrowthTTM`, `AdjustedNetIncomeTTM`, `AftertaxMarginPctFQ`, `AftertaxMarginPctFY`, `AftertaxMarginPctTTM`, `EBITDAFQ`, `EBITDAFY`, `EBITDATTM`, `EBITFQ`, `EBITFY`, `EBITTTM`, `FreeCashFlowMarginPctFQ`, `FreeCashFlowMarginPctFY`, `FreeCashFlowMarginPctTTM`, `FreeCashFlowReturnonAssetsPctFY`, `FreeCashFlowReturnonAssetsPctTTM`, `NetIncomeperEmployeeFY`, `NetIncomeperEmployeeTTM`, `PretaxMarginPctFQ`, `PretaxMarginPctFY`, `PretaxMarginPctTTM`, `ReturnonAssetsPctFY`, `ReturnonAssetsPctTTM`, `ReturnonEquityPctFY`, `ReturnonEquityPctTTM`, `ReturnonInvestedCapitalPctFY`, `ReturnonInvestedCapitalPctTTM`, `RevenueperEmployeeFY`, `RevenueperEmployeeTTM`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        /*$query .= "'".$dates->ticker_id."',";
         $query .= $rawdata["AdjustedEBITDAFQ"][$treports].",";
         $query .= $rawdata["AdjustedEBITDAFY"][$treports].",";
         $query .= $rawdata["AdjustedEBITDATTM"][$treports].",";
@@ -208,11 +380,65 @@ function update_raw_data_tickers($dates, $rawdata) {
         $query .= $rawdata["ReturnonInvestedCapitalPctTTM"][$treports].",";
         $query .= $rawdata["RevenueperEmployeeFY"][$treports].",";
         $query .= $rawdata["RevenueperEmployeeTTM"][$treports];
-        $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        $query .= ")";*/
+        $params = array();
+        $params[] = $dates->ticker_id;
+        $params[] = $rawdata["AdjustedEBITDAFQ"][$treports];
+        $params[] = $rawdata["AdjustedEBITDAFY"][$treports];
+        $params[] = $rawdata["AdjustedEBITDATTM"][$treports];
+        $params[] = $rawdata["AdjustedEBITFQ"][$treports];
+        $params[] = $rawdata["AdjustedEBITFY"][$treports];
+        $params[] = $rawdata["AdjustedEBITPctGrowth3YearCAGRFY"][$treports];
+        $params[] = $rawdata["AdjustedEBITPctGrowth5YearCAGRFY"][$treports];
+        $params[] = $rawdata["AdjustedEBITPctGrowthFY"][$treports];
+        $params[] = $rawdata["AdjustedEBITPctGrowthTTM"][$treports];
+        $params[] = $rawdata["AdjustedEBITTTM"][$treports];
+        $params[] = $rawdata["AdjustedNetIncomeFQ"][$treports];
+        $params[] = $rawdata["AdjustedNetIncomeFY"][$treports];
+        $params[] = $rawdata["AdjustedNetIncomePctGrowth3YearCAGRFY"][$treports];
+        $params[] = $rawdata["AdjustedNetIncomePctGrowth5YearCAGRFY"][$treports];
+        $params[] = $rawdata["AdjustedNetIncomePctGrowthFY"][$treports];
+        $params[] = $rawdata["AdjustedNetIncomePctGrowthTTM"][$treports];
+        $params[] = $rawdata["AdjustedNetIncomeTTM"][$treports];
+        $params[] = $rawdata["AftertaxMarginPctFQ"][$treports];
+        $params[] = $rawdata["AftertaxMarginPctFY"][$treports];
+        $params[] = $rawdata["AftertaxMarginPctTTM"][$treports];
+        $params[] = $rawdata["EBITDAFQ"][$treports];
+        $params[] = $rawdata["EBITDAFY"][$treports];
+        $params[] = $rawdata["EBITDATTM"][$treports];
+        $params[] = $rawdata["EBITFQ"][$treports];
+        $params[] = $rawdata["EBITFY"][$treports];
+        $params[] = $rawdata["EBITTTM"][$treports];
+        $params[] = $rawdata["FreeCashFlowMarginPctFQ"][$treports];
+        $params[] = $rawdata["FreeCashFlowMarginPctFY"][$treports];
+        $params[] = $rawdata["FreeCashFlowMarginPctTTM"][$treports];
+        $params[] = $rawdata["FreeCashFlowReturnonAssetsPctFY"][$treports];
+        $params[] = $rawdata["FreeCashFlowReturnonAssetsPctTTM"][$treports];
+        $params[] = $rawdata["NetIncomeperEmployeeFY"][$treports];
+        $params[] = $rawdata["NetIncomeperEmployeeTTM"][$treports];
+        $params[] = $rawdata["PretaxMarginPctFQ"][$treports];
+        $params[] = $rawdata["PretaxMarginPctFY"][$treports];
+        $params[] = $rawdata["PretaxMarginPctTTM"][$treports];
+        $params[] = $rawdata["ReturnonAssetsPctFY"][$treports];
+        $params[] = $rawdata["ReturnonAssetsPctTTM"][$treports];
+        $params[] = $rawdata["ReturnonEquityPctFY"][$treports];
+        $params[] = $rawdata["ReturnonEquityPctTTM"][$treports];
+        $params[] = $rawdata["ReturnonInvestedCapitalPctFY"][$treports];
+        $params[] = $rawdata["ReturnonInvestedCapitalPctTTM"][$treports];
+        $params[] = $rawdata["RevenueperEmployeeFY"][$treports];
+        $params[] = $rawdata["RevenueperEmployeeTTM"][$treports];
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $res = $db->prepare($query);
+                $res->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 	//tickers_valuation_ratios
-	$query = "INSERT INTO `tickers_valuation_ratios` (`ticker_id`, `TotalEquityFQ`, `TotalEquityFY`, `EarningsperShareNormalizedDilutedFQ`, `EarningsperShareNormalizedDilutedFY`, `EarningsperShareNormalizedDilutedTTM`, `AdjustedEPSDilutedPctGrowth3YearCAGRFY`, `AdjustedEPSDilutedPctGrowth5YearCAGRFY`, `AdjustedEPSDilutedPctGrowthFY`, `AdjustedEPSDilutedPctGrowthTTM`, `BasicAverageShares`, `DilutedAverageShares`, `DividendsperShareFQ`, `DividendsperShareFY`, `DividendsperShareTTM`, `EarningsperShareBasicFQ`, `EarningsperShareBasicFY`, `EarningsperShareBasicTTM`, `EarningsperShareDilutedFQ`, `EarningsperShareDilutedFY`, `EarningsperShareDilutedTTM`, `EnterpriseValueEBITDAFY`, `EnterpriseValueEBITDATTM`, `EnterpriseValueEBITFY`, `EnterpriseValueEBITTTM`, `EnterpriseValueFQ`, `EnterpriseValueFY`, `ExpectedAnnualDividends`, `PriceBookExclIntangiblesFQ`, `PriceBookExclIntangiblesFY`, `PriceEarningsNormalizedFY`, `PriceEarningsNormalizedTTM`, `PriceFreeCashFlowFY`, `PriceFreeCashFlowTTM`, `PriceRevenueFY`, `PriceRevenueTTM`) VALUES (";
-        $query .= "'".$dates->ticker_id."',";
+	//$query = "INSERT INTO `tickers_valuation_ratios` (`ticker_id`, `TotalEquityFQ`, `TotalEquityFY`, `EarningsperShareNormalizedDilutedFQ`, `EarningsperShareNormalizedDilutedFY`, `EarningsperShareNormalizedDilutedTTM`, `AdjustedEPSDilutedPctGrowth3YearCAGRFY`, `AdjustedEPSDilutedPctGrowth5YearCAGRFY`, `AdjustedEPSDilutedPctGrowthFY`, `AdjustedEPSDilutedPctGrowthTTM`, `BasicAverageShares`, `DilutedAverageShares`, `DividendsperShareFQ`, `DividendsperShareFY`, `DividendsperShareTTM`, `EarningsperShareBasicFQ`, `EarningsperShareBasicFY`, `EarningsperShareBasicTTM`, `EarningsperShareDilutedFQ`, `EarningsperShareDilutedFY`, `EarningsperShareDilutedTTM`, `EnterpriseValueEBITDAFY`, `EnterpriseValueEBITDATTM`, `EnterpriseValueEBITFY`, `EnterpriseValueEBITTTM`, `EnterpriseValueFQ`, `EnterpriseValueFY`, `ExpectedAnnualDividends`, `PriceBookExclIntangiblesFQ`, `PriceBookExclIntangiblesFY`, `PriceEarningsNormalizedFY`, `PriceEarningsNormalizedTTM`, `PriceFreeCashFlowFY`, `PriceFreeCashFlowTTM`, `PriceRevenueFY`, `PriceRevenueTTM`) VALUES (";
+        $query = "INSERT INTO `tickers_valuation_ratios` (`ticker_id`, `TotalEquityFQ`, `TotalEquityFY`, `EarningsperShareNormalizedDilutedFQ`, `EarningsperShareNormalizedDilutedFY`, `EarningsperShareNormalizedDilutedTTM`, `AdjustedEPSDilutedPctGrowth3YearCAGRFY`, `AdjustedEPSDilutedPctGrowth5YearCAGRFY`, `AdjustedEPSDilutedPctGrowthFY`, `AdjustedEPSDilutedPctGrowthTTM`, `BasicAverageShares`, `DilutedAverageShares`, `DividendsperShareFQ`, `DividendsperShareFY`, `DividendsperShareTTM`, `EarningsperShareBasicFQ`, `EarningsperShareBasicFY`, `EarningsperShareBasicTTM`, `EarningsperShareDilutedFQ`, `EarningsperShareDilutedFY`, `EarningsperShareDilutedTTM`, `EnterpriseValueEBITDAFY`, `EnterpriseValueEBITDATTM`, `EnterpriseValueEBITFY`, `EnterpriseValueEBITTTM`, `EnterpriseValueFQ`, `EnterpriseValueFY`, `ExpectedAnnualDividends`, `PriceBookExclIntangiblesFQ`, `PriceBookExclIntangiblesFY`, `PriceEarningsNormalizedFY`, `PriceEarningsNormalizedTTM`, `PriceFreeCashFlowFY`, `PriceFreeCashFlowTTM`, `PriceRevenueFY`, `PriceRevenueTTM`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        /*$query .= "'".$dates->ticker_id."',";
         $query .= $rawdata["TotalEquityFQ"][$treports].",";
         $query .= $rawdata["TotalEquityFY"][$treports].",";
         $query .= $rawdata["EarningsperShareNormalizedDilutedFQ"][$treports].",";
@@ -248,62 +474,196 @@ function update_raw_data_tickers($dates, $rawdata) {
         $query .= $rawdata["PriceFreeCashFlowTTM"][$treports].",";
         $query .= $rawdata["PriceRevenueFY"][$treports].",";
         $query .= $rawdata["PriceRevenueTTM"][$treports];
-        $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        $query .= ")";*/
+        $params = array();
+        try {
+                $params[] = $dates->ticker_id;
+                $params[] = $rawdata["TotalEquityFQ"][$treports];
+                $params[] = $rawdata["TotalEquityFY"][$treports];
+                $params[] = $rawdata["EarningsperShareNormalizedDilutedFQ"][$treports];
+                $params[] = $rawdata["EarningsperShareNormalizedDilutedFY"][$treports];
+                $params[] = $rawdata["EarningsperShareNormalizedDilutedTTM"][$treports];
+                $params[] = $rawdata["AdjustedEPSDilutedPctGrowth3YearCAGRFY"][$treports];
+                $params[] = $rawdata["AdjustedEPSDilutedPctGrowth5YearCAGRFY"][$treports];
+                $params[] = $rawdata["AdjustedEPSDilutedPctGrowthFY"][$treports];
+                $params[] = $rawdata["AdjustedEPSDilutedPctGrowthTTM"][$treports];
+                $params[] = $rawdata["BasicAverageShares"][$treports];
+                $params[] = $rawdata["DilutedAverageShares"][$treports];
+                $params[] = $rawdata["DividendsperShareFQ"][$treports];
+                $params[] = $rawdata["DividendsperShareFY"][$treports];
+                $params[] = $rawdata["DividendsperShareTTM"][$treports];
+                $params[] = $rawdata["EarningsperShareBasicFQ"][$treports];
+                $params[] = $rawdata["EarningsperShareBasicFY"][$treports];
+                $params[] = $rawdata["EarningsperShareBasicTTM"][$treports];
+                $params[] = $rawdata["EarningsperShareDilutedFQ"][$treports];
+                $params[] = $rawdata["EarningsperShareDilutedFY"][$treports];
+                $params[] = $rawdata["EarningsperShareDilutedTTM"][$treports];
+                $params[] = $rawdata["EnterpriseValueEBITDAFY"][$treports];
+                $params[] = $rawdata["EnterpriseValueEBITDATTM"][$treports];
+                $params[] = $rawdata["EnterpriseValueEBITFY"][$treports];
+                $params[] = $rawdata["EnterpriseValueEBITTTM"][$treports];
+                $params[] = $rawdata["EnterpriseValueFQ"][$treports];
+                $params[] = $rawdata["EnterpriseValueFY"][$treports];
+                $params[] = $rawdata["ExpectedAnnualDividends"][$treports];
+                $params[] = $rawdata["PriceBookExclIntangiblesFQ"][$treports];
+                $params[] = $rawdata["PriceBookExclIntangiblesFY"][$treports];
+                $params[] = $rawdata["PriceEarningsNormalizedFY"][$treports];
+                $params[] = $rawdata["PriceEarningsNormalizedTTM"][$treports];
+                $params[] = $rawdata["PriceFreeCashFlowFY"][$treports];
+                $params[] = $rawdata["PriceFreeCashFlowTTM"][$treports];
+                $params[] = $rawdata["PriceRevenueFY"][$treports];
+                $params[] = $rawdata["PriceRevenueTTM"][$treports];
+                //mysql_query($query) or die ($query."\n".mysql_error());
+                $res = $db->prepare($query);
+                $res->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 	//tickers_metadata_eol
-	$query = "INSERT INTO `tickers_metadata_eol` (`ticker_id`, `TotalSharesOutstandingDate`, `BusinessDescription`, `CITY`, `Country`, `Formername`, `Industry`, `InvRelationsEmail`, `LastAnnualEPS`, `LastAnnualNetIncome`, `LastAnnualRevenue`, `LastAnnualTotalAssets`, `PhoneAreaCode`, `PhoneCountryCode`, `PhoneNumber`, `PublicFloat`, `PublicFloatDate`, `Sector`, `State`, `StateofIncorporation`, `StreetAddress1`, `StreetAddress2`, `TaxID`, `WebSiteURL`, `ZipCode`) VALUES (";
-        $query .= "'".$dates->ticker_id."',";
-        $query .= "'".date("Y-m-d",strtotime($rawdata["TotalSharesOutstandingDate"][$treports]))."',";
-        $query .= ($rawdata["BusinessDescription"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["BusinessDescription"][$treports])."',");
-        $query .= ($rawdata["CITY"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["CITY"][$treports])."',");
-        $query .= ($rawdata["Country"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Country"][$treports])."',");
-        $query .= ($rawdata["Formername"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Formername"][$treports])."',");
-        $query .= ($rawdata["Industry"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Industry"][$treports])."',");
-        $query .= ($rawdata["InvRelationsEmail"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["InvRelationsEmail"][$treports])."',");
-        $query .= $rawdata["LastAnnualEPS"][$treports].",";
-        $query .= $rawdata["LastAnnualNetIncome"][$treports].",";
-        $query .= $rawdata["LastAnnualRevenue"][$treports].",";
-        $query .= $rawdata["LastAnnualTotalAssets"][$treports].",";
-        $query .= ($rawdata["PhoneAreaCode"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["PhoneAreaCode"][$treports])."',");
-        $query .= ($rawdata["PhoneCountryCode"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["PhoneCountryCode"][$treports])."',");
-        $query .= ($rawdata["PhoneNumber"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["PhoneNumber"][$treports])."',");
-        $query .= $rawdata["PublicFloat"][$treports].",";
-        $query .= "'".date("Y-m-d",strtotime($rawdata["PublicFloatDate"][$treports]))."',";
-        $query .= ($rawdata["Sector"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Sector"][$treports])."',");
-        $query .= ($rawdata["State"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["State"][$treports])."',");
-        $query .= ($rawdata["StateofIncorporation"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["StateofIncorporation"][$treports])."',");
-        $query .= ($rawdata["StreetAddress1"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["StreetAddress1"][$treports])."',");
-        $query .= ($rawdata["StreetAddress2"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["StreetAddress2"][$treports])."',");
-        $query .= ($rawdata["TaxID"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["TaxID"][$treports])."',");
-        $query .= ($rawdata["WebSiteURL"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["WebSiteURL"][$treports])."',");
-        $query .= ($rawdata["ZipCode"][$treports]=='null' ? 'null':"'".mysql_real_escape_string($rawdata["ZipCode"][$treports])."'");
+	$query = "INSERT INTO `tickers_metadata_eol` (`ticker_id`, `TotalSharesOutstandingDate`, `BusinessDescription`, `CITY`, `Country`, `Formername`, `Industry`, `InvRelationsEmail`, `LastAnnualEPS`, `LastAnnualNetIncome`, `LastAnnualRevenue`, `LastAnnualTotalAssets`, `PhoneAreaCode`, `PhoneCountryCode`, `PhoneNumber`, `PublicFloat`, `PublicFloatDate`, `Sector`, `State`, `StateofIncorporation`, `StreetAddress1`, `StreetAddress2`, `TaxID`, `WebSiteURL`, `ZipCode`) VALUES ("; //?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+        //$query .= "'".$dates->ticker_id."',";
+        $query .= "?,";
+        //$query .= "'".date("Y-m-d",strtotime($rawdata["TotalSharesOutstandingDate"][$treports]))."',";
+        $query .= "?,";
+        //$query .= ($rawdata["BusinessDescription"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["BusinessDescription"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["CITY"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["CITY"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["Country"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Country"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["Formername"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Formername"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["Industry"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Industry"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["InvRelationsEmail"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["InvRelationsEmail"][$treports])."',");
+        $query .= "?,";
+        //$query .= $rawdata["LastAnnualEPS"][$treports].",";
+        $query .= "?,";
+        //$query .= $rawdata["LastAnnualNetIncome"][$treports].",";
+        $query .= "?,";
+        //$query .= $rawdata["LastAnnualRevenue"][$treports].",";
+        $query .= "?,";
+        //$query .= $rawdata["LastAnnualTotalAssets"][$treports].",";
+        $query .= "?,";
+        //$query .= ($rawdata["PhoneAreaCode"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["PhoneAreaCode"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["PhoneCountryCode"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["PhoneCountryCode"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["PhoneNumber"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["PhoneNumber"][$treports])."',");
+        $query .= "?,";
+        //$query .= $rawdata["PublicFloat"][$treports].",";
+        $query .= "?,";
+        //$query .= "'".date("Y-m-d",strtotime($rawdata["PublicFloatDate"][$treports]))."',";
+        $query .= "?,";
+        //$query .= ($rawdata["Sector"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["Sector"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["State"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["State"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["StateofIncorporation"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["StateofIncorporation"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["StreetAddress1"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["StreetAddress1"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["StreetAddress2"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["StreetAddress2"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["TaxID"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["TaxID"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["WebSiteURL"][$treports]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["WebSiteURL"][$treports])."',");
+        $query .= "?,";
+        //$query .= ($rawdata["ZipCode"][$treports]=='null' ? 'null':"'".mysql_real_escape_string($rawdata["ZipCode"][$treports])."'");
+        $query .= "?";
         $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $params = array();
+                $params[] = ($dates->ticker_id);
+                $params[] = (date("Y-m-d",strtotime($rawdata["TotalSharesOutstandingDate"][$treports])));
+                $params[] = ($rawdata["BusinessDescription"][$treports]=='null' ? null:$rawdata["BusinessDescription"][$treports]);
+                $params[] = ($rawdata["CITY"][$treports]=='null' ? null:$rawdata["CITY"][$treports]);
+                $params[] = ($rawdata["Country"][$treports]=='null' ? null:$rawdata["Country"][$treports]);
+                $params[] = ($rawdata["Formername"][$treports]=='null' ? null:$rawdata["Formername"][$treports]);
+                $params[] = ($rawdata["Industry"][$treports]=='null' ? null:$rawdata["Industry"][$treports]);
+                $params[] = ($rawdata["InvRelationsEmail"][$treports]=='null' ? null:$rawdata["InvRelationsEmail"][$treports]);
+                $params[] = ($rawdata["LastAnnualEPS"][$treports]);
+                $params[] = ($rawdata["LastAnnualNetIncome"][$treports]);
+                $params[] = ($rawdata["LastAnnualRevenue"][$treports]);
+                $params[] = ($rawdata["LastAnnualTotalAssets"][$treports]);
+                $params[] = ($rawdata["PhoneAreaCode"][$treports]=='null' ? null:$rawdata["PhoneAreaCode"][$treports]);
+                $params[] = ($rawdata["PhoneCountryCode"][$treports]=='null' ? null:$rawdata["PhoneCountryCode"][$treports]);
+                $params[] = ($rawdata["PhoneNumber"][$treports]=='null' ? null:$rawdata["PhoneNumber"][$treports]);
+                $params[] = ($rawdata["PublicFloat"][$treports]);
+                $params[] = (date("Y-m-d",strtotime($rawdata["PublicFloatDate"][$treports])));
+                $params[] = ($rawdata["Sector"][$treports]=='null' ? null:$rawdata["Sector"][$treports]);
+                $params[] = ($rawdata["State"][$treports]=='null' ? null:$rawdata["State"][$treports]);
+                $params[] = ($rawdata["StateofIncorporation"][$treports]=='null' ? null:$rawdata["StateofIncorporation"][$treports]);
+                $params[] = ($rawdata["StreetAddress1"][$treports]=='null' ? null:$rawdata["StreetAddress1"][$treports]);
+                $params[] = ($rawdata["StreetAddress2"][$treports]=='null' ? null:$rawdata["StreetAddress2"][$treports]);
+                $params[] = ($rawdata["TaxID"][$treports]=='null' ? null:$rawdata["TaxID"][$treports]);
+                $params[] = ($rawdata["WebSiteURL"][$treports]=='null' ? null:$rawdata["WebSiteURL"][$treports]);
+                $params[] = ($rawdata["ZipCode"][$treports]=='null' ? null:$rawdata["ZipCode"][$treports]);
+        
+                $res = $db->prepare($query);
+                $res->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
         //Update reports_* tables
         foreach($report_tables as $table) {
                 $query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$dates->ticker_id.")";
-                mysql_query($query) or die (mysql_error());
+                //mysql_query($query) or die (mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
         }
         $query = "DELETE FROM reports_header WHERE ticker_id = ".$dates->ticker_id;
-        mysql_query($query) or die (mysql_error());
+        //mysql_query($query) or die (mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
 	for($i=1; $i<=$treports; $i++) {
 	    if (!is_numeric($rawdata["duration"][$i])) {
         	//reports_header
-		$query = "INSERT IGNORE INTO `reports_header` (`report_type`, `report_date`, `ticker_id`, `fiscal_year`, `fiscal_quarter`) VALUES (";
-        	$query .= "'".$rawdata["duration"][$i]."',";
+		//$query = "INSERT IGNORE INTO `reports_header` (`report_type`, `report_date`, `ticker_id`, `fiscal_year`, `fiscal_quarter`) VALUES (";
+                $query = "INSERT IGNORE INTO `reports_header` (`report_type`, `report_date`, `ticker_id`, `fiscal_year`, `fiscal_quarter`) VALUES (?, ?, ?, ?, ?)";
+        	/*$query .= "'".$rawdata["duration"][$i]."',";
         	$query .= "'".date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]))."',";
         	$query .= "'".$dates->ticker_id."',";
         	$query .= "'".$rawdata["fiscalYear"][$i]."',";
         	$query .= "'".$rawdata["FiscalQuarter"][$i]."'";
-        	$query .= ")";
-	        mysql_query($query) or die ($query."\n".mysql_error());
-		if (mysql_affected_rows()>0) {
-			$report_id = mysql_insert_id();
+        	$query .= ")";*/
+                $params = array();
+                $params[] = $rawdata["duration"][$i];
+                $params[] = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
+                $params[] = $dates->ticker_id;
+                $params[] = $rawdata["fiscalYear"][$i];
+                $params[] = $rawdata["FiscalQuarter"][$i];
+	        //mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $res = $db->prepare($query);
+                        $res->execute($params);
+                        //$affected_rows = $db->exec($query);
+                        $affected_rows = $res->rowCount();
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
+		//if (mysql_affected_rows()>0) {
+                if ($affected_rows>0) {
+			//$report_id = mysql_insert_id();
+                        $report_id = $db->lastInsertId();
 			//reports_balanceconsolidated
-			$query = "INSERT INTO `reports_balanceconsolidated` (`report_id`, `CommitmentsContingencies`, `CommonStock`, `DeferredCharges`, `DeferredIncomeTaxesCurrent`, `DeferredIncomeTaxesLongterm`, `AccountsPayableandAccruedExpenses`, `AccruedInterest`, `AdditionalPaidinCapital`, `AdditionalPaidinCapitalPreferredStock`, `CashandCashEquivalents`, `CashCashEquivalentsandShorttermInvestments`, `Goodwill`, `IntangibleAssets`, `InventoriesNet`, `LongtermDeferredIncomeTaxLiabilities`, `LongtermDeferredLiabilityCharges`, `LongtermInvestments`, `MinorityInterest`, `OtherAccumulatedComprehensiveIncome`, `OtherAssets`, `OtherCurrentAssets`, `OtherCurrentLiabilities`, `OtherEquity`, `OtherInvestments`, `OtherLiabilities`, `PartnersCapital`, `PensionPostretirementObligation`, `PreferredStock`, `PrepaidExpenses`, `PropertyPlantEquipmentNet`, `RestrictedCash`, `RetainedEarnings`, `TemporaryEquity`, `TotalAssets`, `TotalCurrentAssets`, `TotalCurrentLiabilities`, `TotalLiabilities`, `TotalLongtermDebt`, `TotalReceivablesNet`, `TotalShorttermDebt`, `TotalStockholdersEquity`, `TreasuryStock`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_balanceconsolidated` (`report_id`, `CommitmentsContingencies`, `CommonStock`, `DeferredCharges`, `DeferredIncomeTaxesCurrent`, `DeferredIncomeTaxesLongterm`, `AccountsPayableandAccruedExpenses`, `AccruedInterest`, `AdditionalPaidinCapital`, `AdditionalPaidinCapitalPreferredStock`, `CashandCashEquivalents`, `CashCashEquivalentsandShorttermInvestments`, `Goodwill`, `IntangibleAssets`, `InventoriesNet`, `LongtermDeferredIncomeTaxLiabilities`, `LongtermDeferredLiabilityCharges`, `LongtermInvestments`, `MinorityInterest`, `OtherAccumulatedComprehensiveIncome`, `OtherAssets`, `OtherCurrentAssets`, `OtherCurrentLiabilities`, `OtherEquity`, `OtherInvestments`, `OtherLiabilities`, `PartnersCapital`, `PensionPostretirementObligation`, `PreferredStock`, `PrepaidExpenses`, `PropertyPlantEquipmentNet`, `RestrictedCash`, `RetainedEarnings`, `TemporaryEquity`, `TotalAssets`, `TotalCurrentAssets`, `TotalCurrentLiabilities`, `TotalLiabilities`, `TotalLongtermDebt`, `TotalReceivablesNet`, `TotalShorttermDebt`, `TotalStockholdersEquity`, `TreasuryStock`) VALUES (";
+                        $query = "INSERT INTO `reports_balanceconsolidated` (`report_id`, `CommitmentsContingencies`, `CommonStock`, `DeferredCharges`, `DeferredIncomeTaxesCurrent`, `DeferredIncomeTaxesLongterm`, `AccountsPayableandAccruedExpenses`, `AccruedInterest`, `AdditionalPaidinCapital`, `AdditionalPaidinCapitalPreferredStock`, `CashandCashEquivalents`, `CashCashEquivalentsandShorttermInvestments`, `Goodwill`, `IntangibleAssets`, `InventoriesNet`, `LongtermDeferredIncomeTaxLiabilities`, `LongtermDeferredLiabilityCharges`, `LongtermInvestments`, `MinorityInterest`, `OtherAccumulatedComprehensiveIncome`, `OtherAssets`, `OtherCurrentAssets`, `OtherCurrentLiabilities`, `OtherEquity`, `OtherInvestments`, `OtherLiabilities`, `PartnersCapital`, `PensionPostretirementObligation`, `PreferredStock`, `PrepaidExpenses`, `PropertyPlantEquipmentNet`, `RestrictedCash`, `RetainedEarnings`, `TemporaryEquity`, `TotalAssets`, `TotalCurrentAssets`, `TotalCurrentLiabilities`, `TotalLiabilities`, `TotalLongtermDebt`, `TotalReceivablesNet`, `TotalShorttermDebt`, `TotalStockholdersEquity`, `TreasuryStock`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["CommitmentsContingencies"][$i].",";
         		$query .= $rawdata["CommonStock"][$i].",";
 	        	$query .= $rawdata["DeferredCharges"][$i].",";
@@ -346,8 +706,59 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["TotalShorttermDebt"][$i].",";
         		$query .= $rawdata["TotalStockholdersEquity"][$i].",";
 	        	$query .= $rawdata["TreasuryStock"][$i]."";
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["CommitmentsContingencies"][$i];
+                        $params[] = $rawdata["CommonStock"][$i];
+                        $params[] = $rawdata["DeferredCharges"][$i];
+                        $params[] = $rawdata["DeferredIncomeTaxesCurrent"][$i];
+                        $params[] = $rawdata["DeferredIncomeTaxesLongterm"][$i];
+                        $params[] = $rawdata["AccountsPayableandAccruedExpenses"][$i];
+                        $params[] = $rawdata["AccruedInterest"][$i];
+                        $params[] = $rawdata["AdditionalPaidinCapital"][$i];
+                        $params[] = $rawdata["AdditionalPaidinCapitalPreferredStock"][$i];
+                        $params[] = $rawdata["CashandCashEquivalents"][$i];
+                        $params[] = $rawdata["CashCashEquivalentsandShorttermInvestments"][$i];
+                        $params[] = $rawdata["Goodwill"][$i];
+                        $params[] = $rawdata["IntangibleAssets"][$i];
+                        $params[] = $rawdata["InventoriesNet"][$i];
+                        $params[] = $rawdata["LongtermDeferredIncomeTaxLiabilities"][$i];
+                        $params[] = $rawdata["LongtermDeferredLiabilityCharges"][$i];
+                        $params[] = $rawdata["LongtermInvestments"][$i];
+                        $params[] = $rawdata["MinorityInterest"][$i];
+                        $params[] = $rawdata["OtherAccumulatedComprehensiveIncome"][$i];
+                        $params[] = $rawdata["OtherAssets"][$i];
+                        $params[] = $rawdata["OtherCurrentAssets"][$i];
+                        $params[] = $rawdata["OtherCurrentLiabilities"][$i];
+                        $params[] = $rawdata["OtherEquity"][$i];
+                        $params[] = $rawdata["OtherInvestments"][$i];
+                        $params[] = $rawdata["OtherLiabilities"][$i];
+                        $params[] = $rawdata["PartnersCapital"][$i];
+                        $params[] = $rawdata["PensionPostretirementObligation"][$i];
+                        $params[] = $rawdata["PreferredStock"][$i];
+                        $params[] = $rawdata["PrepaidExpenses"][$i];
+                        $params[] = $rawdata["PropertyPlantEquipmentNet"][$i];
+                        $params[] = $rawdata["RestrictedCash"][$i];
+                        $params[] = $rawdata["RetainedEarnings"][$i];
+                        $params[] = $rawdata["TemporaryEquity"][$i];
+                        $params[] = $rawdata["TotalAssets"][$i];
+                        $params[] = $rawdata["TotalCurrentAssets"][$i];
+                        $params[] = $rawdata["TotalCurrentLiabilities"][$i];
+                        $params[] = $rawdata["TotalLiabilities"][$i];
+                        $params[] = $rawdata["TotalLongtermDebt"][$i];
+                        $params[] = $rawdata["TotalReceivablesNet"][$i];
+                        $params[] = $rawdata["TotalShorttermDebt"][$i];
+                        $params[] = $rawdata["TotalStockholdersEquity"][$i];
+                        $params[] = $rawdata["TreasuryStock"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_balanceconsolidated CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
@@ -366,8 +777,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                         }
 
 			//reports_balancefull
-			$query = "INSERT INTO `reports_balancefull` (`report_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_balancefull` (`report_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (";
+                        $query = "INSERT INTO `reports_balancefull` (`report_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["TotalDebt"][$i].",";
         		$query .= $rawdata["TotalAssetsFQ"][$i].",";
         		$query .= $rawdata["TotalAssetsFY"][$i].",";
@@ -395,8 +807,44 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["TotalLongtermLiabilities"][$i].",";
         		$query .= $rawdata["TotalSharesOutstanding"][$i].",";
 			$query .= $rawdata["ShorttermInvestments"][$i];
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["TotalDebt"][$i];
+                        $params[] = $rawdata["TotalAssetsFQ"][$i];
+                        $params[] = $rawdata["TotalAssetsFY"][$i];
+                        $params[] = $rawdata["CurrentPortionofLongtermDebt"][$i];
+                        $params[] = $rawdata["DeferredIncomeTaxLiabilitiesShortterm"][$i];
+                        $params[] = $rawdata["DeferredLiabilityCharges"][$i];
+                        $params[] = $rawdata["AccountsNotesReceivableNet"][$i];
+                        $params[] = $rawdata["AccountsPayable"][$i];
+                        $params[] = $rawdata["AccountsReceivableTradeNet"][$i];
+                        $params[] = $rawdata["AccruedExpenses"][$i];
+                        $params[] = $rawdata["AccumulatedDepreciation"][$i];
+                        $params[] = $rawdata["AmountsDuetoRelatedPartiesShortterm"][$i];
+                        $params[] = $rawdata["GoodwillIntangibleAssetsNet"][$i];
+                        $params[] = $rawdata["IncomeTaxesPayable"][$i];
+                        $params[] = $rawdata["LiabilitiesStockholdersEquity"][$i];
+                        $params[] = $rawdata["LongtermDebt"][$i];
+                        $params[] = $rawdata["NotesPayable"][$i];
+                        $params[] = $rawdata["OperatingLeases"][$i];
+                        $params[] = $rawdata["OtherAccountsNotesReceivable"][$i];
+                        $params[] = $rawdata["OtherAccountsPayableandAccruedExpenses"][$i];
+                        $params[] = $rawdata["OtherBorrowings"][$i];
+                        $params[] = $rawdata["OtherReceivables"][$i];
+                        $params[] = $rawdata["PropertyandEquipmentGross"][$i];
+                        $params[] = $rawdata["TotalLongtermAssets"][$i];
+                        $params[] = $rawdata["TotalLongtermLiabilities"][$i];
+                        $params[] = $rawdata["TotalSharesOutstanding"][$i];
+                        $params[] = $rawdata["ShorttermInvestments"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_balancefull CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
@@ -415,8 +863,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                         }
 
 			//reports_cashflowconsolidated
-			$query = "INSERT INTO `reports_cashflowconsolidated` (`report_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_cashflowconsolidated` (`report_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
+                        $query = "INSERT INTO `reports_cashflowconsolidated` (`report_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["ChangeinCurrentAssets"][$i].",";
         		$query .= $rawdata["ChangeinCurrentLiabilities"][$i].",";
         		$query .= $rawdata["ChangeinDebtNet"][$i].",";
@@ -456,8 +905,56 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["SaleofPropertyPlantEquipment"][$i].",";
         		$query .= $rawdata["StockOptionTaxBenefits"][$i].",";
         		$query .= $rawdata["TotalAdjustments"][$i];
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["ChangeinCurrentAssets"][$i];
+                        $params[] = $rawdata["ChangeinCurrentLiabilities"][$i];
+                        $params[] = $rawdata["ChangeinDebtNet"][$i];
+                        $params[] = $rawdata["ChangeinDeferredRevenue"][$i];
+                        $params[] = $rawdata["ChangeinEquityNet"][$i];
+                        $params[] = $rawdata["ChangeinIncomeTaxesPayable"][$i];
+                        $params[] = $rawdata["ChangeinInventories"][$i];
+                        $params[] = $rawdata["ChangeinOperatingAssetsLiabilities"][$i];
+                        $params[] = $rawdata["ChangeinOtherAssets"][$i];
+                        $params[] = $rawdata["ChangeinOtherCurrentAssets"][$i];
+                        $params[] = $rawdata["ChangeinOtherCurrentLiabilities"][$i];
+                        $params[] = $rawdata["ChangeinOtherLiabilities"][$i];
+                        $params[] = $rawdata["ChangeinPrepaidExpenses"][$i];
+                        $params[] = $rawdata["DividendsPaid"][$i];
+                        $params[] = $rawdata["EffectofExchangeRateonCash"][$i];
+                        $params[] = $rawdata["EmployeeCompensation"][$i];
+                        $params[] = $rawdata["AcquisitionSaleofBusinessNet"][$i];
+                        $params[] = $rawdata["AdjustmentforEquityEarnings"][$i];
+                        $params[] = $rawdata["AdjustmentforMinorityInterest"][$i];
+                        $params[] = $rawdata["AdjustmentforSpecialCharges"][$i];
+                        $params[] = $rawdata["CapitalExpenditures"][$i];
+                        $params[] = $rawdata["CashfromDiscontinuedOperations"][$i];
+                        $params[] = $rawdata["CashfromFinancingActivities"][$i];
+                        $params[] = $rawdata["CashfromInvestingActivities"][$i];
+                        $params[] = $rawdata["CashfromOperatingActivities"][$i];
+                        $params[] = $rawdata["CFDepreciationAmortization"][$i];
+                        $params[] = $rawdata["DeferredIncomeTaxes"][$i];
+                        $params[] = $rawdata["ChangeinAccountsPayableAccruedExpenses"][$i];
+                        $params[] = $rawdata["ChangeinAccountsReceivable"][$i];
+                        $params[] = $rawdata["InvestmentChangesNet"][$i];
+                        $params[] = $rawdata["NetChangeinCash"][$i];
+                        $params[] = $rawdata["OtherAdjustments"][$i];
+                        $params[] = $rawdata["OtherAssetLiabilityChangesNet"][$i];
+                        $params[] = $rawdata["OtherFinancingActivitiesNet"][$i];
+                        $params[] = $rawdata["OtherInvestingActivities"][$i];
+                        $params[] = $rawdata["RealizedGainsLosses"][$i];
+                        $params[] = $rawdata["SaleofPropertyPlantEquipment"][$i];
+                        $params[] = $rawdata["StockOptionTaxBenefits"][$i];
+                        $params[] = $rawdata["TotalAdjustments"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_cashflowconsolidated CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
@@ -476,8 +973,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                         }
 
 			//reports_cashflowfull
-			$query = "INSERT INTO `reports_cashflowfull` (`report_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_cashflowfull` (`report_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
+                        $query = "INSERT INTO `reports_cashflowfull` (`report_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["ChangeinLongtermDebtNet"][$i].",";
         		$query .= $rawdata["ChangeinShorttermBorrowingsNet"][$i].",";
         		$query .= $rawdata["CashandCashEquivalentsBeginningofYear"][$i].",";
@@ -496,8 +994,35 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["SaleofInvestments"][$i].",";
         		$query .= $rawdata["ShorttermBorrowings"][$i].",";
         		$query .= $rawdata["TotalNoncashAdjustments"][$i];
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["ChangeinLongtermDebtNet"][$i];
+                        $params[] = $rawdata["ChangeinShorttermBorrowingsNet"][$i];
+                        $params[] = $rawdata["CashandCashEquivalentsBeginningofYear"][$i];
+                        $params[] = $rawdata["CashandCashEquivalentsEndofYear"][$i];
+                        $params[] = $rawdata["CashPaidforIncomeTaxes"][$i];
+                        $params[] = $rawdata["CashPaidforInterestExpense"][$i];
+                        $params[] = $rawdata["CFNetIncome"][$i];
+                        $params[] = $rawdata["IssuanceofEquity"][$i];
+                        $params[] = $rawdata["LongtermDebtPayments"][$i];
+                        $params[] = $rawdata["LongtermDebtProceeds"][$i];
+                        $params[] = $rawdata["OtherDebtNet"][$i];
+                        $params[] = $rawdata["OtherEquityTransactionsNet"][$i];
+                        $params[] = $rawdata["OtherInvestmentChangesNet"][$i];
+                        $params[] = $rawdata["PurchaseofInvestments"][$i];
+                        $params[] = $rawdata["RepurchaseofEquity"][$i];
+                        $params[] = $rawdata["SaleofInvestments"][$i];
+                        $params[] = $rawdata["ShorttermBorrowings"][$i];
+                        $params[] = $rawdata["TotalNoncashAdjustments"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_cashflowfull CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
@@ -516,8 +1041,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                         }
 
 			//reports_financialheader
-			$query = "INSERT INTO `reports_financialheader` (`report_id`, `USDConversionRate`, `Restated`, `ReceivedDate`, `Preliminary`, `PeriodLengthCode`, `PeriodLength`, `Original`, `FormType`, `FiledDate`, `DCN`, `CurrencyCode`, `CrossCalculated`, `Audited`, `Amended`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_financialheader` (`report_id`, `USDConversionRate`, `Restated`, `ReceivedDate`, `Preliminary`, `PeriodLengthCode`, `PeriodLength`, `Original`, `FormType`, `FiledDate`, `DCN`, `CurrencyCode`, `CrossCalculated`, `Audited`, `Amended`) VALUES (";
+                        $query = "INSERT INTO `reports_financialheader` (`report_id`, `USDConversionRate`, `Restated`, `ReceivedDate`, `Preliminary`, `PeriodLengthCode`, `PeriodLength`, `Original`, `FormType`, `FiledDate`, `DCN`, `CurrencyCode`, `CrossCalculated`, `Audited`, `Amended`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["USDConversionRate"][$i].",";
         		$query .= "'".($rawdata["Restated"][$i] == "false" ? 0 : 1)."',";
         		$query .= "'".date("Y-m-d",strtotime($rawdata["ReceivedDate"][$i]))."',";
@@ -532,11 +1058,35 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= "'".($rawdata["CrossCalculated"][$i] == "false" ? 0 : 1)."',";
         		$query .= "'".($rawdata["Audited"][$i] == "false" ? 0 : 1)."',";
         		$query .= "'".($rawdata["Amended"][$i] == "false" ? 0 : 1)."'";
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["USDConversionRate"][$i];
+                        $params[] = ($rawdata["Restated"][$i] == "false" ? 0 : 1);
+                        $params[] = date("Y-m-d",strtotime($rawdata["ReceivedDate"][$i]));
+                        $params[] = ($rawdata["Preliminary"][$i] == "false" ? 0 : 1);
+                        $params[] = ($rawdata["PeriodLengthCode"][$i]=='null' ? null:$rawdata["PeriodLengthCode"][$i]);
+                        $params[] = $rawdata["PeriodLength"][$i];
+                        $params[] = ($rawdata["Original"][$i] == "false" ? 0 : 1);
+                        $params[] = ($rawdata["FormType"][$i]=='null' ? null:$rawdata["FormType"][$i]);
+                        $params[] = date("Y-m-d",strtotime($rawdata["FiledDate"][$i]));
+                        $params[] = ($rawdata["DCN"][$i]=='null' ? null:$rawdata["DCN"][$i]);
+                        $params[] = ($rawdata["CurrencyCode"][$i]=='null' ? null:$rawdata["CurrencyCode"][$i]);
+                        $params[] = ($rawdata["CrossCalculated"][$i] == "false" ? 0 : 1);
+                        $params[] = ($rawdata["Audited"][$i] == "false" ? 0 : 1);
+                        $params[] = ($rawdata["Amended"][$i] == "false" ? 0 : 1);
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_gf_data
-			$query = "INSERT INTO `reports_gf_data` (`report_id`, `fiscalPeriod_eol`, `fiscalPeriod_gf`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_gf_data` (`report_id`, `fiscalPeriod_eol`, `fiscalPeriod_gf`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
+                        $query = "INSERT INTO `reports_gf_data` (`report_id`, `fiscalPeriod_eol`, `fiscalPeriod_gf`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= ($rawdata["fiscalPeriod"][$i]=='null' ? 'null,':"'".$rawdata["fiscalPeriod"][$i]."',");
         		$query .= ($rawdata["FiscalPeriod"][$i]=='null' ? 'null,':"'".$rawdata["FiscalPeriod"][$i]."',");
         		$query .= toFloat($rawdata["InterestIncome"][$i]).",";
@@ -556,8 +1106,36 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= toFloat($rawdata["ConstructionInProgress"][$i]).",";
         		$query .= toFloat($rawdata["GrossPropertyPlantandEquipment"][$i]).",";
         		$query .= toFloat($rawdata["SharesOutstandingBasic"][$i]);
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = ($rawdata["fiscalPeriod"][$i]=='null' ? null:$rawdata["fiscalPeriod"][$i]);
+                        $params[] = ($rawdata["FiscalPeriod"][$i]=='null' ? null:$rawdata["FiscalPeriod"][$i]);
+                        $params[] = toFloat($rawdata["InterestIncome"][$i]);
+                        $params[] = toFloat($rawdata["InterestExpense"][$i]);
+                        $params[] = toFloat($rawdata["EPSBasic"][$i]);
+                        $params[] = toFloat($rawdata["EPSDiluted"][$i]);
+                        $params[] = toFloat($rawdata["SharesOutstandingDiluted"][$i]);
+                        $params[] = toFloat($rawdata["InventoriesRawMaterialsComponents"][$i]);
+                        $params[] = toFloat($rawdata["InventoriesWorkInProcess"][$i]);
+                        $params[] = toFloat($rawdata["InventoriesInventoriesAdjustments"][$i]);
+                        $params[] = toFloat($rawdata["InventoriesFinishedGoods"][$i]);
+                        $params[] = toFloat($rawdata["InventoriesOther"][$i]);
+                        $params[] = toFloat($rawdata["TotalInventories"][$i]);
+                        $params[] = toFloat($rawdata["LandAndImprovements"][$i]);
+                        $params[] = toFloat($rawdata["BuildingsAndImprovements"][$i]);
+                        $params[] = toFloat($rawdata["MachineryFurnitureEquipment"][$i]);
+                        $params[] = toFloat($rawdata["ConstructionInProgress"][$i]);
+                        $params[] = toFloat($rawdata["GrossPropertyPlantandEquipment"][$i]);
+                        $params[] = toFloat($rawdata["SharesOutstandingBasic"][$i]);
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_gf_data CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
@@ -576,8 +1154,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                         }
 
 			//reports_incomeconsolidated
-			$query = "INSERT INTO `reports_incomeconsolidated` (`report_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_incomeconsolidated` (`report_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (";
+                        $query = "INSERT INTO `reports_incomeconsolidated` (`report_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
 			if ($rawdata["EBIT"][$i] === "null" && $rawdata["OperatingProfit"][$i] !== "null") {
 				$rawdata["EBIT"][$i] = $rawdata["OperatingProfit"][$i];
 			}
@@ -606,9 +1185,46 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["RestructuringRemediationImpairmentProvisions"][$i].",";
         		$query .= $rawdata["TotalRevenue"][$i].",";
         		$query .= $rawdata["SellingGeneralAdministrativeExpenses"][$i];
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
-			//reports_incomeconsolidated CAGR
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        if ($rawdata["EBIT"][$i] === "null" && $rawdata["OperatingProfit"][$i] !== "null") {
+                                $rawdata["EBIT"][$i] = $rawdata["OperatingProfit"][$i];
+                        }
+                        $params[] = $rawdata["EBIT"][$i];
+                        $params[] = $rawdata["CostofRevenue"][$i];
+                        $params[] = $rawdata["DepreciationAmortizationExpense"][$i];
+                        $params[] = $rawdata["DilutedEPSNetIncome"][$i];
+                        $params[] = $rawdata["DiscontinuedOperations"][$i];
+                        $params[] = $rawdata["EquityEarnings"][$i];
+                        $params[] = $rawdata["AccountingChange"][$i];
+                        $params[] = $rawdata["BasicEPSNetIncome"][$i];
+                        $params[] = $rawdata["ExtraordinaryItems"][$i];
+                        $params[] = $rawdata["GrossProfit"][$i];
+                        $params[] = $rawdata["IncomebeforeExtraordinaryItems"][$i];
+                        $params[] = $rawdata["IncomeBeforeTaxes"][$i];
+                        $params[] = $rawdata["IncomeTaxes"][$i];
+                        $params[] = toFloat($rawdata["InterestExpense"][$i]);
+                        $params[] = toFloat($rawdata["InterestIncome"][$i]);
+                        $params[] = $rawdata["MinorityInterestEquityEarnings"][$i];
+                        $params[] = $rawdata["NetIncome"][$i];
+                        $params[] = $rawdata["NetIncomeApplicabletoCommon"][$i];
+                        $params[] = $rawdata["OperatingProfit"][$i];
+                        $params[] = $rawdata["OtherNonoperatingIncomeExpense"][$i];
+                        $params[] = $rawdata["OtherOperatingExpenses"][$i];
+                        $params[] = $rawdata["ResearchDevelopmentExpense"][$i];
+                        $params[] = $rawdata["RestructuringRemediationImpairmentProvisions"][$i];
+                        $params[] = $rawdata["TotalRevenue"][$i];
+                        $params[] = $rawdata["SellingGeneralAdministrativeExpenses"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+			try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
+                        //reports_incomeconsolidated CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
 					$fieldArray = Array("EBIT", "CostofRevenue", "DepreciationAmortizationExpense", "DilutedEPSNetIncome", "DiscontinuedOperations", "EquityEarnings", "AccountingChange", "BasicEPSNetIncome", "ExtraordinaryItems", "GrossProfit", "IncomebeforeExtraordinaryItems", "IncomeBeforeTaxes", "IncomeTaxes", "InterestExpense", "InterestIncome", "MinorityInterestEquityEarnings", "NetIncome", "NetIncomeApplicabletoCommon", "OperatingProfit", "OtherNonoperatingIncomeExpense", "OtherOperatingExpenses", "ResearchDevelopmentExpense", "RestructuringRemediationImpairmentProvisions", "TotalRevenue", "SellingGeneralAdministrativeExpenses");
@@ -626,8 +1242,9 @@ function update_raw_data_tickers($dates, $rawdata) {
                         }
 
 			//reports_incomefull
-			$query = "INSERT INTO `reports_incomefull` (`report_id`, `AdjustedEBIT`, `AdjustedEBITDA`, `AdjustedNetIncome`, `AftertaxMargin`, `EBITDA`, `GrossMargin`, `NetOperatingProfitafterTax`, `OperatingMargin`, `RevenueFQ`, `RevenueFY`, `RevenueTTM`, `CostOperatingExpenses`, `DepreciationExpense`, `DilutedEPSNetIncomefromContinuingOperations`, `DilutedWeightedAverageShares`, `AmortizationExpense`, `BasicEPSNetIncomefromContinuingOperations`, `BasicWeightedAverageShares`, `GeneralAdministrativeExpense`, `IncomeAfterTaxes`, `LaborExpense`, `NetIncomefromContinuingOperationsApplicabletoCommon`, `InterestIncomeExpenseNet`, `NoncontrollingInterest`, `NonoperatingGainsLosses`, `OperatingExpenses`, `OtherGeneralAdministrativeExpense`, `OtherInterestIncomeExpenseNet`, `OtherRevenue`, `OtherSellingGeneralAdministrativeExpenses`, `PreferredDividends`, `SalesMarketingExpense`, `TotalNonoperatingIncomeExpense`, `TotalOperatingExpenses`, `OperatingRevenue`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_incomefull` (`report_id`, `AdjustedEBIT`, `AdjustedEBITDA`, `AdjustedNetIncome`, `AftertaxMargin`, `EBITDA`, `GrossMargin`, `NetOperatingProfitafterTax`, `OperatingMargin`, `RevenueFQ`, `RevenueFY`, `RevenueTTM`, `CostOperatingExpenses`, `DepreciationExpense`, `DilutedEPSNetIncomefromContinuingOperations`, `DilutedWeightedAverageShares`, `AmortizationExpense`, `BasicEPSNetIncomefromContinuingOperations`, `BasicWeightedAverageShares`, `GeneralAdministrativeExpense`, `IncomeAfterTaxes`, `LaborExpense`, `NetIncomefromContinuingOperationsApplicabletoCommon`, `InterestIncomeExpenseNet`, `NoncontrollingInterest`, `NonoperatingGainsLosses`, `OperatingExpenses`, `OtherGeneralAdministrativeExpense`, `OtherInterestIncomeExpenseNet`, `OtherRevenue`, `OtherSellingGeneralAdministrativeExpenses`, `PreferredDividends`, `SalesMarketingExpense`, `TotalNonoperatingIncomeExpense`, `TotalOperatingExpenses`, `OperatingRevenue`) VALUES (";
+                        $query = "INSERT INTO `reports_incomefull` (`report_id`, `AdjustedEBIT`, `AdjustedEBITDA`, `AdjustedNetIncome`, `AftertaxMargin`, `EBITDA`, `GrossMargin`, `NetOperatingProfitafterTax`, `OperatingMargin`, `RevenueFQ`, `RevenueFY`, `RevenueTTM`, `CostOperatingExpenses`, `DepreciationExpense`, `DilutedEPSNetIncomefromContinuingOperations`, `DilutedWeightedAverageShares`, `AmortizationExpense`, `BasicEPSNetIncomefromContinuingOperations`, `BasicWeightedAverageShares`, `GeneralAdministrativeExpense`, `IncomeAfterTaxes`, `LaborExpense`, `NetIncomefromContinuingOperationsApplicabletoCommon`, `InterestIncomeExpenseNet`, `NoncontrollingInterest`, `NonoperatingGainsLosses`, `OperatingExpenses`, `OtherGeneralAdministrativeExpense`, `OtherInterestIncomeExpenseNet`, `OtherRevenue`, `OtherSellingGeneralAdministrativeExpenses`, `PreferredDividends`, `SalesMarketingExpense`, `TotalNonoperatingIncomeExpense`, `TotalOperatingExpenses`, `OperatingRevenue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["AdjustedEBIT"][$i].",";
         		$query .= $rawdata["AdjustedEBITDA"][$i].",";
         		$query .= $rawdata["AdjustedNetIncome"][$i].",";
@@ -666,9 +1283,56 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["TotalNonoperatingIncomeExpense"][$i].",";
         		$query .= $rawdata["TotalOperatingExpenses"][$i].",";
         		$query .= $rawdata["OperatingRevenue"][$i];
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
-			//reports_incomefull CAGR
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["AdjustedEBIT"][$i];
+                        $params[] = $rawdata["AdjustedEBITDA"][$i];
+                        $params[] = $rawdata["AdjustedNetIncome"][$i];
+                        $params[] = $rawdata["AftertaxMargin"][$i];
+                        if ($rawdata["EBITDA"][$i] === "null" && $rawdata["OperatingProfit"][$i] !== "null") {
+                                $rawdata["EBITDA"][$i] = $rawdata["OperatingProfit"][$i] + $rawdata["DepreciationAmortizationExpense"][$i];
+                        }
+                        $params[] = $rawdata["EBITDA"][$i];
+                        $params[] = $rawdata["GrossMargin"][$i];
+                        $params[] = $rawdata["NetOperatingProfitafterTax"][$i];
+                        $params[] = $rawdata["OperatingMargin"][$i];
+                        $params[] = $rawdata["RevenueFQ"][$i];
+                        $params[] = $rawdata["RevenueFY"][$i];
+                        $params[] = $rawdata["RevenueTTM"][$i];
+                        $params[] = $rawdata["CostOperatingExpenses"][$i];
+                        $params[] = $rawdata["DepreciationExpense"][$i];
+                        $params[] = $rawdata["DilutedEPSNetIncomefromContinuingOperations"][$i];
+                        $params[] = $rawdata["DilutedWeightedAverageShares"][$i];
+                        $params[] = $rawdata["AmortizationExpense"][$i];
+                        $params[] = $rawdata["BasicEPSNetIncomefromContinuingOperations"][$i];
+                        $params[] = $rawdata["BasicWeightedAverageShares"][$i];
+                        $params[] = $rawdata["GeneralAdministrativeExpense"][$i];
+                        $params[] = $rawdata["IncomeAfterTaxes"][$i];
+                        $params[] = $rawdata["LaborExpense"][$i];
+                        $params[] = $rawdata["NetIncomefromContinuingOperationsApplicabletoCommon"][$i];
+                        $params[] = $rawdata["InterestIncomeExpenseNet"][$i];
+                        $params[] = $rawdata["NoncontrollingInterest"][$i];
+                        $params[] = $rawdata["NonoperatingGainsLosses"][$i];
+                        $params[] = $rawdata["OperatingExpenses"][$i];
+                        $params[] = $rawdata["OtherGeneralAdministrativeExpense"][$i];
+                        $params[] = $rawdata["OtherInterestIncomeExpenseNet"][$i];
+                        $params[] = $rawdata["OtherRevenue"][$i];
+                        $params[] = $rawdata["OtherSellingGeneralAdministrativeExpenses"][$i];
+                        $params[] = $rawdata["PreferredDividends"][$i];
+                        $params[] = $rawdata["SalesMarketingExpense"][$i];
+                        $params[] = $rawdata["TotalNonoperatingIncomeExpense"][$i];
+                        $params[] = $rawdata["TotalOperatingExpenses"][$i];
+                        $params[] = $rawdata["OperatingRevenue"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+			try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
+                        //reports_incomefull CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
 					$fieldArray = Array("AdjustedEBIT", "AdjustedEBITDA", "AdjustedNetIncome", "AftertaxMargin", "EBITDA", "GrossMargin", "NetOperatingProfitafterTax", "OperatingMargin", "RevenueFQ", "RevenueFY", "RevenueTTM", "CostOperatingExpenses", "DepreciationExpense", "DilutedEPSNetIncomefromContinuingOperations", "DilutedWeightedAverageShares", "AmortizationExpense", "BasicEPSNetIncomefromContinuingOperations", "BasicWeightedAverageShares", "GeneralAdministrativeExpense", "IncomeAfterTaxes", "LaborExpense", "NetIncomefromContinuingOperationsApplicabletoCommon", "InterestIncomeExpenseNet", "NoncontrollingInterest", "NonoperatingGainsLosses", "OperatingExpenses", "OtherGeneralAdministrativeExpense", "OtherInterestIncomeExpenseNet", "OtherRevenue", "OtherSellingGeneralAdministrativeExpenses", "PreferredDividends", "SalesMarketingExpense", "TotalNonoperatingIncomeExpense", "TotalOperatingExpenses", "OperatingRevenue");
@@ -686,20 +1350,38 @@ function update_raw_data_tickers($dates, $rawdata) {
                         }
 
 			//reports_metadata_eol
-			$query = "INSERT INTO `reports_metadata_eol` (`report_id`, `CoverSheetTSO`, `CoverSheetTSODate`, `AuditorCode`, `AuditorOpinion`, `InventoryPolicy`, `NumberofShareholders`, `NumberofEmployees`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_metadata_eol` (`report_id`, `CoverSheetTSO`, `CoverSheetTSODate`, `AuditorCode`, `AuditorOpinion`, `InventoryPolicy`, `NumberofShareholders`, `NumberofEmployees`) VALUES (";
+                        $query = "INSERT INTO `reports_metadata_eol` (`report_id`, `CoverSheetTSO`, `CoverSheetTSODate`, `AuditorCode`, `AuditorOpinion`, `InventoryPolicy`, `NumberofShareholders`, `NumberofEmployees`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["CoverSheetTSO"][$i].",";
         		$query .= "'".date("Y-m-d",strtotime($rawdata["CoverSheetTSODate"][$i]))."',";
-        		$query .= ($rawdata["AuditorCode"][$i]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["AuditorCode"][$i])."',");
-        		$query .= ($rawdata["AuditorOpinion"][$i]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["AuditorOpinion"][$i])."',");
-        		$query .= ($rawdata["InventoryPolicy"][$i]=='null' ? 'null,':"'".mysql_real_escape_string($rawdata["InventoryPolicy"][$i])."',");
+        		$query .= ($rawdata["AuditorCode"][$i]=='null' ? 'null,':"AuditorCode = ?,");
+        		$query .= ($rawdata["AuditorOpinion"][$i]=='null' ? 'null,':"AuditorOpinion = ?,");
+        		$query .= ($rawdata["InventoryPolicy"][$i]=='null' ? 'null,':"InventoryPolicy = ?,");
         		$query .= $rawdata["NumberofShareholders"][$i].",";
         		$query .= $rawdata["NumberofEmployees"][$i];
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["CoverSheetTSO"][$i];
+                        $params[] = date("Y-m-d",strtotime($rawdata["CoverSheetTSODate"][$i]));
+                        $params[] = ($rawdata["AuditorCode"][$i]=='null' ? null:$rawdata["AuditorCode"][$i]);
+                        $params[] = ($rawdata["AuditorOpinion"][$i]=='null' ? null:$rawdata["AuditorOpinion"][$i]);
+                        $params[] = ($rawdata["InventoryPolicy"][$i]=='null' ? null:$rawdata["InventoryPolicy"][$i]);
+                        $params[] = $rawdata["NumberofShareholders"][$i];
+                        $params[] = $rawdata["NumberofEmployees"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_variable_ratios
-			$query = "INSERT INTO `reports_variable_ratios` (`report_id`, `BookEquity`, `DebttoAssets`, `DegreeofCombinedLeverage`, `DegreeofFinancialLeverage`, `DegreeofOperationalLeverage`, `FreeCashFlow`, `DebttoEquity`, `AdjustedEPSBasic`, `AdjustedEPSDiluted`, `FreeCashFlowReturnonAssets`, `ReturnonAssets`, `ReturnonEquity`, `ReturnonInvestedCapital`, `RevenueperEmployee`, `CashRatio`, `CurrentRatio`, `FreeCashFlowMargin`, `LongTermCapital`, `LongTermDebttoLongTermCapital`, `LongTermDebttoTotalCapital`, `NetDebt`, `NetIncomeperEmployee`, `NetWorkingCapital`, `PretaxMargin`, `QuickRatio`, `TaxRate`, `TotalCapital`) VALUES (";
-	        	$query .= "'".$report_id."',";
+			//$query = "INSERT INTO `reports_variable_ratios` (`report_id`, `BookEquity`, `DebttoAssets`, `DegreeofCombinedLeverage`, `DegreeofFinancialLeverage`, `DegreeofOperationalLeverage`, `FreeCashFlow`, `DebttoEquity`, `AdjustedEPSBasic`, `AdjustedEPSDiluted`, `FreeCashFlowReturnonAssets`, `ReturnonAssets`, `ReturnonEquity`, `ReturnonInvestedCapital`, `RevenueperEmployee`, `CashRatio`, `CurrentRatio`, `FreeCashFlowMargin`, `LongTermCapital`, `LongTermDebttoLongTermCapital`, `LongTermDebttoTotalCapital`, `NetDebt`, `NetIncomeperEmployee`, `NetWorkingCapital`, `PretaxMargin`, `QuickRatio`, `TaxRate`, `TotalCapital`) VALUES (";
+                        $query = "INSERT INTO `reports_variable_ratios` (`report_id`, `BookEquity`, `DebttoAssets`, `DegreeofCombinedLeverage`, `DegreeofFinancialLeverage`, `DegreeofOperationalLeverage`, `FreeCashFlow`, `DebttoEquity`, `AdjustedEPSBasic`, `AdjustedEPSDiluted`, `FreeCashFlowReturnonAssets`, `ReturnonAssets`, `ReturnonEquity`, `ReturnonInvestedCapital`, `RevenueperEmployee`, `CashRatio`, `CurrentRatio`, `FreeCashFlowMargin`, `LongTermCapital`, `LongTermDebttoLongTermCapital`, `LongTermDebttoTotalCapital`, `NetDebt`, `NetIncomeperEmployee`, `NetWorkingCapital`, `PretaxMargin`, `QuickRatio`, `TaxRate`, `TotalCapital`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        	/*$query .= "'".$report_id."',";
         		$query .= $rawdata["BookEquity"][$i].",";
         		$query .= $rawdata["DebttoAssets"][$i].",";
         		$query .= $rawdata["DegreeofCombinedLeverage"][$i].",";
@@ -727,8 +1409,44 @@ function update_raw_data_tickers($dates, $rawdata) {
         		$query .= $rawdata["QuickRatio"][$i].",";
         		$query .= $rawdata["TaxRate"][$i].",";
         		$query .= $rawdata["TotalCapital"][$i];
-        		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+        		$query .= ")";*/
+                        $params = array();
+                        $params[] = $report_id;
+                        $params[] = $rawdata["BookEquity"][$i];
+                        $params[] = $rawdata["DebttoAssets"][$i];
+                        $params[] = $rawdata["DegreeofCombinedLeverage"][$i];
+                        $params[] = $rawdata["DegreeofFinancialLeverage"][$i];
+                        $params[] = $rawdata["DegreeofOperationalLeverage"][$i];
+                        $params[] = $rawdata["FreeCashFlow"][$i];
+                        $params[] = $rawdata["DebttoEquity"][$i];
+                        $params[] = $rawdata["AdjustedEPSBasic"][$i];
+                        $params[] = $rawdata["AdjustedEPSDiluted"][$i];
+                        $params[] = $rawdata["FreeCashFlowReturnonAssets"][$i];
+                        $params[] = $rawdata["ReturnonAssets"][$i];
+                        $params[] = $rawdata["ReturnonEquity"][$i];
+                        $params[] = $rawdata["ReturnonInvestedCapital"][$i];
+                        $params[] = $rawdata["RevenueperEmployee"][$i];
+                        $params[] = $rawdata["CashRatio"][$i];
+                        $params[] = $rawdata["CurrentRatio"][$i];
+                        $params[] = $rawdata["FreeCashFlowMargin"][$i];
+                        $params[] = $rawdata["LongTermCapital"][$i];
+                        $params[] = $rawdata["LongTermDebttoLongTermCapital"][$i];
+                        $params[] = $rawdata["LongTermDebttoTotalCapital"][$i];
+                        $params[] = $rawdata["NetDebt"][$i];
+                        $params[] = $rawdata["NetIncomeperEmployee"][$i];
+                        $params[] = $rawdata["NetWorkingCapital"][$i];
+                        $params[] = $rawdata["PretaxMargin"][$i];
+                        $params[] = $rawdata["QuickRatio"][$i];
+                        $params[] = $rawdata["TaxRate"][$i];
+                        $params[] = $rawdata["TotalCapital"][$i];
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $res = $db->prepare($query);
+                                $res->execute($params);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_variable_ratios CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
@@ -786,7 +1504,13 @@ function update_raw_data_tickers($dates, $rawdata) {
 				$query .= "null,null";
 			}
         		$query .= ")";
-	        	mysql_query($query) or die ($query."\n".mysql_error());
+	        	//mysql_query($query) or die ($query."\n".mysql_error());
+                        try {
+                                $db->exec($query);
+                        } catch(PDOException $ex) {
+                                echo "\nDatabase Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
 			//reports_financialscustom CAGR
                         if ($i <= $areports) {
                                 if ($i > 3) {
@@ -818,9 +1542,18 @@ function update_raw_data_tickers($dates, $rawdata) {
 				$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
 				$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date <= '".$rdate."' order by report_date desc limit 1";
 				$price = null;
-		                $rquote = mysql_query($qquote) or die (mysql_error());
-                		if(mysql_num_rows($rquote) > 0) {
-		                      	$price = mysql_fetch_assoc($rquote);
+		                //$rquote = mysql_query($qquote) or die (mysql_error());
+                                try {
+                                        $rquote = $db->query($qquote);
+                                } catch(PDOException $ex) {
+                                        echo "\nDatabase Error"; //user message
+                                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                                }
+                                //if(mysql_num_rows($rquote) > 0) {
+                                $row_count = $rquote->rowCount();
+                		if($row_count > 0) {
+		                      	//$price = mysql_fetch_assoc($rquote); 
+                                        $price = $rquote->fetch(PDO::FETCH_ASSOC);
               				$rdate = $price["report_date"];
 		                        $price = $price["adj_close"];
 		                }
@@ -890,7 +1623,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 		$query .= ((($rawdata["TotalShorttermDebt"][$i]=='null'&&$rawdata["TotalLongtermDebt"][$i]=='null')||$rawdata["TotalAssets"][$i]=='null'||$rawdata["TotalAssets"][$i]==0)?'null':(($rawdata["TotalShorttermDebt"][$i]+$rawdata["TotalLongtermDebt"][$i]) / $rawdata["TotalAssets"][$i])).",";
 		                $query .= ((($rawdata["TotalCurrentAssets"][$i]=='null'&&$rawdata["TotalCurrentLiabilities"][$i]=='null')||$rawdata["SharesOutstandingDiluted"][$i]=='null'||$rawdata["SharesOutstandingDiluted"][$i]==0||is_null($price)||$price==0)?'null':((($rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalCurrentLiabilities"][$i]) / (toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000))/$price));
                 		$query .= ")";
-				mysql_query($query) or die ($query."\n".mysql_error());
+				//mysql_query($query) or die ($query."\n".mysql_error());
+                                try {
+                                        $db->exec($query);
+                                } catch(PDOException $ex) {
+                                        echo "\nDatabase Error"; //user message
+                                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                                }
 	                        //reports_key_ratios CAGR
                                 if ($i > 3) {
                                         updateCAGR_KR("reports_key_ratios_3cagr", 3, $i, $report_id, $rawdata, $dates->ticker_id);
@@ -912,11 +1651,23 @@ function update_raw_data_tickers($dates, $rawdata) {
 	//Update TTM and PTTM data
         foreach($ttm_tables as $table) {
                 $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
-                mysql_query($query) or die (mysql_error());
+                //mysql_query($query) or die (mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
         }
         foreach($pttm_tables as $table) {
                 $query = "DELETE FROM $table WHERE ticker_id = ".$dates->ticker_id;
-                mysql_query($query) or die (mysql_error());
+                //mysql_query($query) or die (mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
         }
 	//Determine if USA stock or ADR
 	$stock_type = "ADR";
@@ -974,7 +1725,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        	$query .= $rawdata["TotalStockholdersEquity"][$MRQRow].",";
        	$query .= $rawdata["TreasuryStock"][$MRQRow];
        	$query .= ")";
-       	mysql_query($query) or die ($query."\n".mysql_error());
+       	//mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
 	$query = "INSERT INTO `pttm_balanceconsolidated` (`ticker_id`, `CommitmentsContingencies`, `CommonStock`, `DeferredCharges`, `DeferredIncomeTaxesCurrent`, `DeferredIncomeTaxesLongterm`, `AccountsPayableandAccruedExpenses`, `AccruedInterest`, `AdditionalPaidinCapital`, `AdditionalPaidinCapitalPreferredStock`, `CashandCashEquivalents`, `CashCashEquivalentsandShorttermInvestments`, `Goodwill`, `IntangibleAssets`, `InventoriesNet`, `LongtermDeferredIncomeTaxLiabilities`, `LongtermDeferredLiabilityCharges`, `LongtermInvestments`, `MinorityInterest`, `OtherAccumulatedComprehensiveIncome`, `OtherAssets`, `OtherCurrentAssets`, `OtherCurrentLiabilities`, `OtherEquity`, `OtherInvestments`, `OtherLiabilities`, `PartnersCapital`, `PensionPostretirementObligation`, `PreferredStock`, `PrepaidExpenses`, `PropertyPlantEquipmentNet`, `RestrictedCash`, `RetainedEarnings`, `TemporaryEquity`, `TotalAssets`, `TotalCurrentAssets`, `TotalCurrentLiabilities`, `TotalLiabilities`, `TotalLongtermDebt`, `TotalReceivablesNet`, `TotalShorttermDebt`, `TotalStockholdersEquity`, `TreasuryStock`) VALUES (";
        	$query .= "'".$dates->ticker_id."',";
@@ -1021,7 +1778,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        	$query .= $rawdata["TotalStockholdersEquity"][$PMRQRow].",";
        	$query .= $rawdata["TreasuryStock"][$PMRQRow];
        	$query .= ")";
-       	mysql_query($query) or die ($query."\n".mysql_error());
+       	//mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
 	$query = "INSERT INTO `ttm_balancefull` (`ticker_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (";
        	$query .= "'".$dates->ticker_id."',";
@@ -1053,7 +1816,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        	$query .= $rawdata["TotalSharesOutstanding"][$MRQRow].",";
 	$query .= $rawdata["ShorttermInvestments"][$MRQRow];
        	$query .= ")";
-       	mysql_query($query) or die ($query."\n".mysql_error());
+       	//mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
 	$query = "INSERT INTO `pttm_balancefull` (`ticker_id`, `TotalDebt`, `TotalAssetsFQ`, `TotalAssetsFY`, `CurrentPortionofLongtermDebt`, `DeferredIncomeTaxLiabilitiesShortterm`, `DeferredLiabilityCharges`, `AccountsNotesReceivableNet`, `AccountsPayable`, `AccountsReceivableTradeNet`, `AccruedExpenses`, `AccumulatedDepreciation`, `AmountsDuetoRelatedPartiesShortterm`, `GoodwillIntangibleAssetsNet`, `IncomeTaxesPayable`, `LiabilitiesStockholdersEquity`, `LongtermDebt`, `NotesPayable`, `OperatingLeases`, `OtherAccountsNotesReceivable`, `OtherAccountsPayableandAccruedExpenses`, `OtherBorrowings`, `OtherReceivables`, `PropertyandEquipmentGross`, `TotalLongtermAssets`, `TotalLongtermLiabilities`, `TotalSharesOutstanding`, `ShorttermInvestments`) VALUES (";
        	$query .= "'".$dates->ticker_id."',";
@@ -1085,7 +1854,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        	$query .= $rawdata["TotalSharesOutstanding"][$PMRQRow].",";
 	$query .= $rawdata["ShorttermInvestments"][$PMRQRow];
        	$query .= ")";
-       	mysql_query($query) or die ($query."\n".mysql_error());
+       	//mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
 	//Cashflow and Financial
 	if($stock_type == "ADR") {
@@ -1109,7 +1884,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= toFloat($rawdata["GrossPropertyPlantandEquipment"][$MRQRow]).",";
                 $query .= toFloat($rawdata["SharesOutstandingBasic"][$MRQRow]);
                 $query .= ")";
-                mysql_query($query) or die ($query."\n".mysql_error());
+                //mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
                 $query = "INSERT INTO `pttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
@@ -1131,7 +1912,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= toFloat($rawdata["GrossPropertyPlantandEquipment"][$PMRQRow]).",";
                 $query .= toFloat($rawdata["SharesOutstandingBasic"][$PMRQRow]);
                 $query .= ")";
-                mysql_query($query) or die ($query."\n".mysql_error());
+                //mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_cashflowconsolidated` (`ticker_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
 	       	$query .= "'".$dates->ticker_id."',";
@@ -1175,8 +1962,14 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= $rawdata["StockOptionTaxBenefits"][$MRQRow].",";
         	$query .= $rawdata["TotalAdjustments"][$MRQRow];
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
-		
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
+        		
 		$query = "INSERT INTO `pttm_cashflowconsolidated` (`ticker_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
 	       	$query .= "'".$dates->ticker_id."',";
         	$query .= $rawdata["ChangeinCurrentAssets"][$PMRQRow].",";
@@ -1219,7 +2012,13 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= $rawdata["StockOptionTaxBenefits"][$PMRQRow].",";
         	$query .= $rawdata["TotalAdjustments"][$PMRQRow];
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1242,7 +2041,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= $rawdata["ShorttermBorrowings"][$MRQRow].",";
        		$query .= $rawdata["TotalNoncashAdjustments"][$MRQRow];
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `pttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1265,7 +2070,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= $rawdata["ShorttermBorrowings"][$PMRQRow].",";
        		$query .= $rawdata["TotalNoncashAdjustments"][$PMRQRow];
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_incomeconsolidated` (`ticker_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1295,7 +2106,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= $rawdata["TotalRevenue"][$MRQRow].",";
        		$query .= $rawdata["SellingGeneralAdministrativeExpenses"][$MRQRow];
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `pttm_incomeconsolidated` (`ticker_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1325,7 +2142,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= $rawdata["TotalRevenue"][$PMRQRow].",";
        		$query .= $rawdata["SellingGeneralAdministrativeExpenses"][$PMRQRow];
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_incomefull` (`ticker_id`, `AdjustedEBIT`, `AdjustedEBITDA`, `AdjustedNetIncome`, `AftertaxMargin`, `EBITDA`, `GrossMargin`, `NetOperatingProfitafterTax`, `OperatingMargin`, `RevenueFQ`, `RevenueFY`, `RevenueTTM`, `CostOperatingExpenses`, `DepreciationExpense`, `DilutedEPSNetIncomefromContinuingOperations`, `DilutedWeightedAverageShares`, `AmortizationExpense`, `BasicEPSNetIncomefromContinuingOperations`, `BasicWeightedAverageShares`, `GeneralAdministrativeExpense`, `IncomeAfterTaxes`, `LaborExpense`, `NetIncomefromContinuingOperationsApplicabletoCommon`, `InterestIncomeExpenseNet`, `NoncontrollingInterest`, `NonoperatingGainsLosses`, `OperatingExpenses`, `OtherGeneralAdministrativeExpense`, `OtherInterestIncomeExpenseNet`, `OtherRevenue`, `OtherSellingGeneralAdministrativeExpenses`, `PreferredDividends`, `SalesMarketingExpense`, `TotalNonoperatingIncomeExpense`, `TotalOperatingExpenses`, `OperatingRevenue`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1365,7 +2188,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= $rawdata["TotalOperatingExpenses"][$MRQRow].",";
        		$query .= $rawdata["OperatingRevenue"][$MRQRow];
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `pttm_incomefull` (`ticker_id`, `AdjustedEBIT`, `AdjustedEBITDA`, `AdjustedNetIncome`, `AftertaxMargin`, `EBITDA`, `GrossMargin`, `NetOperatingProfitafterTax`, `OperatingMargin`, `RevenueFQ`, `RevenueFY`, `RevenueTTM`, `CostOperatingExpenses`, `DepreciationExpense`, `DilutedEPSNetIncomefromContinuingOperations`, `DilutedWeightedAverageShares`, `AmortizationExpense`, `BasicEPSNetIncomefromContinuingOperations`, `BasicWeightedAverageShares`, `GeneralAdministrativeExpense`, `IncomeAfterTaxes`, `LaborExpense`, `NetIncomefromContinuingOperationsApplicabletoCommon`, `InterestIncomeExpenseNet`, `NoncontrollingInterest`, `NonoperatingGainsLosses`, `OperatingExpenses`, `OtherGeneralAdministrativeExpense`, `OtherInterestIncomeExpenseNet`, `OtherRevenue`, `OtherSellingGeneralAdministrativeExpenses`, `PreferredDividends`, `SalesMarketingExpense`, `TotalNonoperatingIncomeExpense`, `TotalOperatingExpenses`, `OperatingRevenue`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1405,7 +2234,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= $rawdata["TotalOperatingExpenses"][$PMRQRow].",";
        		$query .= $rawdata["OperatingRevenue"][$PMRQRow];
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
                 $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`, `Sales5YYCGrPerc`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
@@ -1429,7 +2264,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= (($rawdata["CFNetIncome"][$MRQRow]=='null' && $rawdata["CFDepreciationAmortization"][$MRQRow]=='null' && $rawdata["EmployeeCompensation"][$MRQRow]=='null' && $rawdata["AdjustmentforSpecialCharges"][$MRQRow]=='null' && $rawdata["DeferredIncomeTaxes"][$MRQRow]=='null' && $rawdata["CapitalExpenditures"][$MRQRow]=='null' && $rawdata["ChangeinCurrentAssets"][$MRQRow]=='null' && $rawdata["ChangeinCurrentLiabilities"][$MRQRow]=='null')?'null':($rawdata["CFNetIncome"][$MRQRow]+$rawdata["CFDepreciationAmortization"][$MRQRow]+$rawdata["EmployeeCompensation"][$MRQRow]+$rawdata["AdjustmentforSpecialCharges"][$MRQRow]+$rawdata["DeferredIncomeTaxes"][$MRQRow]+$rawdata["CapitalExpenditures"][$MRQRow]+($rawdata["ChangeinCurrentAssets"][$MRQRow]+$rawdata["ChangeinCurrentLiabilities"][$MRQRow]))).",";
 		$query .= (($rawdata["TotalRevenue"][$MRQRow]=='null' || $rawdata["TotalRevenue"][$MRQRow-5]=='null' || $rawdata["TotalRevenue"][$MRQRow-5]<=0 || $rawdata["TotalRevenue"][$MRQRow] < 0)?'null':(pow($rawdata["TotalRevenue"][$MRQRow]/$rawdata["TotalRevenue"][$MRQRow-5], 1/5) - 1));
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
                 $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
@@ -1452,7 +2293,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= (($rawdata["CashfromOperatingActivities"][$PMRQRow]=='null' && $rawdata["CapitalExpenditures"][$PMRQRow]=='null')?'null':($rawdata["CashfromOperatingActivities"][$PMRQRow]+$rawdata["CapitalExpenditures"][$PMRQRow])).",";
                 $query .= (($rawdata["CFNetIncome"][$PMRQRow]=='null' && $rawdata["CFDepreciationAmortization"][$PMRQRow]=='null' && $rawdata["EmployeeCompensation"][$PMRQRow]=='null' && $rawdata["AdjustmentforSpecialCharges"][$PMRQRow]=='null' && $rawdata["DeferredIncomeTaxes"][$PMRQRow]=='null' && $rawdata["CapitalExpenditures"][$PMRQRow]=='null' && $rawdata["ChangeinCurrentAssets"][$PMRQRow]=='null' && $rawdata["ChangeinCurrentLiabilities"][$PMRQRow]=='null')?'null':($rawdata["CFNetIncome"][$PMRQRow]+$rawdata["CFDepreciationAmortization"][$PMRQRow]+$rawdata["EmployeeCompensation"][$PMRQRow]+$rawdata["AdjustmentforSpecialCharges"][$PMRQRow]+$rawdata["DeferredIncomeTaxes"][$PMRQRow]+$rawdata["CapitalExpenditures"][$PMRQRow]+($rawdata["ChangeinCurrentAssets"][$PMRQRow]+$rawdata["ChangeinCurrentLiabilities"][$PMRQRow])));
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 	} else {
                 $query = "INSERT INTO `ttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
@@ -1474,7 +2321,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= toFloat($rawdata["GrossPropertyPlantandEquipment"][$MRQRow]).",";
                 $query .= toFloat($rawdata["SharesOutstandingBasic"][$MRQRow]);
                 $query .= ")";
-                mysql_query($query) or die ($query."\n".mysql_error());
+                //mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
                 $query = "INSERT INTO `pttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
@@ -1496,7 +2349,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= toFloat($rawdata["GrossPropertyPlantandEquipment"][$PMRQRow]).",";
                 $query .= toFloat($rawdata["SharesOutstandingBasic"][$PMRQRow]);
                 $query .= ")";
-                mysql_query($query) or die ($query."\n".mysql_error());
+                //mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_cashflowconsolidated` (`ticker_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
 	       	$query .= "'".$dates->ticker_id."',";
@@ -1540,7 +2399,13 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= (($rawdata["StockOptionTaxBenefits"][$treports-3]=='null'&&$rawdata["StockOptionTaxBenefits"][$treports-2]=='null'&&$rawdata["StockOptionTaxBenefits"][$treports-1]=='null'&&$rawdata["StockOptionTaxBenefits"][$treports]=='null')?'null':($rawdata["StockOptionTaxBenefits"][$treports-3]+$rawdata["StockOptionTaxBenefits"][$treports-2]+$rawdata["StockOptionTaxBenefits"][$treports-1]+$rawdata["StockOptionTaxBenefits"][$treports])).",";
         	$query .= (($rawdata["TotalAdjustments"][$treports-3]=='null'&&$rawdata["TotalAdjustments"][$treports-2]=='null'&&$rawdata["TotalAdjustments"][$treports-1]=='null'&&$rawdata["TotalAdjustments"][$treports]=='null')?'null':($rawdata["TotalAdjustments"][$treports-3]+$rawdata["TotalAdjustments"][$treports-2]+$rawdata["TotalAdjustments"][$treports-1]+$rawdata["TotalAdjustments"][$treports]));
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 		
 		$query = "INSERT INTO `pttm_cashflowconsolidated` (`ticker_id`, `ChangeinCurrentAssets`, `ChangeinCurrentLiabilities`, `ChangeinDebtNet`, `ChangeinDeferredRevenue`, `ChangeinEquityNet`, `ChangeinIncomeTaxesPayable`, `ChangeinInventories`, `ChangeinOperatingAssetsLiabilities`, `ChangeinOtherAssets`, `ChangeinOtherCurrentAssets`, `ChangeinOtherCurrentLiabilities`, `ChangeinOtherLiabilities`, `ChangeinPrepaidExpenses`, `DividendsPaid`, `EffectofExchangeRateonCash`, `EmployeeCompensation`, `AcquisitionSaleofBusinessNet`, `AdjustmentforEquityEarnings`, `AdjustmentforMinorityInterest`, `AdjustmentforSpecialCharges`, `CapitalExpenditures`, `CashfromDiscontinuedOperations`, `CashfromFinancingActivities`, `CashfromInvestingActivities`, `CashfromOperatingActivities`, `CFDepreciationAmortization`, `DeferredIncomeTaxes`, `ChangeinAccountsPayableAccruedExpenses`, `ChangeinAccountsReceivable`, `InvestmentChangesNet`, `NetChangeinCash`, `OtherAdjustments`, `OtherAssetLiabilityChangesNet`, `OtherFinancingActivitiesNet`, `OtherInvestingActivities`, `RealizedGainsLosses`, `SaleofPropertyPlantEquipment`, `StockOptionTaxBenefits`, `TotalAdjustments`) VALUES (";
 	       	$query .= "'".$dates->ticker_id."',";
@@ -1584,7 +2449,13 @@ function update_raw_data_tickers($dates, $rawdata) {
         	$query .= (($rawdata["StockOptionTaxBenefits"][$treports-7]=='null'&&$rawdata["StockOptionTaxBenefits"][$treports-6]=='null'&&$rawdata["StockOptionTaxBenefits"][$treports-5]=='null'&&$rawdata["StockOptionTaxBenefits"][$treports-4]=='null')?'null':($rawdata["StockOptionTaxBenefits"][$treports-7]+$rawdata["StockOptionTaxBenefits"][$treports-6]+$rawdata["StockOptionTaxBenefits"][$treports-5]+$rawdata["StockOptionTaxBenefits"][$treports-4])).",";
         	$query .= (($rawdata["TotalAdjustments"][$treports-7]=='null'&&$rawdata["TotalAdjustments"][$treports-6]=='null'&&$rawdata["TotalAdjustments"][$treports-5]=='null'&&$rawdata["TotalAdjustments"][$treports-4]=='null')?'null':($rawdata["TotalAdjustments"][$treports-7]+$rawdata["TotalAdjustments"][$treports-6]+$rawdata["TotalAdjustments"][$treports-5]+$rawdata["TotalAdjustments"][$treports-4]));
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1607,7 +2478,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= (($rawdata["ShorttermBorrowings"][$treports-3]=='null'&&$rawdata["ShorttermBorrowings"][$treports-2]=='null'&&$rawdata["ShorttermBorrowings"][$treports-1]=='null'&&$rawdata["ShorttermBorrowings"][$treports]=='null')?'null':($rawdata["ShorttermBorrowings"][$treports-3]+$rawdata["ShorttermBorrowings"][$treports-2]+$rawdata["ShorttermBorrowings"][$treports-1]+$rawdata["ShorttermBorrowings"][$treports])).",";
        		$query .= (($rawdata["TotalNoncashAdjustments"][$treports-3]=='null'&&$rawdata["TotalNoncashAdjustments"][$treports-2]=='null'&&$rawdata["TotalNoncashAdjustments"][$treports-1]=='null'&&$rawdata["TotalNoncashAdjustments"][$treports]=='null')?'null':($rawdata["TotalNoncashAdjustments"][$treports-3]+$rawdata["TotalNoncashAdjustments"][$treports-2]+$rawdata["TotalNoncashAdjustments"][$treports-1]+$rawdata["TotalNoncashAdjustments"][$treports]));
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `pttm_cashflowfull` (`ticker_id`, `ChangeinLongtermDebtNet`, `ChangeinShorttermBorrowingsNet`, `CashandCashEquivalentsBeginningofYear`, `CashandCashEquivalentsEndofYear`, `CashPaidforIncomeTaxes`, `CashPaidforInterestExpense`, `CFNetIncome`, `IssuanceofEquity`, `LongtermDebtPayments`, `LongtermDebtProceeds`, `OtherDebtNet`, `OtherEquityTransactionsNet`, `OtherInvestmentChangesNet`, `PurchaseofInvestments`, `RepurchaseofEquity`, `SaleofInvestments`, `ShorttermBorrowings`, `TotalNoncashAdjustments`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1630,7 +2507,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= (($rawdata["ShorttermBorrowings"][$treports-7]=='null'&&$rawdata["ShorttermBorrowings"][$treports-6]=='null'&&$rawdata["ShorttermBorrowings"][$treports-5]=='null'&&$rawdata["ShorttermBorrowings"][$treports-4]=='null')?'null':($rawdata["ShorttermBorrowings"][$treports-7]+$rawdata["ShorttermBorrowings"][$treports-6]+$rawdata["ShorttermBorrowings"][$treports-5]+$rawdata["ShorttermBorrowings"][$treports-4])).",";
        		$query .= (($rawdata["TotalNoncashAdjustments"][$treports-7]=='null'&&$rawdata["TotalNoncashAdjustments"][$treports-6]=='null'&&$rawdata["TotalNoncashAdjustments"][$treports-5]=='null'&&$rawdata["TotalNoncashAdjustments"][$treports-4]=='null')?'null':($rawdata["TotalNoncashAdjustments"][$treports-7]+$rawdata["TotalNoncashAdjustments"][$treports-6]+$rawdata["TotalNoncashAdjustments"][$treports-5]+$rawdata["TotalNoncashAdjustments"][$treports-4]));
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_incomeconsolidated` (`ticker_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1660,7 +2543,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= (($rawdata["TotalRevenue"][$treports-3]=='null'&&$rawdata["TotalRevenue"][$treports-2]=='null'&&$rawdata["TotalRevenue"][$treports-1]=='null'&&$rawdata["TotalRevenue"][$treports]=='null')?'null':($rawdata["TotalRevenue"][$treports-3]+$rawdata["TotalRevenue"][$treports-2]+$rawdata["TotalRevenue"][$treports-1]+$rawdata["TotalRevenue"][$treports])).",";
        		$query .= (($rawdata["SellingGeneralAdministrativeExpenses"][$treports-3]=='null'&&$rawdata["SellingGeneralAdministrativeExpenses"][$treports-2]=='null'&&$rawdata["SellingGeneralAdministrativeExpenses"][$treports-1]=='null'&&$rawdata["SellingGeneralAdministrativeExpenses"][$treports]=='null')?'null':($rawdata["SellingGeneralAdministrativeExpenses"][$treports-3]+$rawdata["SellingGeneralAdministrativeExpenses"][$treports-2]+$rawdata["SellingGeneralAdministrativeExpenses"][$treports-1]+$rawdata["SellingGeneralAdministrativeExpenses"][$treports]));
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `pttm_incomeconsolidated` (`ticker_id`, `EBIT`, `CostofRevenue`, `DepreciationAmortizationExpense`, `DilutedEPSNetIncome`, `DiscontinuedOperations`, `EquityEarnings`, `AccountingChange`, `BasicEPSNetIncome`, `ExtraordinaryItems`, `GrossProfit`, `IncomebeforeExtraordinaryItems`, `IncomeBeforeTaxes`, `IncomeTaxes`, `InterestExpense`, `InterestIncome`, `MinorityInterestEquityEarnings`, `NetIncome`, `NetIncomeApplicabletoCommon`, `OperatingProfit`, `OtherNonoperatingIncomeExpense`, `OtherOperatingExpenses`, `ResearchDevelopmentExpense`, `RestructuringRemediationImpairmentProvisions`, `TotalRevenue`, `SellingGeneralAdministrativeExpenses`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1690,7 +2579,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= (($rawdata["TotalRevenue"][$treports-7]=='null'&&$rawdata["TotalRevenue"][$treports-6]=='null'&&$rawdata["TotalRevenue"][$treports-5]=='null'&&$rawdata["TotalRevenue"][$treports-4]=='null')?'null':($rawdata["TotalRevenue"][$treports-7]+$rawdata["TotalRevenue"][$treports-6]+$rawdata["TotalRevenue"][$treports-5]+$rawdata["TotalRevenue"][$treports-4])).",";
        		$query .= (($rawdata["SellingGeneralAdministrativeExpenses"][$treports-7]=='null'&&$rawdata["SellingGeneralAdministrativeExpenses"][$treports-6]=='null'&&$rawdata["SellingGeneralAdministrativeExpenses"][$treports-5]=='null'&&$rawdata["SellingGeneralAdministrativeExpenses"][$treports-4]=='null')?'null':($rawdata["SellingGeneralAdministrativeExpenses"][$treports-7]+$rawdata["SellingGeneralAdministrativeExpenses"][$treports-6]+$rawdata["SellingGeneralAdministrativeExpenses"][$treports-5]+$rawdata["SellingGeneralAdministrativeExpenses"][$treports-4]));
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `ttm_incomefull` (`ticker_id`, `AdjustedEBIT`, `AdjustedEBITDA`, `AdjustedNetIncome`, `AftertaxMargin`, `EBITDA`, `GrossMargin`, `NetOperatingProfitafterTax`, `OperatingMargin`, `RevenueFQ`, `RevenueFY`, `RevenueTTM`, `CostOperatingExpenses`, `DepreciationExpense`, `DilutedEPSNetIncomefromContinuingOperations`, `DilutedWeightedAverageShares`, `AmortizationExpense`, `BasicEPSNetIncomefromContinuingOperations`, `BasicWeightedAverageShares`, `GeneralAdministrativeExpense`, `IncomeAfterTaxes`, `LaborExpense`, `NetIncomefromContinuingOperationsApplicabletoCommon`, `InterestIncomeExpenseNet`, `NoncontrollingInterest`, `NonoperatingGainsLosses`, `OperatingExpenses`, `OtherGeneralAdministrativeExpense`, `OtherInterestIncomeExpenseNet`, `OtherRevenue`, `OtherSellingGeneralAdministrativeExpenses`, `PreferredDividends`, `SalesMarketingExpense`, `TotalNonoperatingIncomeExpense`, `TotalOperatingExpenses`, `OperatingRevenue`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1745,7 +2640,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= (($rawdata["TotalOperatingExpenses"][$treports-3]=='null'&&$rawdata["TotalOperatingExpenses"][$treports-2]=='null'&&$rawdata["TotalOperatingExpenses"][$treports-1]=='null'&&$rawdata["TotalOperatingExpenses"][$treports]=='null')?'null':($rawdata["TotalOperatingExpenses"][$treports-3]+$rawdata["TotalOperatingExpenses"][$treports-2]+$rawdata["TotalOperatingExpenses"][$treports-1]+$rawdata["TotalOperatingExpenses"][$treports])).",";
        		$query .= (($rawdata["OperatingRevenue"][$treports-3]=='null'&&$rawdata["OperatingRevenue"][$treports-2]=='null'&&$rawdata["OperatingRevenue"][$treports-1]=='null'&&$rawdata["OperatingRevenue"][$treports]=='null')?'null':($rawdata["OperatingRevenue"][$treports-3]+$rawdata["OperatingRevenue"][$treports-2]+$rawdata["OperatingRevenue"][$treports-1]+$rawdata["OperatingRevenue"][$treports]));
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$query = "INSERT INTO `pttm_incomefull` (`ticker_id`, `AdjustedEBIT`, `AdjustedEBITDA`, `AdjustedNetIncome`, `AftertaxMargin`, `EBITDA`, `GrossMargin`, `NetOperatingProfitafterTax`, `OperatingMargin`, `RevenueFQ`, `RevenueFY`, `RevenueTTM`, `CostOperatingExpenses`, `DepreciationExpense`, `DilutedEPSNetIncomefromContinuingOperations`, `DilutedWeightedAverageShares`, `AmortizationExpense`, `BasicEPSNetIncomefromContinuingOperations`, `BasicWeightedAverageShares`, `GeneralAdministrativeExpense`, `IncomeAfterTaxes`, `LaborExpense`, `NetIncomefromContinuingOperationsApplicabletoCommon`, `InterestIncomeExpenseNet`, `NoncontrollingInterest`, `NonoperatingGainsLosses`, `OperatingExpenses`, `OtherGeneralAdministrativeExpense`, `OtherInterestIncomeExpenseNet`, `OtherRevenue`, `OtherSellingGeneralAdministrativeExpenses`, `PreferredDividends`, `SalesMarketingExpense`, `TotalNonoperatingIncomeExpense`, `TotalOperatingExpenses`, `OperatingRevenue`) VALUES (";
         	$query .= "'".$dates->ticker_id."',";
@@ -1800,7 +2701,13 @@ function update_raw_data_tickers($dates, $rawdata) {
        		$query .= (($rawdata["TotalOperatingExpenses"][$treports-7]=='null'&&$rawdata["TotalOperatingExpenses"][$treports-6]=='null'&&$rawdata["TotalOperatingExpenses"][$treports-5]=='null'&&$rawdata["TotalOperatingExpenses"][$treports-4]=='null')?'null':($rawdata["TotalOperatingExpenses"][$treports-7]+$rawdata["TotalOperatingExpenses"][$treports-6]+$rawdata["TotalOperatingExpenses"][$treports-5]+$rawdata["TotalOperatingExpenses"][$treports-4])).",";
        		$query .= (($rawdata["OperatingRevenue"][$treports-7]=='null'&&$rawdata["OperatingRevenue"][$treports-6]=='null'&&$rawdata["OperatingRevenue"][$treports-5]=='null'&&$rawdata["OperatingRevenue"][$treports-4]=='null')?'null':($rawdata["OperatingRevenue"][$treports-7]+$rawdata["OperatingRevenue"][$treports-6]+$rawdata["OperatingRevenue"][$treports-5]+$rawdata["OperatingRevenue"][$treports-4]));
        		$query .= ")";
-        	mysql_query($query) or die ($query."\n".mysql_error());
+        	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
                 $query = "INSERT INTO `ttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`, `Sales5YYCGrPerc`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
@@ -1842,7 +2749,13 @@ function update_raw_data_tickers($dates, $rawdata) {
 			(($rawdata["CFNetIncome"][$treports-3]+$rawdata["CFNetIncome"][$treports-2]+$rawdata["CFNetIncome"][$treports-1]+$rawdata["CFNetIncome"][$treports])+($rawdata["CFDepreciationAmortization"][$treports-3]+$rawdata["CFDepreciationAmortization"][$treports-2]+$rawdata["CFDepreciationAmortization"][$treports-1]+$rawdata["CFDepreciationAmortization"][$treports])+($rawdata["EmployeeCompensation"][$treports-3]+$rawdata["EmployeeCompensation"][$treports-2]+$rawdata["EmployeeCompensation"][$treports-1]+$rawdata["EmployeeCompensation"][$treports])+($rawdata["AdjustmentforSpecialCharges"][$treports-3]+$rawdata["AdjustmentforSpecialCharges"][$treports-2]+$rawdata["AdjustmentforSpecialCharges"][$treports-1]+$rawdata["AdjustmentforSpecialCharges"][$treports])+($rawdata["DeferredIncomeTaxes"][$treports-3]+$rawdata["DeferredIncomeTaxes"][$treports-2]+$rawdata["DeferredIncomeTaxes"][$treports-1]+$rawdata["DeferredIncomeTaxes"][$treports])+($rawdata["CapitalExpenditures"][$treports-3]+$rawdata["CapitalExpenditures"][$treports-2]+$rawdata["CapitalExpenditures"][$treports-1]+$rawdata["CapitalExpenditures"][$treports])+(($rawdata["ChangeinCurrentAssets"][$treports-3]+$rawdata["ChangeinCurrentAssets"][$treports-2]+$rawdata["ChangeinCurrentAssets"][$treports-1]+$rawdata["ChangeinCurrentAssets"][$treports])+($rawdata["ChangeinCurrentLiabilities"][$treports-3]+$rawdata["ChangeinCurrentLiabilities"][$treports-2]+$rawdata["ChangeinCurrentLiabilities"][$treports-1]+$rawdata["ChangeinCurrentLiabilities"][$treports])))).",";
 		$query .= ((($rawdata["TotalRevenue"][$treports-3]=='null' && $rawdata["TotalRevenue"][$treports-2]=='null' && $rawdata["TotalRevenue"][$treports-1]=='null' && $rawdata["TotalRevenue"][$treports]=='null') || $rawdata["TotalRevenue"][$areports-5]=='null' || $rawdata["TotalRevenue"][$areports-5]<=0 || ($rawdata["TotalRevenue"][$treports-3]+$rawdata["TotalRevenue"][$treports-2]+$rawdata["TotalRevenue"][$treports-1]+$rawdata["TotalRevenue"][$treports] < 0))?'null':(pow(($rawdata["TotalRevenue"][$treports-3]+$rawdata["TotalRevenue"][$treports-2]+$rawdata["TotalRevenue"][$treports-1]+$rawdata["TotalRevenue"][$treports])/$rawdata["TotalRevenue"][$areports-5], 1/5) - 1));
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
                 $query = "INSERT INTO `pttm_financialscustom` (`ticker_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (";
                 $query .= "'".$dates->ticker_id."',";
@@ -1883,7 +2796,13 @@ function update_raw_data_tickers($dates, $rawdata) {
                 $query .= ((($rawdata["CFNetIncome"][$treports-7]=='null'&&$rawdata["CFNetIncome"][$treports-6]=='null'&&$rawdata["CFNetIncome"][$treports-5]=='null'&&$rawdata["CFNetIncome"][$treports-4]=='null')&&($rawdata["CFDepreciationAmortization"][$treports-7]=='null'&&$rawdata["CFDepreciationAmortization"][$treports-6]=='null'&&$rawdata["CFDepreciationAmortization"][$treports-5]=='null'&&$rawdata["CFDepreciationAmortization"][$treports-4]=='null')&&($rawdata["EmployeeCompensation"][$treports-7]=='null'&&$rawdata["EmployeeCompensation"][$treports-6]=='null'&&$rawdata["EmployeeCompensation"][$treports-5]=='null'&&$rawdata["EmployeeCompensation"][$treports-4]=='null')&&($rawdata["AdjustmentforSpecialCharges"][$treports-7]=='null'&&$rawdata["AdjustmentforSpecialCharges"][$treports-6]=='null'&&$rawdata["AdjustmentforSpecialCharges"][$treports-5]=='null'&&$rawdata["AdjustmentforSpecialCharges"][$treports-4]=='null')&&($rawdata["DeferredIncomeTaxes"][$treports-7]=='null'&&$rawdata["DeferredIncomeTaxes"][$treports-6]=='null'&&$rawdata["DeferredIncomeTaxes"][$treports-5]=='null'&&$rawdata["DeferredIncomeTaxes"][$treports-4]=='null')&&($rawdata["CapitalExpenditures"][$treports-7]=='null'&&$rawdata["CapitalExpenditures"][$treports-6]=='null'&&$rawdata["CapitalExpenditures"][$treports-5]=='null'&&$rawdata["CapitalExpenditures"][$treports-4]=='null')&&($rawdata["ChangeinCurrentAssets"][$treports-7]=='null'&&$rawdata["ChangeinCurrentAssets"][$treports-6]=='null'&&$rawdata["ChangeinCurrentAssets"][$treports-5]=='null'&&$rawdata["ChangeinCurrentAssets"][$treports-4]=='null')&&($rawdata["ChangeinCurrentLiabilities"][$treports-7]=='null'&&$rawdata["ChangeinCurrentLiabilities"][$treports-6]=='null'&&$rawdata["ChangeinCurrentLiabilities"][$treports-5]=='null'&&$rawdata["ChangeinCurrentLiabilities"][$treports-4]=='null'))?'null':
 			(($rawdata["CFNetIncome"][$treports-7]+$rawdata["CFNetIncome"][$treports-6]+$rawdata["CFNetIncome"][$treports-5]+$rawdata["CFNetIncome"][$treports-4])+($rawdata["CFDepreciationAmortization"][$treports-7]+$rawdata["CFDepreciationAmortization"][$treports-6]+$rawdata["CFDepreciationAmortization"][$treports-5]+$rawdata["CFDepreciationAmortization"][$treports-4])+($rawdata["EmployeeCompensation"][$treports-7]+$rawdata["EmployeeCompensation"][$treports-6]+$rawdata["EmployeeCompensation"][$treports-5]+$rawdata["EmployeeCompensation"][$treports-4])+($rawdata["AdjustmentforSpecialCharges"][$treports-7]+$rawdata["AdjustmentforSpecialCharges"][$treports-6]+$rawdata["AdjustmentforSpecialCharges"][$treports-5]+$rawdata["AdjustmentforSpecialCharges"][$treports-4])+($rawdata["DeferredIncomeTaxes"][$treports-7]+$rawdata["DeferredIncomeTaxes"][$treports-6]+$rawdata["DeferredIncomeTaxes"][$treports-5]+$rawdata["DeferredIncomeTaxes"][$treports-4])+($rawdata["CapitalExpenditures"][$treports-7]+$rawdata["CapitalExpenditures"][$treports-6]+$rawdata["CapitalExpenditures"][$treports-5]+$rawdata["CapitalExpenditures"][$treports-4])+(($rawdata["ChangeinCurrentAssets"][$treports-7]+$rawdata["ChangeinCurrentAssets"][$treports-6]+$rawdata["ChangeinCurrentAssets"][$treports-5]+$rawdata["ChangeinCurrentAssets"][$treports-4])+($rawdata["ChangeinCurrentLiabilities"][$treports-7]+$rawdata["ChangeinCurrentLiabilities"][$treports-6]+$rawdata["ChangeinCurrentLiabilities"][$treports-5]+$rawdata["ChangeinCurrentLiabilities"][$treports-4]))));
         	$query .= ")";
-	       	mysql_query($query) or die ($query."\n".mysql_error());
+	       	//mysql_query($query) or die ($query."\n".mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 	}
 }
 
@@ -1907,7 +2826,8 @@ function toFloat($num) {
 }
 
 function updateCAGR($table, $fieldArray, $years, $period, $report_id, $rawdata, $toFloat = false) {
-	$query = "INSERT INTO `$table` (`report_id`";
+	$db = Database::GetInstance(); 
+        $query = "INSERT INTO `$table` (`report_id`";
 	foreach ($fieldArray as $value) {
 		$query .= ",`$value`";
 	}
@@ -1925,7 +2845,13 @@ function updateCAGR($table, $fieldArray, $years, $period, $report_id, $rawdata, 
 	        }
 	}
         $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 }
 
 function updateCAGR_concat($vv, $va, $years) {
@@ -1937,6 +2863,7 @@ function updateCAGR_concat($vv, $va, $years) {
 }
 
 function updateCAGR_FC($table, $years, $i, $report_id, $rawdata) {
+        $db = Database::GetInstance(); 
         $query = "INSERT INTO `$table` (`report_id`";
 	$query .= ", `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`, `SalesPercChange`) VALUES (";
         $query .= "'".$report_id."'";
@@ -2004,10 +2931,17 @@ function updateCAGR_FC($table, $years, $i, $report_id, $rawdata) {
         }
 
         $query .= ")";
-        mysql_query($query) or die ($query."\n".mysql_error());
+        //mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 }
 
 function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
+        $db = Database::GetInstance(); 
 	$CapEx_a = (($rawdata["CapitalExpenditures"][$i]=='null')?null:(-$rawdata["CapitalExpenditures"][$i]));
 	$CapEx_v = (($rawdata["CapitalExpenditures"][$i-$years]=='null')?null:(-$rawdata["CapitalExpenditures"][$i-$years]));
 	$FreeCashFlow_a = (($rawdata["CashfromOperatingActivities"][$i]=='null' && $rawdata["CapitalExpenditures"][$i]=='null')?null:($rawdata["CashfromOperatingActivities"][$i]+$rawdata["CapitalExpenditures"][$i]));
@@ -2025,17 +2959,36 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
 	$rdate_a = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
 	$qquote_a = "Select * from tickers_yahoo_historical_data where ticker_id = '".$ticker_id."' and report_date <= '".$rdate_a."' order by report_date desc limit 1";
 	$price_a = null;
-        $rquote_a = mysql_query($qquote_a) or die (mysql_error());
-	if(mysql_num_rows($rquote_a) > 0) {
-             	$price_a = mysql_fetch_assoc($rquote_a);
+        //$rquote_a = mysql_query($qquote_a) or die (mysql_error());
+        try {
+                $rquote_a = $db->query($qquote_a);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+
+	//if(mysql_num_rows($rquote_a) > 0) {
+        $row_count_a = $rquote_a->rowCount();
+                if($row_count_a > 0) {                                        
+             	//$price_a = mysql_fetch_assoc($rquote_a);
+                $price = $rquote_a->fetch(PDO::FETCH_ASSOC);
 	        $price_a = $price_a["adj_close"];
 	}
 	$rdate_v = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i-$years]));
 	$qquote_v = "Select * from tickers_yahoo_historical_data where ticker_id = '".$ticker_id."' and report_date <= '".$rdate_v."' order by report_date desc limit 1";
 	$price_v = null;
-        $rquote_v = mysql_query($qquote_v) or die (mysql_error());
-	if(mysql_num_rows($rquote_v) > 0) {
-             	$price_v = mysql_fetch_assoc($rquote_v);
+        //$rquote_v = mysql_query($qquote_v) or die (mysql_error());
+        try {
+                $rquote_v = $db->query($qquote_v);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+	//if(mysql_num_rows($rquote_v) > 0) {
+        $row_count_v = $rquote_v->rowCount();
+                if($row_count_v > 0) {
+             	//$price_v = mysql_fetch_assoc($rquote_v);
+                $price = $rquote_v->fetch(PDO::FETCH_ASSOC);
 	        $price_v = $price_v["adj_close"];
 	}
         $entValue_a = (($rawdata["SharesOutstandingDiluted"][$i]=='null' && is_null($price_a) && $rawdata["TotalLongtermDebt"][$i]=='null' && $rawdata["TotalShorttermDebt"][$i]=='null' && $rawdata["PreferredStock"][$i]=='null' && $rawdata["MinorityInterestEquityEarnings"][$i]=='null' && $rawdata["CashCashEquivalentsandShorttermInvestments"][$i]=='null')?null:((toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price_a)+$rawdata["TotalLongtermDebt"][$i]+$rawdata["TotalShorttermDebt"][$i]+$rawdata["PreferredStock"][$i]+$rawdata["MinorityInterestEquityEarnings"][$i]-$rawdata["CashCashEquivalentsandShorttermInvestments"][$i]));
@@ -2215,6 +3168,12 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
 	$vv = ((($rawdata["TotalCurrentAssets"][$i-$years]=='null'&&$rawdata["TotalCurrentLiabilities"][$i-$years]=='null')||$rawdata["SharesOutstandingDiluted"][$i-$years]=='null'||$rawdata["SharesOutstandingDiluted"][$i-$years]==0||is_null($price_v)||$price_v==0)?'null':((($rawdata["TotalCurrentAssets"][$i-$years] - $rawdata["TotalCurrentLiabilities"][$i-$years]) / (toFloat($rawdata["SharesOutstandingDiluted"][$i-$years])*1000000))/$price_v));
 	$query .= updateCAGR_concat($vv, $va, $years);
         $query .= ")";
-	mysql_query($query) or die ($query."\n".mysql_error());
+	//mysql_query($query) or die ($query."\n".mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 }
 ?>

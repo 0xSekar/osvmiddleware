@@ -8,21 +8,30 @@
 error_reporting(E_ALL & ~E_NOTICE);
 include_once('../config.php');
 include_once('../db/database.php');
+include_once('../db/db.php');
 include_once('./include/raw_data_update_yahoo_estimates.php');
 require_once("../include/yahoo/common.inc.php");
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 connectfe();
+$db = Database::GetInstance(); 
 
 set_time_limit(0);                   // ignore php timeout
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
-$query = "SELECT value FROM system WHERE parameter = 'query_yahoo'";
-$res = mysql_query($query) or die(mysql_error());
-$row = mysql_fetch_assoc($res);
+//$query = "SELECT value FROM system WHERE parameter = 'query_yahoo'";
+//$res = mysql_query($query) or die(mysql_error());
+try {
+	$res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
+} catch(PDOException $ex) {
+	echo "\nDatabase Error"; //user message
+	die("Line: ".__LINE__." - ".$ex->getMessage());
+}
+//$row = mysql_fetch_assoc($res);
+$row = $res->fetch(PDO::FETCH_ASSOC);
 if($row["value"] == 0) {
         echo "Skip process as yahoo queries are currently dissabled.\n";
         exit;
@@ -38,9 +47,16 @@ $enotfound = 0;
 $eerrors = 0;
 echo "Updating Tickers...\n";
 //Analyst Estimates needs more frequent updates
-$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id";
-$res = mysql_query($query) or die(mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+//$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id";
+//$res = mysql_query($query) or die(mysql_error());
+try {
+	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id");
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$count2++;
 	echo "Updating ".$row["ticker"]." Estimates...";
 	//UPDATE ESTIMATES
