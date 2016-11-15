@@ -73,48 +73,71 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			$rawdata->nextYear = new stdClass();
 			$rawdata->plus5Year = new stdClass();
 			$rawdata->minus5Year = new stdClass();
-			$rawdata->industryPegRatio = $response->query->results->result->industryTrend->pegRatio;
-			$rawdata->sectorPegRatio = $response->query->results->result->sectorTrend->pegRatio;
+			$rawdata->industryPegRatio = null;
+			$rawdata->sectorPegRatio = null;
 			//Get dates from fetched ticker
-			foreach($response->query->results->result->earningsHistory->history as $value) {
-				if($value->period == "-4q") {
-					$rawdata->earningsHistory->minus4q = $value;
-				} elseif($value->period == "-3q") {
-					$rawdata->earningsHistory->minus3q = $value;
-				} elseif($value->period == "-2q") {
-					$rawdata->earningsHistory->minus2q = $value;
-				} elseif($value->period == "-1q") {
-					$rawdata->earningsHistory->minus1q = $value;
+			if(isset($response->query->results->result->earningsHistory)) {
+				foreach($response->query->results->result->earningsHistory->history as $value) {
+					if($value->period == "-4q") {
+						$rawdata->earningsHistory->minus4q = $value;
+					} elseif($value->period == "-3q") {
+						$rawdata->earningsHistory->minus3q = $value;
+					} elseif($value->period == "-2q") {
+						$rawdata->earningsHistory->minus2q = $value;
+					} elseif($value->period == "-1q") {
+						$rawdata->earningsHistory->minus1q = $value;
+					}
 				}
 			}
 			foreach($response->query->results->result->earningsTrend->trend as $value) {
-				if($value->period == "0q") {
+				if($value->period == "0q" && $value->endDate !== "null") {
 					$rawdata->currQtr = $value;
-				} elseif ($value->period == "+1q") {
+				} elseif ($value->period == "+1q" && $value->endDate !== "null") {
 					$rawdata->nextQtr = $value;
-				} elseif ($value->period == "0y") {
+				} elseif ($value->period == "0y" && $value->endDate !== "null") {
 					$rawdata->currYear = $value;
-				} elseif ($value->period == "+1y") {
+				} elseif ($value->period == "+1y" && $value->endDate !== "null") {
 					$rawdata->nextYear = $value;
-				} elseif ($value->period == "+5y") {
+				} elseif ($value->period == "+5y" && $value->endDate !== "null") {
 					$rawdata->plus5Year = $value;
-				} elseif ($value->period == "-5y") {
+				} elseif ($value->period == "-5y" && $value->endDate !== "null") {
 					$rawdata->minus5Year = $value;
 				}
 			}
-			foreach($response->query->results->result->industryTrend->estimates as $value) {
-				if($value->period == "0q") {
-					$rawdata->currQtr->industryTrend = $value;
-				} elseif($value->period == "+1q") {
-					$rawdata->nextQtr->industryTrend = $value;
-				} elseif($value->period == "0y") {
-					$rawdata->currYear->industryTrend = $value;
-				} elseif($value->period == "+1y") {
-					$rawdata->nextYear->industryTrend = $value;
-				} elseif($value->period == "+5y") {
-					$rawdata->plus5Year->industryTrend = $value;
-				} elseif($value->period == "-5y") {
-					$rawdata->minus5Year->industryTrend = $value;
+			if(isset($response->query->results->result->industryTrend)) {
+				$rawdata->industryPegRatio = $response->query->results->result->industryTrend->pegRatio;
+				foreach($response->query->results->result->industryTrend->estimates as $value) {
+					if($value->period == "0q") {
+						$rawdata->currQtr->industryTrend = $value;
+					} elseif($value->period == "+1q") {
+						$rawdata->nextQtr->industryTrend = $value;
+					} elseif($value->period == "0y") {
+						$rawdata->currYear->industryTrend = $value;
+					} elseif($value->period == "+1y") {
+						$rawdata->nextYear->industryTrend = $value;
+					} elseif($value->period == "+5y") {
+						$rawdata->plus5Year->industryTrend = $value;
+					} elseif($value->period == "-5y") {
+						$rawdata->minus5Year->industryTrend = $value;
+					}
+				}
+			}
+			if(isset($response->query->results->result->sectorTrend)) {
+				$rawdata->sectorPegRatio = $response->query->results->result->sectorTrend->pegRatio;
+				foreach($response->query->results->result->sectorTrend->estimates as $value) {
+					if($value->period == "0q") {
+						$rawdata->currQtr->sectorTrend = $value;
+					} elseif($value->period == "+1q") {
+						$rawdata->nextQtr->sectorTrend = $value;
+					} elseif($value->period == "0y") {
+						$rawdata->currYear->sectorTrend = $value;
+					} elseif($value->period == "+1y") {
+						$rawdata->nextYear->sectorTrend = $value;
+					} elseif($value->period == "+5y") {
+						$rawdata->plus5Year->sectorTrend = $value;
+					} elseif($value->period == "-5y") {
+						$rawdata->minus5Year->sectorTrend = $value;
+					}
 				}
 			}
 			update_raw_data_yahoo_estimates($row["id"], $rawdata);
