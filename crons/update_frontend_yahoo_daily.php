@@ -83,15 +83,24 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	if(isset($response->query) && isset($response->query->results)) {
 		foreach($response->query->results->quote as $element) {
 			if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
-				$query_div = "INSERT INTO `tickers_yahoo_dividend_history` (ticker_id, qtrDate, dividends) VALUES (";
+				/*$query_div = "INSERT INTO `tickers_yahoo_dividend_history` (ticker_id, qtrDate, dividends) VALUES (";
 				$query_div .= "'".$row["id"]."',";
 				$query_div .= "'".$element->Date."',";
 				$query_div .= (is_null($element->Dividends)?"NULL":$element->Dividends);
 				$query_div .= ") ON DUPLICATE KEY UPDATE dividends = ";
-				$query_div .= (is_null($element->Dividends)?"NULL":$element->Dividends);
+				$query_div .= (is_null($element->Dividends)?"NULL":$element->Dividends);*/
+
+				$query_div = "INSERT INTO `tickers_yahoo_dividend_history` (ticker_id, qtrDate, dividends) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE dividends = ?";
+				$params = array();
+				$params[] = $row["id"];
+				$params[] = $element->Date;
+				$params[] = (is_null($element->Dividends)?NULL:$element->Dividends);
+				$params[] = (is_null($element->Dividends)?NULL:$element->Dividends);
 				//mysql_query($query_div) or die(mysql_error());
 				try {
-					$res1 = $db->exec($query_div);
+					//$res1 = $db->exec($query_div);
+					$res1 = $db->prepare($query_div);
+                	$res1->execute($params);
 				} catch(PDOException $ex) {
 					    echo "\nDatabase Error"; //user message
 					    die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -126,7 +135,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime($years ." years"))."' and endDate = '".date("Y-m-d", strtotime(($years+1) ." years"))."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
 			if(isset($response->query) && isset($response->query->results)) {
 				foreach($response->query->results->quote as $element) {
-					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
+					/*$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
 					$query_div .= "'".$row["id"]."',";
 					$query_div .= "'".$element->Date."',";
 					$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
@@ -141,10 +150,30 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 					$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
 					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
 					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
-					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
+					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);*/
+
+					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
+					$params = array();
+					$params[] = $row["id"];
+					$params[] = $element->Date;
+					$params[] = (is_null($element->Open)?NULL:$element->Open);
+					$params[] = (is_null($element->High)?NULL:$element->High);
+					$params[] = (is_null($element->Low)?NULL:$element->Low);
+					$params[] = (is_null($element->Close)?NULL:$element->Close);
+					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
+					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
+
+					$params[] = (is_null($element->Open)?NULL:$element->Open);
+					$params[] = (is_null($element->High)?NULL:$element->High);
+					$params[] = (is_null($element->Low)?NULL:$element->Low);
+					$params[] = (is_null($element->Close)?NULL:$element->Close);
+					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
+					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
 					//mysql_query($query_div) or die(mysql_error());
 					try {
-					$res1 = $db->exec($query_div);
+						//$res1 = $db->exec($query_div);
+						$res1 = $db->prepare($query_div);
+                		$res1->execute($params);
 					} catch(PDOException $ex) {
 					    echo "\nDatabase Error"; //user message
 					    die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -178,7 +207,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		if(isset($response->query) && isset($response->query->results)) {
 			foreach($response->query->results->quote as $element) {
 				if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
-					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
+					/*$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
 					$query_div .= "'".$row["id"]."',";
 					$query_div .= "'".$element->Date."',";
 					$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
@@ -193,10 +222,30 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 					$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
 					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
 					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
-					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
+					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);*/
+
+					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
+					$params = array();
+					$params[] = $row["id"];
+					$params[] = $element->Date;
+					$params[] = (is_null($element->Open)?NULL:$element->Open);
+					$params[] = (is_null($element->High)?NULL:$element->High);
+					$params[] = (is_null($element->Low)?NULL:$element->Low);
+					$params[] = (is_null($element->Close)?NULL:$element->Close);
+					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
+					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
+
+					$params[] = (is_null($element->Open)?NULL:$element->Open);
+					$params[] = (is_null($element->High)?NULL:$element->High);
+					$params[] = (is_null($element->Low)?NULL:$element->Low);
+					$params[] = (is_null($element->Close)?NULL:$element->Close);
+					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
+					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
 					//mysql_query($query_div) or die(mysql_error());
 					try {
-						$res1 = $db->exec($query_div);
+						//$res1 = $db->exec($query_div);
+						$res1 = $db->prepare($query_div);
+                		$res1->execute($params);
 					} catch(PDOException $ex) {
 						    echo "\nDatabase Error"; //user message
 						    die("Line: ".__LINE__." - ".$ex->getMessage());
