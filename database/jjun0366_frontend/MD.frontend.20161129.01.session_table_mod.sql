@@ -1,0 +1,2 @@
+ALTER TABLE  `sessions` CHANGE  `data`  `data` LONGTEXT CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL ;
+
