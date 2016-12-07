@@ -179,8 +179,212 @@ class screener_filter {
 		} else {
 		    $params[] = "N";
 		}
-		//TODO: Fill group
-		$params[] = 1;
+		switch ($value["table"]) {
+		    case "mrq_alt_checks":
+		    case "reports_alt_checks":
+		    case "ttm_alt_checks":
+			$params[] = 1;
+			break;
+		    case "pttm_balanceconsolidated":
+		    case "ttm_balanceconsolidated":
+		    case "reports_balanceconsolidated":
+		    case "pttm_balancefull":
+		    case "ttm_balancefull":
+		    case "reports_balancefull":
+			$params[] = 2;
+			break;
+		    case "reports_balanceconsolidated_3cagr":
+		    case "reports_balanceconsolidated_5cagr":
+		    case "reports_balanceconsolidated_7cagr":
+		    case "reports_balanceconsolidated_10cagr":
+		    case "reports_balancefull_3cagr":
+		    case "reports_balancefull_5cagr":
+		    case "reports_balancefull_7cagr":
+		    case "reports_balancefull_10cagr":
+			$params[] = 3;
+			break;
+		    case "reports_beneish_checks":
+		    case "ttm_beneish_checks":
+			$params[] = 4;
+			break;
+		    case "pttm_cashflowconsolidated":
+		    case "ttm_cashflowconsolidated":
+		    case "reports_cashflowconsolidated":
+		    case "pttm_cashflowfull":
+		    case "ttm_cashflowfull":
+		    case "reports_cashflowfull":
+			$params[] = 5;
+			break;
+		    case "reports_cashflowconsolidated_3cagr":
+		    case "reports_cashflowconsolidated_5cagr":
+		    case "reports_cashflowconsolidated_7cagr":
+		    case "reports_cashflowconsolidated_10cagr":
+		    case "reports_cashflowfull_3cagr":
+		    case "reports_cashflowfull_5cagr":
+		    case "reports_cashflowfull_7cagr":
+		    case "reports_cashflowfull_10cagr":
+			$params[] = 6;
+			break;
+		    case "reports_metadata_eol":
+		    case "tickers":
+			$params[] = 7;
+			break;
+		    case "tickers_xignite_estimates":
+		    case "tickers_yahoo_estimates_curr_qtr":
+		    case "tickers_yahoo_estimates_curr_year":
+		    case "tickers_yahoo_estimates_earn_hist":
+		    case "tickers_yahoo_estimates_next_qtr":
+		    case "tickers_yahoo_estimates_next_year":
+		    case "tickers_yahoo_estimates_others":
+			$params[] = 8;
+			break;
+		    case "pttm_incomeconsolidated":
+		    case "ttm_incomeconsolidated":
+		    case "reports_incomeconsolidated":
+			$params[] = 9;
+			break;
+		    case "reports_incomeconsolidated_3cagr":
+		    case "reports_incomeconsolidated_5cagr":
+		    case "reports_incomeconsolidated_7cagr":
+		    case "reports_incomeconsolidated_10cagr":
+		    case "reports_incomefull_3cagr":
+		    case "reports_incomefull_5cagr":
+		    case "reports_incomefull_7cagr":
+		    case "reports_incomefull_10cagr":
+			$params[] = 10;
+			break;
+		    case "reports_financialscustom_3cagr":
+		    case "reports_financialscustom_5cagr":
+		    case "reports_financialscustom_7cagr":
+		    case "reports_financialscustom_10cagr":
+		    case "tickers_growth_ratios":
+			$params[] = 12;
+			break;
+		    case "ttm_ratings":
+		    case "reports_ratings":
+			$params[] = 13;
+			break;
+		    case "tickers_profitability_ratios":
+		    case "tickers_yahoo_keystats_2":
+		    case "tickers_yahoo_quotes_1":
+		    case "tickers_yahoo_quotes_2":
+			$params[] = 14;
+			break;
+		    case "tickers_yahoo_historical_data":
+			$params[] = 15;
+			break;
+		    case "ttm_pio_checks":
+		    case "reports_pio_checks":
+			$params[] = 16;
+			break;
+		    case "reports_variable_ratios":
+		    case "reports_variable_ratios_3cagr":
+		    case "reports_variable_ratios_5cagr":
+		    case "reports_variable_ratios_7cagr":
+		    case "reports_variable_ratios_10cagr":
+		    case "tickers_leverage_ratios":
+			$params[] = 17;
+			break;
+		    case "ttm_financialscustom":
+		    case "pttm_financialscustom":
+		    case "reports_financialscustom":
+			switch ($key) {
+			    case "IncomeAfterTaxes":
+				$params[] = 9;
+				break;
+			    case "ShortTermDebtAndCurrentPortion":
+			    case "TotalLongTermDebtAndNotesPayable":
+			    case "NetChangeLongTermDebt":
+				$params[] = 2;
+				break;
+			    case "CapEx":
+			    case "FreeCashFlow":
+			    case "OwnerEarningsFCF":
+				$params[] = 5;
+				break;
+			    case "SalesPercChange":
+			    case "Sales5YYCGrPerc":
+				$params[] = 10;
+				break;
+			    default:
+				$params[] = 17;
+			}
+			break;
+		    case "pttm_gf_data":
+		    case "ttm_gf_data":
+		    case "reports_gf_data":
+		    case "reports_gf_data_3cagr":
+		    case "reports_gf_data_5cagr":
+		    case "reports_gf_data_7cagr":
+		    case "reports_gf_data_10cagr":
+			switch ($key) {
+			    case "Interest Income":
+			    case "Interest Expense":
+			    case "Basic Earnings per Share":
+			    case "Diluted Earnings per Share":
+			    case "Diluted Shares Outstanding":
+			    case "Basic Shares Outstanding":
+				$params[] = 10;
+				break;
+			    default:
+				$params[] = 3;
+			}
+			break;
+                    case "pttm_incomefull":
+                    case "ttm_incomefull":
+                    case "reports_incomefull":
+                        switch ($key) {
+                            case "AftertaxMargin":
+                            case "GrossMargin":
+                            case "OperatingMargin":
+                                $params[] = 17;
+                                break;
+                            default:
+                                $params[] = 9;
+                        }
+                        break;
+                    case "ttm_key_ratios":
+                    case "reports_key_ratios":
+                        switch ($key) {
+                            case "GoodwillIntangibleAssetsNet":
+                            case "TangibleBookValue":
+                            case "ExcessCash":
+                            case "TotalInvestedCapital":
+                            case "WorkingCapital":
+                                $params[] = 2;
+                                break;
+                            default:
+                                $params[] = 17;
+                        }
+                        break;
+                    case "reports_key_ratios_3cagr":
+                    case "reports_key_ratios_5cagr":
+                    case "reports_key_ratios_7cagr":
+                    case "reports_key_ratios_10cagr":
+                        switch ($key) {
+                            case "GoodwillIntangibleAssetsNet":
+                            case "TangibleBookValue":
+                            case "ExcessCash":
+                            case "TotalInvestedCapital":
+                            case "WorkingCapital":
+                                $params[] = 3;
+                                break;
+                            default:
+                                $params[] = 18;
+                        }
+                        break;
+                    case "tickers_yahoo_keystats_1":
+                        switch ($key) {
+                            case "DilutedEPSTTM":
+                                $params[] = 14;
+                                break;
+                            default:
+                                $params[] = 17;
+                        }
+                        break;
+		    default:
+			$params[] = 19;
+		}
 		$params[] = $counter;
 		if($i == 1) {
 		    $params[] = "ANN";
