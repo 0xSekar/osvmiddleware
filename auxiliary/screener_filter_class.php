@@ -7,7 +7,8 @@ class screener_filter {
 
     //Auxiliary private variables
     private $tableListG0 = ["tickers", "tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios", "tickers_xignite_estimates", "tickers_yahoo_estimates_others", "tickers_yahoo_keystats_1", "tickers_yahoo_keystats_2", "tickers_yahoo_quotes_1", "tickers_yahoo_quotes_2"];
-    private $tableListG1 = ["reports_header", "reports_alt_checks", "reports_balanceconsolidated", "reports_balancefull", "reports_beneish_checks", "reports_cashflowconsolidated", "reports_cashflowfull", "reports_financialheader", "reports_financialscustom", "reports_gf_data", "reports_incomeconsolidated", "reports_incomefull", "reports_key_ratios", "reports_metadata_eol", "reports_pio_checks", "reports_ratings", "reports_variable_ratios"];
+    private $tableListG1 = ["reports_header", "reports_balanceconsolidated", "reports_balancefull", "reports_cashflowconsolidated", "reports_cashflowfull", "reports_financialheader", "reports_financialscustom", "reports_gf_data", "reports_incomeconsolidated", "reports_incomefull", "reports_metadata_eol", "reports_variable_ratios"];
+    private $tableListG1r = ["reports_alt_checks", "reports_beneish_checks", "reports_key_ratios", "reports_pio_checks", "reports_ratings"];
     private $tableListG3 = ["ttm_balanceconsolidated", "ttm_balancefull", "ttm_cashflowconsolidated", "ttm_cashflowfull", "ttm_financialscustom", "ttm_incomeconsolidated", "ttm_incomefull", "ttm_gf_data", "ttm_key_ratios", "ttm_beneish_checks", "ttm_pio_checks", "ttm_ratings"];
     private $tableListG4 = ["reports_balanceconsolidated", "reports_balancefull", "reports_cashflowconsolidated", "reports_cashflowfull", "reports_financialscustom", "reports_gf_data", "reports_incomeconsolidated", "reports_incomefull", "reports_key_ratios", "reports_variable_ratios"];
     private $tableListG8 = ["ttm_alt_checks"];
@@ -63,6 +64,26 @@ class screener_filter {
                 }
                 $this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", ANN", "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", ANN");
                 $this->fieldCol[2][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", MRQ", "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", MRQ");
+            }
+        }
+        foreach ($this->tableListG1r as $table) {
+            $q = $this->db->query("SHOW FULL COLUMNS FROM $table");
+            $table_fields = $q->fetchAll(PDO::FETCH_ASSOC);
+            foreach($table_fields as $fieldName) {
+                if(empty($fieldName["Comment"])) {
+                    continue;
+                }
+                $tmp = explode("|", $fieldName["Comment"]);
+                if(!isset($tmp[1]) || empty($tmp[1])) {
+                    $tmp[1] = "";
+                }
+                if(!isset($tmp[2]) || empty($tmp[2])) {
+                    $tmp[2] = "";
+                }
+                if(!isset($tmp[3]) || empty($tmp[3])) {
+                    $tmp[3] = $tmp[0];
+                }
+                $this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", ANN", "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", ANN");
             }
         }
         foreach ($this->tableListG3 as $table) {
@@ -126,7 +147,7 @@ class screener_filter {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[8][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", TTM", "comment" => "Trailing Twelve Months. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", TTM");
-                $this->fieldCol[9][$fieldName["Field"]] = array("table" => "mrq_alt_checks", "title" => $tmp[0].", TTM", "comment" => "Most Recent Quarter. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", MRQ");
+                $this->fieldCol[9][$fieldName["Field"]] = array("table" => "mrq_alt_checks", "title" => $tmp[0].", MRQ", "comment" => "Most Recent Quarter. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", MRQ");
             }
             $this->fieldCol[8]["MarketValueofEquity"] = array("table" => "ttm_alt_checks", "title" => "Market Value of Equity, TTM", "comment" => "Trailing Twelve Months. The stock market value of the equity only.<br><br>The equity market value serves as a proxy for the company asset values.", "format" => "osvnumber:2", "stitle" => "MktValue, TTM");
             $this->fieldCol[9]["MarketValueofEquity"] = array("table" => "mrq_alt_checks", "title" => "Market Value of Equity, MRQ", "comment" => "Most Recent Quarter. The stock market value of the equity only.<br><br>The equity market value serves as a proxy for the company asset values.", "format" => "osvnumber:2", "stitle" => "MktValue, MRQ");
