@@ -32,13 +32,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[0][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3]);
@@ -52,13 +52,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", ANN", "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", ANN");
@@ -73,13 +73,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[3][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", TTM", "comment" => "Trailing Twelve Months. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", TTM");
@@ -93,13 +93,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[4][$fieldName["Field"]] = array("table" => $table."_3cagr", "title" => $tmp[0].", 3Yr Growth", "comment" => "3 Year Compounded Annual Growth Rate. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", 3yCAGR");
@@ -116,13 +116,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[8][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", TTM", "comment" => "Trailing Twelve Months. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", TTM");
@@ -145,13 +145,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[10][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3]);
@@ -165,13 +165,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[11][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3]);
@@ -185,13 +185,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[12][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3]);
@@ -205,13 +205,13 @@ class screener_filter {
                     continue;
                 }
                 $tmp = explode("|", $fieldName["Comment"]);
-                if(!isset($tmp[1])) {
+                if(!isset($tmp[1]) || empty($tmp[1])) {
                     $tmp[1] = "";
                 }
-                if(!isset($tmp[2])) {
+                if(!isset($tmp[2]) || empty($tmp[2])) {
                     $tmp[2] = "";
                 }
-                if(!isset($tmp[3])) {
+                if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
                 $this->fieldCol[13][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3]);
