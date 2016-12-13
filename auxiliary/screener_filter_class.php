@@ -62,8 +62,8 @@ class screener_filter {
                 if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
-                $this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", ANN", "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", ANN");
-                $this->fieldCol[2][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", MRQ", "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", MRQ");
+                $this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", ANN", "comment" => "Latest Annual. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", ANN");
+                $this->fieldCol[2][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", MRQ", "comment" => "Most Recent Quarter. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", MRQ");
             }
         }
         foreach ($this->tableListG1r as $table) {
@@ -83,7 +83,7 @@ class screener_filter {
                 if(!isset($tmp[3]) || empty($tmp[3])) {
                     $tmp[3] = $tmp[0];
                 }
-                $this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", ANN", "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", ANN");
+                $this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0].", ANN", "comment" => "Latest Annual. ".$tmp[1], "format" => $tmp[2], "stitle" => $tmp[3].", ANN");
             }
         }
         foreach ($this->tableListG3 as $table) {
