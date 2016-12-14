@@ -177,7 +177,7 @@ while ($row = mysql_fetch_assoc($res)) {
                 }
 
 		//Sector and Industry
-		if(isset($response->query->results->result->assetProfile->sector)) {
+		if(isset($response->query->results->result->assetProfile->sector) && !empty($response->query->results->result->assetProfile->sector)) {
 			$supdated ++;
                         $query_div = "UPDATE `tickers` SET industry = '" . mysql_real_escape_string($response->query->results->result->assetProfile->industry) ."', ";
                         $query_div .= "sector = '" . mysql_real_escape_string($response->query->results->result->assetProfile->sector) ."' ";
