@@ -167,11 +167,11 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
         $params[] = (!isset($rawdata->trailingAnnualDividendYield->raw) || !is_numeric($rawdata->trailingAnnualDividendYield->raw)?NULL:($rawdata->trailingAnnualDividendYield->raw * 100));
         $params[] = (!isset($rawdata->fiveYearAvgDividendYield->raw) || !is_numeric($rawdata->fiveYearAvgDividendYield->raw)?NULL:$rawdata->fiveYearAvgDividendYield->raw);
         $params[] = (!isset($rawdata->payoutRatio->raw) || !is_numeric($rawdata->payoutRatio->raw)?NULL:($rawdata->payoutRatio->raw * 100));
-        $params[] = date("Y-m-d", strtotime($rawdata->dividendDate->fmt));
-        $params[] = date("Y-m-d", strtotime($rawdata->exDividendDate->fmt));
+        $params[] = (!isset($rawdata->dividendDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->dividendDate->fmt));
+        $params[] = (!isset($rawdata->exDividendDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->exDividendDate->fmt));
         $params[] = NULL;
         $params[] = str_replace('/', ':', $rawdata->lastSplitFactor);
-        $params[] = date("Y-m-d", strtotime($rawdata->lastSplitDate->fmt));
+        $params[] = (!isset($rawdata->lastSplitDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->lastSplitDate->fmt));
         //mysql_query($query) or die (mysql_error());
         try {
                 $res = $db->prepare($query);
