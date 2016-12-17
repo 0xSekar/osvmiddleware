@@ -247,7 +247,7 @@ class screener_filter {
 	for ($i = 0; $i<14; $i++) {
 	    foreach ($this->fieldCol[$i] as $key => $value) {
 		$params = array();
-		$query = "INSERT INTO screener_filter_fields (field_table_name, field_table_field, field_name, field_desc, field_type, field_group, field_order, report_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		$query = "INSERT INTO screener_filter_fields (field_table_name, field_table_field, field_name, field_desc, field_type, field_group, field_order, report_type, format) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		$params[] = $value["table"];
 		$params[] = $key;
 		$params[] = $value["title"];
@@ -474,6 +474,7 @@ class screener_filter {
 		} else {
 		    $params[] = NULL;
 		}
+		$params[] = $type;
 		$q = $this->db->prepare($query);
 		$q->execute($params);
 		$lastId = $this->db->lastInsertId();
@@ -496,9 +497,10 @@ class screener_filter {
 	    foreach ($this->fieldCol[$i] as $key => $value) {
 		$params = array();
 		$table = $value["table"];
-		$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ? WHERE field_table_name = '$table' AND field_table_field = '$key'";
+		$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? WHERE field_table_name = '$table' AND field_table_field = '$key'";
 		$params[] = $value["title"];
 		$params[] = $value["comment"];
+		$params[] = $value["format"];
 		$q = $this->db->prepare($query);
 		$q->execute($params);
 	    }
