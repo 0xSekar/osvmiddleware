@@ -28,9 +28,11 @@ if (!defined('YAHOO_INTEGRATION_PROXY')) {
     define('YAHOO_INTEGRATION_PROXY', null);
 }
 
+// Database
 if (!defined('DB_FRONTEND_DATABASE')) {
     define('DB_FRONTEND_HOST', 'localhost');
     define('DB_FRONTEND_DATABASE', 'jjun0366_frontend');
     define('DB_FRONTEND_USER', 'wsuser');
     define('DB_FRONTEND_PASSWORD', 'ng2Xfy2SAu');
 }
+

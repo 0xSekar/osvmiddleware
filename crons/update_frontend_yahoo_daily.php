@@ -220,7 +220,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 }
 
 		//Sector and Industry
-		if(isset($response->query->results->result->assetProfile->sector)) {
+		if(isset($response->query->results->result->assetProfile->sector) && !empty($response->query->results->result->assetProfile->sector)) {
 			$supdated ++;
                         try {
 							$res1 = $db->prepare("UPDATE `tickers` SET industry = ?, sector = ? WHERE id = ?");
