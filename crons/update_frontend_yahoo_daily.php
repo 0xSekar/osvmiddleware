@@ -21,15 +21,12 @@ set_time_limit(0);                   // ignore php timeout
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
-//$query = "SELECT value FROM system WHERE parameter = 'query_yahoo'";
-//$res = mysql_query($query) or die(mysql_error());
 try {
 	$res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
 } catch(PDOException $ex) {
     echo "\nDatabase Error"; //user message
     die("Line: ".__LINE__." - ".$ex->getMessage());
 }
-//$row = mysql_fetch_assoc($res);
 $row = $res->fetch(PDO::FETCH_ASSOC);
 if($row["value"] == 0) {
 	echo "Skip process as yahoo queries are currently dissabled.\n";
@@ -65,15 +62,12 @@ $snotfound2 = 0;
 echo "Updating Tickers...\n";
 
 //Select all tickers not updated for at least a day
-//$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380";
-//$res = mysql_query($query) or die(mysql_error());
 try {
 	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380");
 } catch(PDOException $ex) {
     echo "\nDatabase Error"; //user message
     die("Line: ".__LINE__." - ".$ex->getMessage());
 }
-//while ($row = mysql_fetch_assoc($res)) {
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {	
 	$count ++;
 	echo "Updating ".$row["ticker"]."...";
@@ -83,12 +77,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	if(isset($response->query) && isset($response->query->results)) {
 		foreach($response->query->results->quote as $element) {
 			if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
-				/*$query_div = "INSERT INTO `tickers_yahoo_dividend_history` (ticker_id, qtrDate, dividends) VALUES (";
-				$query_div .= "'".$row["id"]."',";
-				$query_div .= "'".$element->Date."',";
-				$query_div .= (is_null($element->Dividends)?"NULL":$element->Dividends);
-				$query_div .= ") ON DUPLICATE KEY UPDATE dividends = ";
-				$query_div .= (is_null($element->Dividends)?"NULL":$element->Dividends);*/
 
 				$query_div = "INSERT INTO `tickers_yahoo_dividend_history` (ticker_id, qtrDate, dividends) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE dividends = ?";
 				$params = array();
@@ -96,9 +84,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 				$params[] = $element->Date;
 				$params[] = (is_null($element->Dividends)?NULL:$element->Dividends);
 				$params[] = (is_null($element->Dividends)?NULL:$element->Dividends);
-				//mysql_query($query_div) or die(mysql_error());
 				try {
-					//$res1 = $db->exec($query_div);
 					$res1 = $db->prepare($query_div);
                 	$res1->execute($params);
 				} catch(PDOException $ex) {
@@ -115,8 +101,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         }
 
 	//UPDATE HISTORICAL DATA
-	//$q_count = "select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["id"]."'";
-	//$r_count = mysql_query($q_count) or die (mysql_error());
 	try {
 		$r_count = $db->query("select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["id"]."'"); 
 		//$r_row = mysql_fetch_assoc($r_count);
@@ -135,22 +119,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime($years ." years"))."' and endDate = '".date("Y-m-d", strtotime(($years+1) ." years"))."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
 			if(isset($response->query) && isset($response->query->results)) {
 				foreach($response->query->results->quote as $element) {
-					/*$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
-					$query_div .= "'".$row["id"]."',";
-					$query_div .= "'".$element->Date."',";
-					$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
-					$query_div .= (is_null($element->High)?"NULL":$element->High).",";
-					$query_div .= (is_null($element->Low)?"NULL":$element->Low).",";
-					$query_div .= (is_null($element->Close)?"NULL":$element->Close).",";
-					$query_div .= (is_null($element->Volume)?"NULL":$element->Volume).",";
-					$query_div .= (is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-					$query_div .= ") ON DUPLICATE KEY UPDATE ";
-					$query_div .= "open = ".(is_null($element->Open)?"NULL":$element->Open).",";
-					$query_div .= "high = ".(is_null($element->High)?"NULL":$element->High).",";
-					$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
-					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
-					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
-					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);*/
 
 					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
 					$params = array();
@@ -169,9 +137,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 					$params[] = (is_null($element->Close)?NULL:$element->Close);
 					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
 					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
-					//mysql_query($query_div) or die(mysql_error());
 					try {
-						//$res1 = $db->exec($query_div);
 						$res1 = $db->prepare($query_div);
                 		$res1->execute($params);
 					} catch(PDOException $ex) {
@@ -182,8 +148,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			}
 		}
 		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
-		        //$query_up = "UPDATE tickers_control SET last_split_date = '".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."' WHERE ticker_id = " . $row["id"];
-        		//mysql_query($query_up) or die(mysql_error());	
         		try {
         			$res1 = $db->prepare("UPDATE tickers_control SET last_split_date = ? WHERE ticker_id = ?");
 					$res1->execute(array((date("Y-m-d",strtotime($sresponse->query->results->SplitDate))), $row["id"])); 
@@ -207,22 +171,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		if(isset($response->query) && isset($response->query->results)) {
 			foreach($response->query->results->quote as $element) {
 				if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
-					/*$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (";
-					$query_div .= "'".$row["id"]."',";
-					$query_div .= "'".$element->Date."',";
-					$query_div .= (is_null($element->Open)?"NULL":$element->Open).",";
-					$query_div .= (is_null($element->High)?"NULL":$element->High).",";
-					$query_div .= (is_null($element->Low)?"NULL":$element->Low).",";
-					$query_div .= (is_null($element->Close)?"NULL":$element->Close).",";
-					$query_div .= (is_null($element->Volume)?"NULL":$element->Volume).",";
-					$query_div .= (is_null($element->Adj_Close)?"NULL":$element->Adj_Close);
-					$query_div .= ") ON DUPLICATE KEY UPDATE ";
-					$query_div .= "open = ".(is_null($element->Open)?"NULL":$element->Open).",";
-					$query_div .= "high = ".(is_null($element->High)?"NULL":$element->High).",";
-					$query_div .= "low = ".(is_null($element->Low)?"NULL":$element->Low).",";
-					$query_div .= "close = ".(is_null($element->Close)?"NULL":$element->Close).",";
-					$query_div .= "volume = ".(is_null($element->Volume)?"NULL":$element->Volume).",";
-					$query_div .= "adj_close = ".(is_null($element->Adj_Close)?"NULL":$element->Adj_Close);*/
 
 					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
 					$params = array();
@@ -241,9 +189,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 					$params[] = (is_null($element->Close)?NULL:$element->Close);
 					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
 					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
-					//mysql_query($query_div) or die(mysql_error());
 					try {
-						//$res1 = $db->exec($query_div);
 						$res1 = $db->prepare($query_div);
                 		$res1->execute($params);
 					} catch(PDOException $ex) {
@@ -276,10 +222,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		//Sector and Industry
 		if(isset($response->query->results->result->assetProfile->sector)) {
 			$supdated ++;
-                        //$query_div = "UPDATE `tickers` SET industry = '" . mysql_real_escape_string($response->query->results->result->assetProfile->industry) ."', ";
-                        //$query_div .= "sector = '" . mysql_real_escape_string($response->query->results->result->assetProfile->sector) ."' ";
-                        //$query_div .= "WHERE id = " . $row["id"];
-                        //mysql_query($query_div) or die(mysql_error());
                         try {
 							$res1 = $db->prepare("UPDATE `tickers` SET industry = ?, sector = ? WHERE id = ?");
 							$res1->execute(array((is_null($response->query->results->result->assetProfile->industry)?'':$response->query->results->result->assetProfile->industry), (is_null($response->query->results->result->assetProfile->sector)?'':$response->query->results->result->assetProfile->sector), $row["id"]));					
@@ -295,9 +237,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		//Description
 		if(isset($response->query->results->result->assetProfile->longBusinessSummary)) {
 			$supdated2 ++;
-                        //$query_div = "UPDATE `tickers` SET description = '" . mysql_real_escape_string($response->query->results->result->assetProfile->longBusinessSummary) ."' ";
-                        //$query_div .= "WHERE id = " . $row["id"];
-                        //mysql_query($query_div) or die(mysql_error());
                         try {
 							$res1 = $db->prepare("UPDATE `tickers` SET description = ? WHERE id = ?");
 							$res1->execute(array((is_null($response->query->results->result->assetProfile->longBusinessSummary)?'':$response->query->results->result->assetProfile->longBusinessSummary), $row["id"]));					
@@ -319,11 +258,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	update_key_ratios_ttm($row["id"]);
 
 	// UPDATE DATES
-	//$query_up = "UPDATE tickers_control SET last_yahoo_date = NOW() WHERE ticker_id = " . $row["id"];
 	$query_up = "UPDATE tickers_control SET last_yahoo_date = NOW() WHERE ticker_id = ? ";
 	$params = array();
 	$params[] = $row["id"];
-	//mysql_query($query_up) or die(mysql_error());
 	try {
 		$res1 = $db->prepare($query_up);
         $res1->execute($params);

@@ -1,8 +1,6 @@
 <?php
 function update_ratings() {
         $db = Database::GetInstance();
-        //$query = "delete from reports_ratings";
-        //$res = mysql_query($query) or die (mysql_error());
         try {
                 $res = $db->query("delete from reports_ratings");
             } catch(PDOException $ex) {
@@ -10,8 +8,6 @@ function update_ratings() {
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }
 
-        //$query = "SELECT DISTINCT fiscal_year from reports_header WHERE report_type='ANN' order by fiscal_year";
-        //$resy = mysql_query($query) or die (mysql_error());
         try {
                 $res = $db->query("SELECT DISTINCT fiscal_year from reports_header WHERE report_type='ANN' order by fiscal_year");
             } catch(PDOException $ex) {
@@ -33,7 +29,6 @@ function update_ratings() {
         $vw3 = 0.075;
         $vw4 = 0.275;
 
-        //while($rowy = mysql_fetch_assoc($resy)) {
         while($rowy = $resy->fetch(PDO::FETCH_ASSOC)) {
         	$values = array();
         	$tickerCount = 0;
@@ -49,14 +44,12 @@ function update_ratings() {
         		AND h.fiscal_year = ".$rowy["fiscal_year"]."
         		ORDER BY FCF_S DESC 
         	";
-        	//$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-        	//while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         		$values[$row["report_id"]]["ticker_id"] = $row["ticker_id"];
         		$values[$row["report_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
@@ -78,7 +71,6 @@ function update_ratings() {
         		AND h.fiscal_year = ".$rowy["fiscal_year"]."
         		ORDER BY CROIC DESC 
         	";
-        	//$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
@@ -100,14 +92,12 @@ function update_ratings() {
         		AND h.fiscal_year = ".$rowy["fiscal_year"]."
         		ORDER BY pioTotal DESC 
         	";
-        	//$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-        	//while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         		$values[$row["report_id"]]["Q3"] = $row["value"];
         		$values[$row["report_id"]]["QP3"] = $position;
@@ -132,15 +122,13 @@ function update_ratings() {
                         WHERE h.report_type =  'ANN'
                         AND h.fiscal_year = ".$rowy["fiscal_year"]."
                         ORDER BY SalesPercChange DESC
-                ";
-                //$res = mysql_query($query) or die (mysql_error());
+                        ";
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-                //while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         $values[$row["report_id"]]["G1"] = is_null($row["value"])?null:($row["value"] * 100);
                         $values[$row["report_id"]]["GP1"] = $position;
@@ -156,14 +144,12 @@ function update_ratings() {
                         AND h.fiscal_year = ".$rowy["fiscal_year"]."
                         ORDER BY Sales5YYCGrPerc DESC
                 ";
-                //$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-                //while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         $values[$row["report_id"]]["G2"] = is_null($row["value"])?null:($row["value"] * 100);
                         $values[$row["report_id"]]["GP2"] = $position;
@@ -179,14 +165,12 @@ function update_ratings() {
                         AND h.fiscal_year = ".$rowy["fiscal_year"]."
                         ORDER BY GPA DESC
                 ";
-                //$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-                //while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         $values[$row["report_id"]]["G3"] = is_null($row["value"])?null:($row["value"]);
                         $values[$row["report_id"]]["GP3"] = $position;
@@ -204,14 +188,12 @@ function update_ratings() {
                         AND h.fiscal_year = ".$rowy["fiscal_year"]."
                         ORDER BY EV_EBIT DESC
                 ";
-                //$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-                //while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         $values[$row["report_id"]]["V1"] = is_null($row["value"])?null:($row["value"]);
                         $values[$row["report_id"]]["VP1"] = $position;
@@ -227,14 +209,12 @@ function update_ratings() {
                         AND h.fiscal_year = ".$rowy["fiscal_year"]."
                         ORDER BY P_FCF DESC
                 ";
-                //$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-                //while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         $values[$row["report_id"]]["V2"] = is_null($row["value"])?null:($row["value"]);
                         $values[$row["report_id"]]["VP2"] = $position;
@@ -250,14 +230,12 @@ function update_ratings() {
                         AND h.fiscal_year = ".$rowy["fiscal_year"]."
                         ORDER BY -P_BV DESC
                 ";
-                //$res = mysql_query($query) or die (mysql_error());
                 try {
                         $res = $db->query($query);
                     } catch(PDOException $ex) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-                //while ($row = mysql_fetch_assoc($res)) {
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         $values[$row["report_id"]]["V3"] = is_null($row["value"])?null:($row["value"]);
                         $values[$row["report_id"]]["VP3"] = $position;
@@ -494,29 +472,7 @@ function update_ratings() {
 
 
         		//Save data
-        		//$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (";
                         $query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//20par
-        		/*$query .= $id.",";
-        		$query .= $values[$id]["QPW1"].",";
-        		$query .= $values[$id]["QPW2"].",";
-        		$query .= $values[$id]["QPW3"].",";
-        		$query .= $values[$id]["QF"].",";
-        		$query .= $values[$id]["GPW1"].",";
-        		$query .= $values[$id]["GPW2"].",";
-        		$query .= $values[$id]["GPW3"].",";
-        		$query .= $values[$id]["GPW4"].",";
-        	        $query .= $values[$id]["GF"].",";
-                	$query .= $values[$id]["VPW1"].",";
-        	        $query .= $values[$id]["VPW2"].",";
-                	$query .= $values[$id]["VPW3"].",";
-        	        $query .= $values[$id]["VPW4"].",";
-                	$query .= $values[$id]["VF"].",";
-        		$query .= $values[$id]["AS"].",";
-                        $query .= "'".$values[$id]["RS"]."',";
-                        $query .= "'".$values[$id]["QG"]."',";
-                        $query .= "'".$values[$id]["VG"]."',";
-                        $query .= "'".$values[$id]["GG"]."'";
-        		$query .= ")";*/
                         $params = array();
                         $params[] = $id;
                         $params[] = ($values[$id]["QPW1"] =='null' ? null:$values[$id]["QPW1"]);
@@ -538,7 +494,6 @@ function update_ratings() {
                         $params[] = ($values[$id]["QG"] =='null' ? null:$values[$id]["QG"]);
                         $params[] = ($values[$id]["VG"] =='null' ? null:$values[$id]["VG"]);
                         $params[] = ($values[$id]["GG"] =='null' ? null:$values[$id]["GG"]);
-        		//$save = mysql_query($query) or die (mysql_error());
                         try {
                                 $save = $db->prepare($query);
                                 $save->execute($params);
