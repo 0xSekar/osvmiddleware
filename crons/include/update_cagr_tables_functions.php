@@ -33,7 +33,7 @@ function updateCAGR_concat($vv, $va, $years) {
         if ($va=='null' || $vv=='null' || $vv==0 || ($va < 0 && $vv > 0) || ($va > 0 && $vv < 0)) {
                 return ",null";
         } else {
-		if ($vv > 0) {
+		if ($va > 0) {
 	                return ",".(pow($va/$vv, 1/$years) - 1);
 		} else {
 	                return ",".((pow($va/$vv, 1/$years) - 1) * -1);
