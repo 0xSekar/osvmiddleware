@@ -7,13 +7,21 @@ function updateCAGR($table, $fieldArray, $years, $period, $report_id, $rawdata, 
 	$query .= ") VALUES (";
 	$query .= "'".$report_id."'";
 	foreach ($fieldArray as $value) {
-        	if ($rawdata[$value][$period]=='null' || $rawdata[$value][$period-$years]=='null' || $rawdata[$value][$period-$years]<=0 || $rawdata[$value][$period] < 0) {
+        	if ($rawdata[$value][$period]=='null' || $rawdata[$value][$period-$years]=='null' || $rawdata[$value][$period-$years]==0 || ($rawdata[$value][$period] < 0 && $rawdata[$value][$period-$years] > 0) || ($rawdata[$value][$period] > 0 && $rawdata[$value][$period-$years] < 0)) {
 	        	$query .= ",null";
 	        } else {
 			if ($toFloat) {
-        	        	$query .= ",".(pow(toFloat($rawdata[$value][$period])/toFloat($rawdata[$value][$period-$years]), 1/$years) - 1);
+				if ($rawdata[$value][$period] > 0) {
+	        	        	$query .= ",".(pow(toFloat($rawdata[$value][$period])/toFloat($rawdata[$value][$period-$years]), 1/$years) - 1);
+				} else {
+	        	        	$query .= ",".((pow(toFloat($rawdata[$value][$period])/toFloat($rawdata[$value][$period-$years]), 1/$years) - 1) * -1);
+				}
 			} else {
-        	        	$query .= ",".(pow($rawdata[$value][$period]/$rawdata[$value][$period-$years], 1/$years) - 1);
+				if ($rawdata[$value][$period] > 0) {
+        		        	$query .= ",".(pow($rawdata[$value][$period]/$rawdata[$value][$period-$years], 1/$years) - 1);
+				} else {
+        		        	$query .= ",".((pow($rawdata[$value][$period]/$rawdata[$value][$period-$years], 1/$years) - 1) * -1);
+				}
 			}
 	        }
 	}
@@ -22,10 +30,14 @@ function updateCAGR($table, $fieldArray, $years, $period, $report_id, $rawdata, 
 }
 
 function updateCAGR_concat($vv, $va, $years) {
-        if ($va=='null' || $vv=='null' || $vv<=0 || $va < 0) {
+        if ($va=='null' || $vv=='null' || $vv==0 || ($va < 0 && $vv > 0) || ($va > 0 && $vv < 0)) {
                 return ",null";
         } else {
-                return ",".(pow($va/$vv, 1/$years) - 1);
+		if ($vv > 0) {
+	                return ",".(pow($va/$vv, 1/$years) - 1);
+		} else {
+	                return ",".((pow($va/$vv, 1/$years) - 1) * -1);
+		}
         }
 }
 
