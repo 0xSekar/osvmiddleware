@@ -1,0 +1,1 @@
+ALTER TABLE `screener_persistent` ADD COLUMN `rank` SMALLINT NOT NULL DEFAULT 0 AFTER `fields`
