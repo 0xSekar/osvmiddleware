@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__)."/../db/db.php");
+require_once(dirname(__FILE__)."/../../db/db.php");
 
 class screener_filter {
     //Database access
