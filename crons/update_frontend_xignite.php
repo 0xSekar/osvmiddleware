@@ -97,7 +97,7 @@ try {
 }
 
 echo $count2 . " rows processed\n";
-echo "Quotes:\n";
+echo "Estimates:\n";
 echo "\t".$eupdated." tickers updates\n";
 echo "\t".$enotfound." tickers not found on xignite\n";
 ?>

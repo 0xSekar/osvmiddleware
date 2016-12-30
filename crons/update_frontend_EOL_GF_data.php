@@ -59,8 +59,13 @@ foreach ($result as $symbol) {
 	$res = mysql_query($query) or die(mysql_error());
 	$counter = mysql_fetch_object($res);
 	if ($counter->C == 0) {
+		$qe = "SELECT name_to AS exchange FROM exchange_conversion WHERE name_from = '".mysql_real_escape_string($symbol->exchange)."'";
+		$re = mysql_query($qe) or die(mysql_error());
+		if(!$rowe = mysql_fetch_assoc($re)) {
+			$rowe["exchange"] = "";
+		}
 		$inserted ++;
-		$query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol->ticker)."', '".mysql_real_escape_string($symbol->cik)."', '".mysql_real_escape_string($symbol->company)."', '".mysql_real_escape_string($symbol->exchange)."', '".mysql_real_escape_string($symbol->siccode)."', '".mysql_real_escape_string($symbol->entityid)."', '".mysql_real_escape_string($symbol->formername)."', '".mysql_real_escape_string($symbol->industry)."', '".mysql_real_escape_string($symbol->sector)."', '".mysql_real_escape_string($symbol->country)."')";
+		$query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol->ticker)."', '".mysql_real_escape_string($symbol->cik)."', '".mysql_real_escape_string($symbol->company)."', '".mysql_real_escape_string($rowe["exchange"])."', '".mysql_real_escape_string($symbol->siccode)."', '".mysql_real_escape_string($symbol->entityid)."', '".mysql_real_escape_string($symbol->formername)."', '".mysql_real_escape_string($symbol->industry)."', '".mysql_real_escape_string($symbol->sector)."', '".mysql_real_escape_string($symbol->country)."')";
 		$res = mysql_query($query) or die(mysql_error());
 		$id = mysql_insert_id();
 		$query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
@@ -94,7 +99,12 @@ foreach ($result2 as $symbol2) {
         	        while ($data = fgetcsv($csvst)) {
                 	        $rawdata[$data[0]] = $data;
 	                }
-	                $query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol2->ticker)."', '".mysql_real_escape_string($rawdata["CIK"][$treports])."', '".mysql_real_escape_string($rawdata["COMPANYNAME"][$treports])."', '".mysql_real_escape_string($rawdata["PrimaryExchange"][$treports])."', '".mysql_real_escape_string($rawdata["SICCode"][$treports])."', '".mysql_real_escape_string($rawdata["entityid"][$treports])."', '".mysql_real_escape_string($rawdata["Formername"][$treports])."', '".mysql_real_escape_string($rawdata["Industry"][$treports])."', '".mysql_real_escape_string($rawdata["Sector"][$treports])."', '".mysql_real_escape_string($rawdata["Country"][$treports])."')";
+	                $qe = "SELECT name_to AS exchange FROM exchange_conversion WHERE name_from = '".mysql_real_escape_string($rawdata["PrimaryExchange"][$treports])."'";
+        	        $re = mysql_query($qe) or die(mysql_error());
+                	if(!$rowe = mysql_fetch_assoc($re)) {
+                        	$rowe["exchange"] = "";
+                	}
+	                $query = "INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) values ('".mysql_real_escape_string($symbol2->ticker)."', '".mysql_real_escape_string($rawdata["CIK"][$treports])."', '".mysql_real_escape_string($rawdata["COMPANYNAME"][$treports])."', '".mysql_real_escape_string($rowe["exchange"])."', '".mysql_real_escape_string($rawdata["SICCode"][$treports])."', '".mysql_real_escape_string($rawdata["entityid"][$treports])."', '".mysql_real_escape_string($rawdata["Formername"][$treports])."', '".mysql_real_escape_string($rawdata["Industry"][$treports])."', '".mysql_real_escape_string($rawdata["Sector"][$treports])."', '".mysql_real_escape_string($rawdata["Country"][$treports])."')";
         	        $res = mysql_query($query) or die(mysql_error());
                 	$id = mysql_insert_id();
 	                $query = "INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')";
