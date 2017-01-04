@@ -4,7 +4,6 @@
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
 include_once('../config.php');
-include_once('../db/database.php');
 include_once('../db/db.php');
 include_once('./include/raw_data_update_yahoo_keystats.php');
 require_once("../include/yahoo/common.inc.php");
@@ -13,7 +12,6 @@ include_once('./include/update_ratings_ttm.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-connectfe();
 $db = Database::GetInstance(); 
 
 set_time_limit(0);                   // ignore php timeout

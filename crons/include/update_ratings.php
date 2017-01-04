@@ -9,7 +9,7 @@ function update_ratings() {
             }
 
         try {
-                $res = $db->query("SELECT DISTINCT fiscal_year from reports_header WHERE report_type='ANN' order by fiscal_year");
+                $resy = $db->query("SELECT DISTINCT fiscal_year from reports_header WHERE report_type='ANN' order by fiscal_year");
             } catch(PDOException $ex) {
                 echo "\nDatabase Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());

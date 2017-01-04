@@ -4,13 +4,11 @@
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
 include_once('../config.php');
-include_once('../db/database.php');
 include_once('../db/db.php');
 require_once("../include/yahoo/common.inc.php");
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-connectfe();
 $db = Database::GetInstance(); 
 
 set_time_limit(0);                   // ignore php timeout
@@ -100,7 +98,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         $params[] = (!isset($rawdata->EBITDA)?NULL:$rawdata->EBITDA);
                         $params[] = (!isset($rawdata->ChangeFromYearLow)?NULL:$rawdata->ChangeFromYearLow);
                         $params[] = (!isset($rawdata->PercentChangeFromYearLow)?NULL:$rawdata->PercentChangeFromYearLow);
-                        $params[] = date("H:i",strtotime(substr($rawdata->LastTradeRealTimeWithTime, 0, strpos($rawdata->LastTradeRealTimeWithTime,"-")-1)));
+                        if(isset($rawdata->LastTradeRealTimeWithTime)) {
+                                $params[] = date("H:i",strtotime(substr($rawdata->LastTradeRealTimeWithTime, 0, strpos($rawdata->LastTradeRealTimeWithTime,"-")-1)));
                         } else {
                                 $params[] = NULL;
                         }                        
