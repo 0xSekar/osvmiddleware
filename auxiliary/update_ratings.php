@@ -1,15 +1,29 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
 //error_reporting(0);
-include_once('../db/database.php');
-connectfe();
+//include_once('../db/database.php');
+include_once('../db/db.php');
+//connectfe();
+$db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
 $query = "delete from reports_ratings";
-$res = mysql_query($query) or die (mysql_error());
+//$res = mysql_query($query) or die (mysql_error());
+try {
+    $res = $db->exec($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 
 $query = "SELECT DISTINCT fiscal_year from reports_header WHERE report_type='ANN' order by fiscal_year";
-$resy = mysql_query($query) or die (mysql_error());
+//$resy = mysql_query($query) or die (mysql_error());
+try {
+    $resy = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 
 //Variables to be used for linear transform and squeez
 $squ = 0.998;
@@ -25,7 +39,8 @@ $vw2 = 0.375;
 $vw3 = 0.075;
 $vw4 = 0.275;
 
-while($rowy = mysql_fetch_assoc($resy)) {
+//while($rowy = mysql_fetch_assoc($resy)) {
+while($rowy = $resy->fetch(PDO::FETCH_ASSOC)) {
 	$values = array();
 	$tickerCount = 0;
 
@@ -40,8 +55,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
 		AND h.fiscal_year = ".$rowy["fiscal_year"]."
 		ORDER BY FCF_S DESC 
 	";
-	$res = mysql_query($query) or die (mysql_error());
-	while ($row = mysql_fetch_assoc($res)) {
+	//$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {        
+	while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		$values[$row["report_id"]]["ticker_id"] = $row["ticker_id"];
 		$values[$row["report_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
 		$values[$row["report_id"]]["QP1"] = $position;
@@ -62,8 +84,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
 		AND h.fiscal_year = ".$rowy["fiscal_year"]."
 		ORDER BY CROIC DESC 
 	";
-	$res = mysql_query($query) or die (mysql_error());
-	while ($row = mysql_fetch_assoc($res)) {
+	//$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {  
+	while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		$values[$row["report_id"]]["Q2"] = is_null($row["value"])?null:($row["value"] * 100);
 		$values[$row["report_id"]]["QP2"] = $position;
 		$position++;
@@ -78,8 +107,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
 		AND h.fiscal_year = ".$rowy["fiscal_year"]."
 		ORDER BY pioTotal DESC 
 	";
-	$res = mysql_query($query) or die (mysql_error());
-	while ($row = mysql_fetch_assoc($res)) {
+	//$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+	//while ($row = mysql_fetch_assoc($res)) {  
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		$values[$row["report_id"]]["Q3"] = $row["value"];
 		$values[$row["report_id"]]["QP3"] = $position;
 		$position++;
@@ -104,8 +140,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
                 AND h.fiscal_year = ".$rowy["fiscal_year"]."
                 ORDER BY SalesPercChange DESC
         ";
-        $res = mysql_query($query) or die (mysql_error());
-        while ($row = mysql_fetch_assoc($res)) {
+        //$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {  
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $values[$row["report_id"]]["G1"] = is_null($row["value"])?null:($row["value"] * 100);
                 $values[$row["report_id"]]["GP1"] = $position;
 		$position++;
@@ -120,8 +163,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
                 AND h.fiscal_year = ".$rowy["fiscal_year"]."
                 ORDER BY Sales5YYCGrPerc DESC
         ";
-        $res = mysql_query($query) or die (mysql_error());
-        while ($row = mysql_fetch_assoc($res)) {
+        //$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {  
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $values[$row["report_id"]]["G2"] = is_null($row["value"])?null:($row["value"] * 100);
                 $values[$row["report_id"]]["GP2"] = $position;
 		$position++;
@@ -136,8 +186,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
                 AND h.fiscal_year = ".$rowy["fiscal_year"]."
                 ORDER BY GPA DESC
         ";
-        $res = mysql_query($query) or die (mysql_error());
-        while ($row = mysql_fetch_assoc($res)) {
+        //$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {  
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $values[$row["report_id"]]["G3"] = is_null($row["value"])?null:($row["value"]);
                 $values[$row["report_id"]]["GP3"] = $position;
                 $position++;
@@ -154,8 +211,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
                 AND h.fiscal_year = ".$rowy["fiscal_year"]."
                 ORDER BY EV_EBIT DESC
         ";
-        $res = mysql_query($query) or die (mysql_error());
-        while ($row = mysql_fetch_assoc($res)) {
+        //$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {  
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $values[$row["report_id"]]["V1"] = is_null($row["value"])?null:($row["value"]);
                 $values[$row["report_id"]]["VP1"] = $position;
                 $position++;
@@ -170,8 +234,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
                 AND h.fiscal_year = ".$rowy["fiscal_year"]."
                 ORDER BY P_FCF DESC
         ";
-        $res = mysql_query($query) or die (mysql_error());
-        while ($row = mysql_fetch_assoc($res)) {
+        //$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {  
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $values[$row["report_id"]]["V2"] = is_null($row["value"])?null:($row["value"]);
                 $values[$row["report_id"]]["VP2"] = $position;
                 $position++;
@@ -186,8 +257,15 @@ while($rowy = mysql_fetch_assoc($resy)) {
                 AND h.fiscal_year = ".$rowy["fiscal_year"]."
                 ORDER BY -P_BV DESC
         ";
-        $res = mysql_query($query) or die (mysql_error());
-        while ($row = mysql_fetch_assoc($res)) {
+        //$res = mysql_query($query) or die (mysql_error());
+        try {
+            $res = $db->query($query);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        //while ($row = mysql_fetch_assoc($res)) {  
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $values[$row["report_id"]]["V3"] = is_null($row["value"])?null:($row["value"]);
                 $values[$row["report_id"]]["VP3"] = $position;
                 $position++;
@@ -422,7 +500,7 @@ while($rowy = mysql_fetch_assoc($resy)) {
         	        $values[$id]["VG"] = 'F';
 
 		//Save data
-		$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (";
+		/*$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (";
 		$query .= $id.",";
 		$query .= $values[$id]["QPW1"].",";
 		$query .= $values[$id]["QPW2"].",";
@@ -443,8 +521,37 @@ while($rowy = mysql_fetch_assoc($resy)) {
 		$query .= "'".$values[$id]["QG"]."',";
 		$query .= "'".$values[$id]["VG"]."',";
 		$query .= "'".$values[$id]["GG"]."'";
-		$query .= ")";
-		$save = mysql_query($query) or die (mysql_error());
+		$query .= ")";*/
+                $query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //20
+                $params = array();
+                $params[] = $id;
+                $params[] = $values[$id]["QPW1"];
+                $params[] = $values[$id]["QPW2"];
+                $params[] = $values[$id]["QPW3"];
+                $params[] = $values[$id]["QF"];
+                $params[] = $values[$id]["GPW1"];
+                $params[] = $values[$id]["GPW2"];
+                $params[] = $values[$id]["GPW3"];
+                $params[] = $values[$id]["GPW4"];
+                $params[] = $values[$id]["GF"];
+                $params[] = $values[$id]["VPW1"];
+                $params[] = $values[$id]["VPW2"];
+                $params[] = $values[$id]["VPW3"];
+                $params[] = $values[$id]["VPW4"];
+                $params[] = $values[$id]["VF"];
+                $params[] = $values[$id]["AS"];
+                $params[] = $values[$id]["RS"];
+                $params[] = $values[$id]["QG"];
+                $params[] = $values[$id]["VG"];
+                $params[] = $values[$id]["GG"];
+		//$save = mysql_query($query) or die (mysql_error());
+                try {
+                        $save = $db->prepare($query);
+                        $save->execute($params);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("- Line: ".__LINE__." - ".$ex->getMessage());
+                }
 
 		$values[$id]["id"] = $id;
 	}

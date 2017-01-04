@@ -2,12 +2,14 @@
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
 include_once('../config.php');
-include_once('../db/database.php');
+//include_once('../db/database.php');
+include_once('../db/db.php');
 include_once('../crons/include/update_cagr_tables_functions.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-connectfe();
+//connectfe();
+$db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
@@ -18,7 +20,13 @@ $areports = AREPORTS;
 
 //Get full list of symbols from backend
 $query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id group by a.id";
-$res = mysql_query($query) or die (mysql_error());
+//$res = mysql_query($query) or die (mysql_error());
+try {
+        $res = $db->query($query);
+} catch(PDOException $ex) {
+        echo "\nDatabase Error"; //user message
+        die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 
 $count = 0;
 $inserted = 0;
@@ -27,18 +35,33 @@ $dates = new stdClass();
 $report_tables = array("reports_balanceconsolidated_3cagr","reports_balanceconsolidated_5cagr","reports_balanceconsolidated_7cagr","reports_balanceconsolidated_10cagr","reports_balancefull_3cagr","reports_balancefull_5cagr","reports_balancefull_7cagr","reports_balancefull_10cagr","reports_cashflowconsolidated_3cagr","reports_cashflowconsolidated_5cagr","reports_cashflowconsolidated_7cagr","reports_cashflowconsolidated_10cagr","reports_cashflowfull_3cagr","reports_cashflowfull_5cagr","reports_cashflowfull_7cagr","reports_cashflowfull_10cagr","reports_gf_data_3cagr","reports_gf_data_5cagr","reports_gf_data_7cagr","reports_gf_data_10cagr","reports_incomeconsolidated_3cagr","reports_incomeconsolidated_5cagr","reports_incomeconsolidated_7cagr","reports_incomeconsolidated_10cagr","reports_incomefull_3cagr","reports_incomefull_5cagr","reports_incomefull_7cagr","reports_incomefull_10cagr","reports_variable_ratios_3cagr","reports_variable_ratios_5cagr","reports_variable_ratios_7cagr","reports_variable_ratios_10cagr","reports_financialscustom_3cagr","reports_financialscustom_5cagr","reports_financialscustom_7cagr","reports_financialscustom_10cagr","reports_key_ratios_3cagr","reports_key_ratios_5cagr","reports_key_ratios_7cagr","reports_key_ratios_10cagr");
 
 echo "Updating CAGR data points...<br>\n";
-while($row = mysql_fetch_assoc($res)) {
+//while($row = mysql_fetch_assoc($res)) {
+while($row = $res->fetch(PDO::FETCH_ASSOC)) {    
 	echo "Updating ".$row["ticker"]."<br>\n";
 	$query = "Select count(*) as c from reports_header a where a.ticker_id=".$row["id"]." AND a.report_type='ANN'";
-	$res2 = mysql_query($query) or die (mysql_error());
-	$annCount = mysql_fetch_assoc($res2);
+	//$res2 = mysql_query($query) or die (mysql_error());
+    try {
+            $res2 = $db->query($query);
+    } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+    }
+	//$annCount = mysql_fetch_assoc($res2);
+    $annCount = $res2->fetch(PDO::FETCH_ASSOC);
 	$annCount = $annCount["c"];
 	$count++;
 	$rawdata = array();
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_key_ratios c, reports_incomefull d, reports_incomeconsolidated e, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='ANN' order by a.fiscal_year";
-	$res2 = mysql_query($query) or die (mysql_error());
+	//$res2 = mysql_query($query) or die (mysql_error());
+    try {
+            $res3 = $db->query($query);
+    } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("- Line: ".__LINE__." - ".$ex->getMessage());
+    }
 	$pos = $areports - $annCount;
-	while($row2 = mysql_fetch_assoc($res2)) {
+	//while($row2 = mysql_fetch_assoc($res2)) {
+    while($row2 = $res3->fetch(PDO::FETCH_ASSOC)) {
 		$row2b = $row2;
 		$pos++;
 		foreach ($row2 as $v=>$y) {
@@ -52,11 +75,21 @@ while($row = mysql_fetch_assoc($res)) {
                 }
 	}
 	$dates->ticker_id = $row["id"];
+echo "Reports:".$annCount;
+var_dump($rawdata);
+ echo "Report:".$report_id."\n";
+ exit;       
 	array_walk_recursive($rawdata, 'nullValues');
 
         foreach($report_tables as $table) {
        	        $query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$dates->ticker_id.")";
-               	mysql_query($query) or die (mysql_error());
+               	//mysql_query($query) or die (mysql_error());
+                try {
+                        $db->exec($query);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("- Line: ".__LINE__." - ".$ex->getMessage());
+                }
         }
 
 	//Update each CAGR table

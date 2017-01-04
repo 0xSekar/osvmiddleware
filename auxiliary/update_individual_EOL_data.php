@@ -2,7 +2,8 @@
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 include_once('../config.php');
-include_once('../db/database.php');
+//include_once('../db/database.php');
+include_once('../db/db.php');
 include_once('./../crons/include/raw_data_update_queries.php');
 include_once('./../crons/include/update_key_ratios_ttm.php');
 include_once('./../crons/include/update_quality_checks.php');
@@ -12,7 +13,8 @@ include_once('./../crons/include/update_is_old_field.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-connectfe();
+//connectfe();
+$db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
@@ -38,8 +40,15 @@ if (!isset($_GET["ticker"])) {
 }
 echo "Updating ticker ".$_GET["ticker"]."... <br>";
 $query = "SELECT count(*) as C FROM tickers WHERE ticker = '".$_GET['ticker']."'";
-$res = mysql_query($query) or die(mysql_error());
-$counter = mysql_fetch_object($res);
+//$res = mysql_query($query) or die(mysql_error());
+try {
+        $res = $db->query($query);
+} catch(PDOException $ex) {
+        echo "\nDatabase Error"; //user message
+        die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//$counter = mysql_fetch_object($res);
+$counter = $res->fetch(PDO::FETCH_OBJ);
 if ($counter->C == 0) {
 	echo "Ticker not found in Frontend database";
 	exit;
@@ -54,13 +63,21 @@ $fixticker = $result[0]->ticker;
 
 if (!is_null($fixdate) && $fixtype != "Dummy") {
         $query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$fixticker'";
-        $res = mysql_query($query) or die(mysql_error());
-        if(mysql_num_rows($res) == 0) {
+        //$res = mysql_query($query) or die(mysql_error());
+        try {
+		        $res = $db->query($query);
+		} catch(PDOException $ex) {
+		        echo "\nDatabase Error"; //user message
+		        die("- Line: ".__LINE__." - ".$ex->getMessage());
+		}
+        //if(mysql_num_rows($res) == 0) {
+        if($res->rowCount() == 0) {
 	        echo "Ticker not found in Backend database";
         	exit;
 	}
 	echo "Downloading new data... <br>";
-        $dates = mysql_fetch_object($res);
+        //$dates = mysql_fetch_object($res);
+        $dates = $res->fetch(PDO::FETCH_OBJ);
 
 	$csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
 	$csvst = fopen('php://memory', 'r+');
@@ -85,7 +102,13 @@ if (!is_null($fixdate) && $fixtype != "Dummy") {
 		
 	//Finally update local report date
 	$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
-	mysql_query($query) or die (mysql_error());
+	//mysql_query($query) or die (mysql_error());
+	try {
+	        $db->exec($query);
+	} catch(PDOException $ex) {
+	        echo "\nDatabase Error"; //user message
+	        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	}
 	fclose($csvst);
 }
 
@@ -97,15 +120,33 @@ update_beneish_checks($dates->ticker_id);
 echo "Done <br>";
 echo "Removing old Quality Checks (PIO)... ";
 $query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-mysql_query($query) or die (mysql_error());
+//mysql_query($query) or die (mysql_error());
+try {
+        $db->exec($query);
+} catch(PDOException $ex) {
+        echo "\nDatabase Error"; //user message
+        die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 echo "done<br>\n";
 echo "Removing old Quality Checks (ALTMAN)... ";
 $query = "delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-mysql_query($query) or die (mysql_error());
+//mysql_query($query) or die (mysql_error());
+try {
+        $db->exec($query);
+} catch(PDOException $ex) {
+        echo "\nDatabase Error"; //user message
+        die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 echo "done<br>\n";
 echo "Removing old Quality Checks (BENEISH)... ";
 $query = "delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
-mysql_query($query) or die (mysql_error());
+//mysql_query($query) or die (mysql_error());
+try {
+        $db->exec($query);
+} catch(PDOException $ex) {
+        echo "\nDatabase Error"; //user message
+        die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 echo "done<br>\n";
 echo "Updating Ratings... ";
 update_ratings();

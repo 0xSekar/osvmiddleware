@@ -1,17 +1,37 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
 //error_reporting(0);
-include_once('../db/database.php');
-connectfe();
+//include_once('../db/database.php');
+include_once('../db/db.php');
+//connectfe();
+$db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
 $values = array();
 $query = "delete from ttm_ratings_history where ratings_date = curdate()";
-$res = mysql_query($query) or die (mysql_error());
+//$res = mysql_query($query) or die (mysql_error());
+try {
+    $res = $db->exec($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 $query = "insert into ttm_ratings_history (ticker_id, ratings_date, Q1, Q2, Q3, QT, V1, V2, V3, V4, VT, G1, G2, G3, G4, GT, `AS`, AS_grade, Q_grade, V_grade, G_grade) select ticker_id, curdate() as ratings_date, Q1, Q2, Q3, QT, V1, V2, V3, V4, VT, G1, G2, G3, G4, GT, `AS`, AS_grade, Q_grade, V_grade, G_grade from ttm_ratings";
-$res = mysql_query($query) or die (mysql_error());
+//$res = mysql_query($query) or die (mysql_error());
+try {
+    $res = $db->exec($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 $query = "delete from ttm_ratings";
-$res = mysql_query($query) or die (mysql_error());
+//$res = mysql_query($query) or die (mysql_error());
+try {
+    $res = $db->exec($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 $tickerCount = 0;
 //Variables to be used for linear transform and squeez
 $squ = 0.998;
@@ -36,8 +56,15 @@ FROM (
 	 ttm_key_ratios,(SELECT @rownum := 0) r order by FCF_S desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+//$res = mysql_query($query) or die (mysql_error());
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$values[$row["ticker_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
 	$values[$row["ticker_id"]]["QP1"] = $row["position"];
 	$tickerCount++;
@@ -54,8 +81,14 @@ FROM (
 	 ttm_key_ratios,(SELECT @rownum := 0) r order by CROIC desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$values[$row["ticker_id"]]["Q2"] = is_null($row["value"])?null:($row["value"] * 100);
 	$values[$row["ticker_id"]]["QP2"] = $row["position"];
 }
@@ -67,8 +100,14 @@ FROM (
 	 ttm_pio_checks,(SELECT @rownum := 0) r order by pioTotal desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$values[$row["ticker_id"]]["Q3"] = $row["value"];
 	$values[$row["ticker_id"]]["QP3"] = $row["position"];
 }
@@ -90,8 +129,14 @@ FROM (
          tickers_growth_ratios,(SELECT @rownum := 0) r order by RevenuePctGrowthTTM desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $values[$row["ticker_id"]]["G1"] = is_null($row["value"])?null:($row["value"] * 100);
         $values[$row["ticker_id"]]["GP1"] = $row["position"];
 }
@@ -103,8 +148,14 @@ FROM (
          ttm_financialscustom,(SELECT @rownum := 0) r order by Sales5YYCGrPerc desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $values[$row["ticker_id"]]["G2"] = is_null($row["value"])?null:($row["value"] * 100);
         $values[$row["ticker_id"]]["GP2"] = $row["position"];
 }
@@ -116,8 +167,14 @@ FROM (
          ttm_key_ratios,(SELECT @rownum := 0) r order by GPA desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $values[$row["ticker_id"]]["G3"] = is_null($row["value"])?null:($row["value"]);
         $values[$row["ticker_id"]]["GP3"] = $row["position"];
 }
@@ -130,8 +187,14 @@ FROM (
          ttm_key_ratios,(SELECT @rownum := 0) r order by EV_EBIT desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $values[$row["ticker_id"]]["V1"] = is_null($row["value"])?null:($row["value"]);
         $values[$row["ticker_id"]]["VP1"] = $row["position"];
 }
@@ -143,8 +206,14 @@ FROM (
          ttm_key_ratios,(SELECT @rownum := 0) r order by P_FCF desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $values[$row["ticker_id"]]["V2"] = is_null($row["value"])?null:($row["value"]);
         $values[$row["ticker_id"]]["VP2"] = $row["position"];
 }
@@ -156,8 +225,14 @@ FROM (
          ttm_key_ratios,(SELECT @rownum := 0) r order by -P_BV desc
       ) x
 ";
-$res = mysql_query($query) or die (mysql_error());
-while ($row = mysql_fetch_assoc($res)) {
+try {
+    $res = $db->query($query);
+} catch(PDOException $ex) {
+    echo "\nDatabase Error"; //user message
+    die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
+//while ($row = mysql_fetch_assoc($res)) {        
+while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $values[$row["ticker_id"]]["V3"] = is_null($row["value"])?null:($row["value"]);
         $values[$row["ticker_id"]]["VP3"] = $row["position"];
 }
@@ -391,11 +466,11 @@ foreach($values as $id => $value) {
                 $values[$id]["VG"] = 'F';
 
 	//Save data
-	$query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (";
-	$query .= $id.",";
-	$query .= $values[$id]["QPW1"].",";
-	$query .= $values[$id]["QPW2"].",";
-	$query .= $values[$id]["QPW3"].",";
+	/*$query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (";
+	    $query .= $id.",";
+	    $query .= $values[$id]["QPW1"].",";
+	    $query .= $values[$id]["QPW2"].",";
+	    $query .= $values[$id]["QPW3"].",";
         $query .= $values[$id]["QF"].",";
         $query .= $values[$id]["GPW1"].",";
         $query .= $values[$id]["GPW2"].",";
@@ -407,14 +482,42 @@ foreach($values as $id => $value) {
         $query .= $values[$id]["VPW3"].",";
         $query .= $values[$id]["VPW4"].",";
         $query .= $values[$id]["VF"].",";
-	$query .= $values[$id]["AS"].",";
+	    $query .= $values[$id]["AS"].",";
         $query .= "'".$values[$id]["RS"]."',";
         $query .= "'".$values[$id]["QG"]."',";
         $query .= "'".$values[$id]["VG"]."',";
         $query .= "'".$values[$id]["GG"]."'";
-        $query .= ")";
-	$save = mysql_query($query) or die (mysql_error());
-
+        $query .= ")";*/
+        $query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //20
+        $params = array();
+        $params[] = $id;
+        $params[] = $values[$id]["QPW1"];
+        $params[] = $values[$id]["QPW2"];
+        $params[] = $values[$id]["QPW3"];
+        $params[] = $values[$id]["QF"];
+        $params[] = $values[$id]["GPW1"];
+        $params[] = $values[$id]["GPW2"];
+        $params[] = $values[$id]["GPW3"];
+        $params[] = $values[$id]["GPW4"];
+        $params[] = $values[$id]["GF"];
+        $params[] = $values[$id]["VPW1"];
+        $params[] = $values[$id]["VPW2"];
+        $params[] = $values[$id]["VPW3"];
+        $params[] = $values[$id]["VPW4"];
+        $params[] = $values[$id]["VF"];
+        $params[] = $values[$id]["AS"];
+        $params[] = $values[$id]["RS"];
+        $params[] = $values[$id]["QG"];
+        $params[] = $values[$id]["VG"];
+        $params[] = $values[$id]["GG"];
+	    //$save = mysql_query($query) or die (mysql_error());
+        try {
+                $save = $db->prepare($query);
+                $save->execute($params);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
 	$values[$id]["id"] = $id;
 }
 //Export to csv
