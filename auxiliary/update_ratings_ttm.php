@@ -32,15 +32,15 @@ $vw4 = 0.275;
 $query = "
 SELECT x.ticker_id, x.position, x.FCF_S as value
 FROM (
-      select ticker_id, FCF_S, @rownum := @rownum + 1 AS position from 
-	 ttm_key_ratios,(SELECT @rownum := 0) r order by FCF_S desc
+      select ticker_id, FCF_S, @rownum := @rownum + 1 AS position from
+         ttm_key_ratios a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by FCF_S desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
 while ($row = mysql_fetch_assoc($res)) {
-	$values[$row["ticker_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
-	$values[$row["ticker_id"]]["QP1"] = $row["position"];
-	$tickerCount++;
+        $values[$row["ticker_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
+        $values[$row["ticker_id"]]["QP1"] = $row["position"];
+        $tickerCount++;
 }
 //Aditional variables for linear transform and squeez
 $a = -100 / ($tickerCount - 1);
@@ -50,35 +50,35 @@ $b = 100 - $a;
 $query = "
 SELECT x.ticker_id, x.position, x.CROIC as value
 FROM (
-      select ticker_id, CROIC, @rownum := @rownum + 1 AS position from 
-	 ttm_key_ratios,(SELECT @rownum := 0) r order by CROIC desc
+      select ticker_id, CROIC, @rownum := @rownum + 1 AS position from
+         ttm_key_ratios a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by CROIC desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
 while ($row = mysql_fetch_assoc($res)) {
-	$values[$row["ticker_id"]]["Q2"] = is_null($row["value"])?null:($row["value"] * 100);
-	$values[$row["ticker_id"]]["QP2"] = $row["position"];
+        $values[$row["ticker_id"]]["Q2"] = is_null($row["value"])?null:($row["value"] * 100);
+        $values[$row["ticker_id"]]["QP2"] = $row["position"];
 }
 //PIO F Score
 $query = "
 SELECT x.ticker_id, x.position, x.pioTotal as value
 FROM (
-      select ticker_id, pioTotal, @rownum := @rownum + 1 AS position from 
-	 ttm_pio_checks,(SELECT @rownum := 0) r order by pioTotal desc
+      select ticker_id, pioTotal, @rownum := @rownum + 1 AS position from
+         ttm_pio_checks a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by pioTotal desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
 while ($row = mysql_fetch_assoc($res)) {
-	$values[$row["ticker_id"]]["Q3"] = $row["value"];
-	$values[$row["ticker_id"]]["QP3"] = $row["position"];
+        $values[$row["ticker_id"]]["Q3"] = $row["value"];
+        $values[$row["ticker_id"]]["QP3"] = $row["position"];
 }
 
 //Correction for missing PIO Values
 foreach($values as $id => $value) {
-	if(!isset($value["Q3"]) || is_null($value["Q3"])) {
-		$values[$id]["Q3"] = null;
-		$values[$id]["QP3"] = $tickerCount;
-	}
+        if(!isset($value["Q3"]) || is_null($value["Q3"])) {
+                $values[$id]["Q3"] = null;
+                $values[$id]["QP3"] = $tickerCount;
+        }
 }
 
 //GET SORTED GROWTH VARIABLES
@@ -87,7 +87,7 @@ $query = "
 SELECT x.ticker_id, x.position, x.RevenuePctGrowthTTM as value
 FROM (
       select ticker_id, RevenuePctGrowthTTM, @rownum := @rownum + 1 AS position from
-         tickers_growth_ratios,(SELECT @rownum := 0) r order by RevenuePctGrowthTTM desc
+         tickers_growth_ratios a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by RevenuePctGrowthTTM desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
@@ -100,7 +100,7 @@ $query = "
 SELECT x.ticker_id, x.position, x.Sales5YYCGrPerc as value
 FROM (
       select ticker_id, Sales5YYCGrPerc, @rownum := @rownum + 1 AS position from
-         ttm_financialscustom,(SELECT @rownum := 0) r order by Sales5YYCGrPerc desc
+         ttm_financialscustom a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by Sales5YYCGrPerc desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
@@ -113,7 +113,7 @@ $query = "
 SELECT x.ticker_id, x.position, x.GPA as value
 FROM (
       select ticker_id, GPA, @rownum := @rownum + 1 AS position from
-         ttm_key_ratios,(SELECT @rownum := 0) r order by GPA desc
+         ttm_key_ratios a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by GPA desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
@@ -127,7 +127,7 @@ $query = "
 SELECT x.ticker_id, x.position, x.EV_EBIT as value
 FROM (
       select ticker_id, EV_EBIT, @rownum := @rownum + 1 AS position from
-         ttm_key_ratios,(SELECT @rownum := 0) r order by EV_EBIT desc
+         ttm_key_ratios a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by EV_EBIT desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
@@ -140,7 +140,7 @@ $query = "
 SELECT x.ticker_id, x.position, x.P_FCF as value
 FROM (
       select ticker_id, P_FCF, @rownum := @rownum + 1 AS position from
-         ttm_key_ratios,(SELECT @rownum := 0) r order by P_FCF desc
+         ttm_key_ratios a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by P_FCF desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
@@ -153,7 +153,7 @@ $query = "
 SELECT x.ticker_id, x.position, x.value
 FROM (
       select ticker_id, -P_BV as value, @rownum := @rownum + 1 AS position from
-         ttm_key_ratios,(SELECT @rownum := 0) r order by -P_BV desc
+         ttm_key_ratios a LEFT JOIN tickers b on a.ticker_id=b.id,(SELECT @rownum := 0) r where is_old = FALSE order by -P_BV desc
       ) x
 ";
 $res = mysql_query($query) or die (mysql_error());
