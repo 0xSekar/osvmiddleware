@@ -7,7 +7,7 @@ function update_is_old_field() {
 	$res = mysql_query($query) or die (mysql_error());
 	while($row = mysql_fetch_assoc($res)) {
 		$query = "update tickers set is_old = ";
-		if($row["fyear"] > (date("Y") - 2)."-12-30") {
+		if($row["fyear"] > (date("Y") - 2)."-12-28") {
 			$query .= "0";
 		} else {
 			$query .= "1";
