@@ -52,6 +52,8 @@ while ($row = mysql_fetch_assoc($res)) {
                         mysql_query($query) or die (mysql_error());
                         $query = "delete from tickers_yahoo_quotes_2 where ticker_id = " . $row["id"];
                         mysql_query($query) or die (mysql_error());
+                        $query = "delete from tickers_alt_aux where ticker_id = " . $row["id"];
+                        mysql_query($query) or die (mysql_error());
                         $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id`, `Ask`, `AverageDailyVolume`, `Bid`, `AskRealTime`, `BidRealTime`, `BookValue`, `Change`, `Commision`, `Currency`, `ChangeRealTime`, `AfterHoursChangeRealTime`, `DividendShare`, `LastTradeDate`, `TradeDate`, `EarningsShare`, `EPSEstimateCurrentYear`, `EPSEstimateNextYear`, `EPSEstimateNextQuarter`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, `HoldingsGainPercent`, `AnnualizedGain`, `HoldingsGain`, `HoldingsGainPercentRealTime`, `AnnualizedGainRealTime`, `MoreInfo`, `OrderBookRealTime`, `MarketCapitalization`, `MarketCapRealTime`, `EBITDA`, `ChangeFromYearLow`, `PercentChangeFromYearLow`, `LastTradeRealTimeWithTime`, `ChangePercentRealTime`, `ChangeFromYearHigh`, `PercentChangeFromYearHigh`) VALUES (";
                         $query .= "'".$row["id"]."',";
                         $query .= (!isset($rawdata->Ask)?"NULL":str_replace(',', '', $rawdata->Ask)).",";
@@ -150,6 +152,47 @@ while ($row = mysql_fetch_assoc($res)) {
                         $query .= (!isset($rawdata->SharesOutstanding)?"NULL":str_replace(',', '', $rawdata->SharesOutstanding));
                         $query .= ")";
                         mysql_query($query) or die(mysql_error());
+
+			$query1 = "SELECT *,
+                        (CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL OR X5 IS NULL)
+                        THEN NULL ELSE (1.2 * X1 + 1.4 * X2 + 3.3 * X3 + 0.6 * X4 + 0.999 * X5) END) AS AltmanZNormal,
+                        (CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL) THEN NULL ELSE (6.56 * X1 + 3.26 * X2 + 6.72 * X3 + 1.05 * X4) END) AS AltmanZRevised
+                        FROM (SELECT c.id,a.*, MarketCapitalization as MarketValueofEquity,
+                        (CASE WHEN (TotalLiabilities IS NULL OR TotalLiabilities = 0) THEN NULL ELSE MarketCapitalization / TotalLiabilities END) AS X4
+                        FROM tickers c, mrq_alt_checks a, tickers_yahoo_quotes_1 b WHERE c.id=a.ticker_id and c.id=b.ticker_id AND c.id=".$row["id"].") AS x";
+			$res1 = mysql_query($query1) or die(mysql_error());
+			$row1 = mysql_fetch_assoc($res1);
+
+			$query2 = "SELECT *,
+                        (CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL OR X5 IS NULL)
+                        THEN NULL ELSE (1.2 * X1 + 1.4 * X2 + 3.3 * X3 + 0.6 * X4 + 0.999 * X5) END) AS AltmanZNormal,
+                        (CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL) THEN NULL ELSE (6.56 * X1 + 3.26 * X2 + 6.72 * X3 + 1.05 * X4) END) AS AltmanZRevised
+                        FROM (SELECT c.id,a.*, SharesOutstandingDiluted * LastTradePriceOnly as MarketValueofEquity,
+                        (CASE WHEN (TotalLiabilities IS NULL OR TotalLiabilities = 0) THEN NULL ELSE SharesOutstandingDiluted * LastTradePriceOnly / TotalLiabilities END) AS X4
+                        FROM tickers c, ttm_alt_checks a, tickers_yahoo_quotes_2 b WHERE c.id=a.ticker_id and c.id=b.ticker_id AND c.id=".$row["id"].") AS x";
+			$res2 = mysql_query($query2) or die(mysql_error());
+			$row2 = mysql_fetch_assoc($res2);
+
+			$query = "INSERT INTO  `jjun0366_frontend`.`tickers_alt_aux` (`ticker_id` ,`mrq_MarketValueofEquity` ,`mrq_X4` ,`mrq_AltmanZNormal` ,`mrq_AltmanZRevised` ,`ttm_MarketValueofEquity`, `ttm_X4` ,`ttm_AltmanZNormal` ,`ttm_AltmanZRevised`)VALUES (";
+			$query .= "'".$row["id"]."',";
+			if(is_null($row1)) {
+				$query .= "null,null,null,null,";
+			} else {
+				$query .= (is_null($row1["MarketValueofEquity"])?'null':($row1["MarketValueofEquity"])).",";
+				$query .= (is_null($row1["X4"])?'null':($row1["X4"])).",";
+				$query .= (is_null($row1["AltmanZNormal"])?'null':($row1["AltmanZNormal"])).",";
+				$query .= (is_null($row1["AltmanZRevised"])?'null':($row1["AltmanZRevised"])).",";
+			}
+			if(is_null($row2)) {
+				$query .= "null,null,null,null";
+			} else {
+				$query .= (is_null($row2["MarketValueofEquity"])?'null':($row2["MarketValueofEquity"])).",";
+				$query .= (is_null($row2["X4"])?'null':($row2["X4"])).",";
+				$query .= (is_null($row2["AltmanZNormal"])?'null':($row2["AltmanZNormal"])).",";
+				$query .= (is_null($row2["AltmanZRevised"])?'null':($row2["AltmanZRevised"]));
+			}
+			$query .= ")";
+			mysql_query($query) or die(mysql_error());
 
 			$query = "UPDATE tickers_control SET last_volatile_date = NOW() WHERE ticker_id = " . $row["id"];
 			mysql_query($query) or die(mysql_error());
