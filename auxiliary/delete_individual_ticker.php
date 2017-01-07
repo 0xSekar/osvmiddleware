@@ -2,12 +2,10 @@
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 include_once('../config.php');
-//include_once('../db/database.php');
 include_once('../db/db.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-//connectfe();
 $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
@@ -30,8 +28,6 @@ if (!isset($_GET["ticker"])) {
 }
 echo "Deleting ticker ".$_GET["ticker"]."... <br>";
 
-//$query = "SELECT count(*) as C FROM tickers WHERE ticker = '".$_GET['ticker']."'";
-//$res = mysql_query($query) or die(mysql_error());
 try {
         $query = "SELECT count(*) as C FROM tickers WHERE ticker = '".$_GET['ticker']."'";
         $res = $db->query($query);
@@ -39,15 +35,13 @@ try {
         echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
 }
-//$counter = mysql_fetch_object($res);
+
 $counter = $res->fetch(PDO::FETCH_OBJ);
 if ($counter->C == 0) {
         echo "Ticker not found in Frontend database";
         exit;        
 }
 
-//$query = "SELECT * FROM tickers WHERE ticker = '".$_GET['ticker']."'";
-//$res = mysql_query($query) or die(mysql_error());
 try {
         $query = "SELECT * FROM tickers WHERE ticker = '".$_GET['ticker']."'";
         $res = $db->query($query);
@@ -68,7 +62,6 @@ $pttm_tables = array("pttm_balanceconsolidated","pttm_balancefull","pttm_cashflo
 echo "Deleting Reports... ";
 foreach($report_tables as $table) {
 	$query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$ticker_id.")";
-        //mysql_query($query) or die (mysql_error());
         try {
                 $db->exec($query);
         } catch(PDOException $ex) {
@@ -77,7 +70,6 @@ foreach($report_tables as $table) {
         }
 }
 $query = "DELETE FROM reports_header WHERE ticker_id = ".$ticker_id;
-//mysql_query($query) or die (mysql_error());
 try {
         $db->exec($query);
         } catch(PDOException $ex) {
@@ -89,7 +81,6 @@ echo "Done<br>";
 echo "Deleting Tickers and TTM tables... ";
 foreach($ticker_tables as $table) {
         $query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-        //mysql_query($query) or die (mysql_error());
         try {
                 $db->exec($query);
         } catch(PDOException $ex) {
@@ -99,7 +90,6 @@ foreach($ticker_tables as $table) {
 }
 foreach($ttm_tables as $table) {
         $query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-        //mysql_query($query) or die (mysql_error());
         try {
                 $db->exec($query);
         } catch(PDOException $ex) {
@@ -109,7 +99,6 @@ foreach($ttm_tables as $table) {
 }
 foreach($pttm_tables as $table) {
         $query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-        //mysql_query($query) or die (mysql_error());
         try {
                 $db->exec($query);
         } catch(PDOException $ex) {
@@ -121,7 +110,6 @@ echo "Done<br>";
 
 echo "Deleting from demo_tickers table if applicable... ";
 $query = "DELETE FROM demo_tickers WHERE ticker = '".$row["ticker"]."'";
-//mysql_query($query) or die (mysql_error());
 try {
         $db->exec($query);
 } catch(PDOException $ex) {
@@ -132,7 +120,6 @@ echo "Done<br>";
 
 echo "Deleting from tickers_conversion table if applicable... ";
 $query = "DELETE FROM tickers_conversion WHERE name_from = '".$row["ticker"]."'";
-//mysql_query($query) or die (mysql_error());
 try {
         $db->exec($query);
 } catch(PDOException $ex) {
@@ -143,7 +130,6 @@ echo "Done<br>";
 
 echo "Deleting from control table... ";
 $query = "DELETE FROM tickers_control WHERE ticker_id = ".$ticker_id;
-//mysql_query($query) or die (mysql_error());
 try {
         $db->exec($query);
 } catch(PDOException $ex) {
@@ -154,7 +140,6 @@ echo "Done<br>";
 
 echo "Deleting from tickers table... ";
 $query = "DELETE FROM tickers WHERE id = ".$ticker_id;
-//mysql_query($query) or die (mysql_error());
 try {
         $db->exec($query);
 } catch(PDOException $ex) {

@@ -12,14 +12,12 @@
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
 include_once('../config.php');
-//include_once('../db/database.php');
 include_once('../db/db.php');
 $db = Database::GetInstance();
 include_once('./update_reports_ttm_extra.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-//connectfe();
 
 
 set_time_limit(0);                   // ignore php timeout
@@ -33,7 +31,6 @@ $treports = $areports+$qreports;
 
 //Get full list of symbols from backend
 $query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id group by a.id";
-//$res = mysql_query($query) or die (mysql_error());
 try {
     $res = $db->query($query);
 } catch(PDOException $ex) {
@@ -46,34 +43,28 @@ $inserted = 0;
 $updated = 0;
 
 echo "Updating data points...<br>\n";
-//while ($row = mysql_fetch_assoc($res)) {        
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$query = "Select count(*) as c from reports_header a where a.ticker_id=".$row["id"]." AND a.report_type='ANN'";
-	//$res2 = mysql_query($query) or die (mysql_error());
 	try {
 	    $res2 = $db->query($query);
 	} catch(PDOException $ex) {
 	    echo "\nDatabase Error"; //user message
 	    die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
-	//$annCount = mysql_fetch_assoc($res2);
 	$annCount =  $res2->fetch(PDO::FETCH_ASSOC);
 	$annCount = $annCount["c"];
 	$query = "Select count(*) as c from reports_header a where a.ticker_id=".$row["id"]." AND a.report_type='QTR'";
-	//$res2 = mysql_query($query) or die (mysql_error());
 	try {
 	    $res2 = $db->query($query);
 	} catch(PDOException $ex) {
 	    echo "\nDatabase Error"; //user message
 	    die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
-	//$qtrCount = mysql_fetch_assoc($res2);
 	$qtrCount = $res2->fetch(PDO::FETCH_ASSOC);
 	$qtrCount = $qtrCount["c"];
 	$count++;
 	$rawdata = array();
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='ANN' order by a.fiscal_year";
-	//$res2 = mysql_query($query) or die (mysql_error());
 	try {
 	    $res2 = $db->query($query);
 	} catch(PDOException $ex) {
@@ -81,7 +72,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	    die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$pos = $areports - $annCount;
-	//while($row2 = mysql_fetch_assoc($res2)) {
 	while($row2 = $res2->fetch(PDO::FETCH_ASSOC)) {
 		$row2b = $row2;
 		$pos++;
@@ -97,7 +87,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	}
 
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='QTR' order by a.fiscal_year, a.fiscal_quarter";
-	//$res2 = mysql_query($query) or die (mysql_error());
 	try {
 	    $res2 = $db->query($query);
 	} catch(PDOException $ex) {
@@ -105,7 +94,6 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	    die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$pos = $treports - $qtrCount;
-	//while($row2 = mysql_fetch_assoc($res2)) {
 	while($row2 = $res2->fetch(PDO::FETCH_ASSOC)) {
 		$row2b = $row2;
 		$pos++;
