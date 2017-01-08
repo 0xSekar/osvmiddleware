@@ -64,6 +64,19 @@ foreach ($result as $symbol) {
 		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	if ($counter->C == 0) {
+		try {
+			$qe = "SELECT name_to AS exchange FROM exchange_conversion WHERE name_from = ?";
+		        $params = array();
+        		$params[] = $symbol->exchange;
+
+			$re = $db->query($qe);
+			if(!$rowe = $re->fetch(PDO::FETCH_ASSOC)) {
+				$rowe["exchange"] = "";
+			}
+		} catch(PDOException $ex) {
+                	echo "\nDatabase Error"; //user message
+                	die("Line: ".__LINE__." - ".$ex->getMessage());
+        	}
 		$inserted ++;
 		try {
 			$res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
@@ -71,7 +84,7 @@ foreach ($result as $symbol) {
 				':ticker' => (is_null($symbol->ticker)?'':$symbol->ticker),
 				':cik' => (is_null($symbol->cik)?'':$symbol->cik), 
 				':company' => (is_null($symbol->company)?'':$symbol->company), 
-				':exchange' => (is_null($symbol->exchange)?'':$symbol->exchange), 
+				':exchange' => $rowe["exchange"], 
 				':sic' => (is_null($symbol->siccode)?'':$symbol->siccode), 
 				':entityid' => (is_null($symbol->entityid)?'':$symbol->entityid), 
 				':formername' => (is_null($symbol->formername)?'':$symbol->formername), 
@@ -118,11 +131,20 @@ foreach ($result2 as $symbol2) {
         	        $rawdata[$data[0]] = $data;
             }
 			try {
+	                $qe = "SELECT name_to AS exchange FROM exchange_conversion WHERE name_from = ?";
+                        $params = array();
+                        $params[] = $rawdata["PrimaryExchange"][$treports];
+
+                        $re = $db->query($qe);
+                        if(!$rowe = $re->fetch(PDO::FETCH_ASSOC)) {
+                                $rowe["exchange"] = "";
+                        }
+
         		$res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
 				$res->execute(array(':ticker' => (is_null($symbol2->ticker)?'':$symbol2->ticker),
 					':cik' => (is_null($rawdata["CIK"][$treports])?'':$rawdata["CIK"][$treports]), 
 					':company' => (is_null($rawdata["COMPANYNAME"][$treports])?'':$rawdata["COMPANYNAME"][$treports]), 
-					':exchange' => (is_null($rawdata["PrimaryExchange"][$treports])?'':$rawdata["PrimaryExchange"][$treports]), 
+					':exchange' => $rowe["exchange"], 
 					':sic' => (is_null($rawdata["SICCode"][$treports])?'':$rawdata["SICCode"][$treports]), 
 					':entityid' => (is_null($rawdata["entityid"][$treports])?'':$rawdata["entityid"][$treports]), 
 					':formername' => (is_null($rawdata["Formername"][$treports])?'':$rawdata["Formername"][$treports]), 
