@@ -122,8 +122,8 @@ set_time_limit(0);                   // ignore php timeout
 				$params[] = (((is_null($rawdata["TotalCurrentAssets"])&&is_null($rawdata["TotalCurrentLiabilities"]))||is_null($rawdata["SharesOutstandingDiluted"])||$rawdata["SharesOutstandingDiluted"]==0||is_null($price)||$price==0)?null:((($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"]) / (toFloat($rawdata["SharesOutstandingDiluted"])*1000000))/$price));
 		           
 			try {
-		            $res = $db->prepare($query);
-		            $res->execute($params);
+		            $res1 = $db->prepare($query);
+		            $res1->execute($params);
 		    } catch(PDOException $ex) {
 		            echo "\nDatabase Error"; //user message
 		            die("- Line: ".__LINE__." - ".$ex->getMessage());

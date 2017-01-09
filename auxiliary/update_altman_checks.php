@@ -94,8 +94,8 @@ set_time_limit(0);                   // ignore php timeout
         $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null' && $x5 !== 'null') ? (1.2*$x1+1.4*$x2+3.3*$x3+0.6*$x4+0.999*$x5) : 'null');
         $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null') ? (6.56*$x1+3.26*$x2+6.72*$x3+1.05*$x4) : 'null');
         try {
-                $res = $db->prepare($query1);
-                $res->execute($params);
+                $res1 = $db->prepare($query1);
+                $res1->execute($params);
         } catch(PDOException $ex) {
                 echo "\nDatabase Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());

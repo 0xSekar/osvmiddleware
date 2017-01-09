@@ -107,8 +107,8 @@ $first = true;
     $query2 = $params;
     array_shift($query2);
     try {
-            $res = $db->prepare($query1);
-            $res->execute($params);
+            $res1 = $db->prepare($query1);
+            $res1->execute($params);
     } catch(PDOException $ex) {
             echo "\nDatabase Error"; //user message
             die("- Line: ".__LINE__." - ".$ex->getMessage());
