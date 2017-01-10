@@ -167,6 +167,7 @@ set_time_limit(0);                   // ignore php timeout
 	pioTTM($pid,$rawdata,$query2,$prawdata);
 
 function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
+	$db = Database::GetInstance();
         $queryqtr = "SELECT * FROM reports_header where report_type='QTR' and ticker_id = $ppid order by fiscal_year desc, fiscal_quarter desc limit 1";
         try {
 	            $res = $db->query($query);

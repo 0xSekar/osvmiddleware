@@ -109,6 +109,7 @@ set_time_limit(0);                   // ignore php timeout
 	altmanTTM($pid);
 
 function altmanTTM($ppid) {
+    $db = Database::GetInstance();
         $tquery = "SELECT * FROM ttm_incomeconsolidated a, ttm_balanceconsolidated b, ttm_gf_data c WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id= " . $ppid;
         try {
                 $tres = $db->query($tquery);
@@ -139,8 +140,8 @@ function altmanTTM($ppid) {
         $params[] = $x5;
         
         try {
-                $res = $db->prepare($query1);
-                $res->execute($params);
+                $res2 = $db->prepare($query1);
+                $res2->execute($params);
         } catch(PDOException $ex) {
                 echo "\nDatabase Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -175,8 +176,8 @@ function altmanTTM($ppid) {
         $params[] = $x3;
         $params[] = $x5;
         try {
-                $res = $db->prepare($query1);
-                $res->execute($params);
+                $res3 = $db->prepare($query1);
+                $res3->execute($params);
         } catch(PDOException $ex) {
                 echo "\nDatabase Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());

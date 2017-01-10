@@ -69,7 +69,8 @@ foreach ($result as $symbol) {
 		        $params = array();
         		$params[] = $symbol->exchange;
 
-			$re = $db->query($qe);
+			$re = $db->prepare($qe);
+            $re ->execute($params);
 			if(!$rowe = $re->fetch(PDO::FETCH_ASSOC)) {
 				$rowe["exchange"] = "";
 			}
@@ -135,7 +136,8 @@ foreach ($result2 as $symbol2) {
                         $params = array();
                         $params[] = $rawdata["PrimaryExchange"][$treports];
 
-                        $re = $db->query($qe);
+                        $re = $db->prepare($qe);
+                        $re ->execute($params);
                         if(!$rowe = $re->fetch(PDO::FETCH_ASSOC)) {
                                 $rowe["exchange"] = "";
                         }

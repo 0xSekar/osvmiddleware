@@ -118,6 +118,7 @@ $first = true;
 beneishTTM($pid,$rawdata,$query2);
 
 function beneishTTM($ppid,$prawdata,$querypre) {
+    $db = Database::GetInstance();
     $queryqtr = "SELECT * FROM reports_header where report_type='QTR' and ticker_id = $ppid order by fiscal_year desc, fiscal_quarter desc limit 1";
     try {
         $resqtr = $db->query($queryqtr);

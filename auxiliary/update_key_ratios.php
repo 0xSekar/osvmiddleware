@@ -59,7 +59,7 @@ set_time_limit(0);                   // ignore php timeout
 		    	$params = array();
     			$params[] = $row["id"];                
 				$params[] = $rawdata["fiscal_year"];
-				$params[] = "'".date("Y-m-d",strtotime($rawdata["report_date"]));
+				$params[] = date("Y-m-d",strtotime($rawdata["report_date"]));
 				$params[] = ($rdate == '0000-00-00'?null:$rdate);
 				$params[] = $price;
 				$params[] = (((is_null($rawdata["GrossProfit"]) && is_null($rawdata["OperatingExpenses"]) && is_null($rawdata["CapEx"])) || is_null($rawdata["TaxRatePercent"]))?null:(($rawdata["GrossProfit"]-$rawdata["OperatingExpenses"]-$rawdata["CapEx"])*(1-$rawdata["TaxRatePercent"])));
