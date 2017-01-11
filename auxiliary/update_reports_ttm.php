@@ -75,7 +75,7 @@ while($row = mysql_fetch_assoc($res)) {
 			$rawdata[$v][$pos]=$y;
 		}
 	}
-	for($i = 1; $i <= $treports - $qtrCount; $i++) {
+	for($i = 1; $i <= $qreports - $qtrCount; $i++) {
                 foreach ($row2b as $v=>$y) {
                         $rawdata[$v][$areports+$i] = null;
                 }
