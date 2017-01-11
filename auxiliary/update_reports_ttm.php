@@ -108,7 +108,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	}
 	$dates->ticker_id = $row["id"];
 	array_walk_recursive($rawdata, 'nullValues');
-        update_raw_data_tickers($dates, $rawdata);
+    update_raw_data_tickers($dates, $rawdata);
+	
 }
 
 echo "$count total rows. $updated stocks has new reports<br>\n";
