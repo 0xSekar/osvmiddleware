@@ -90,7 +90,7 @@ function update_ratings() {
         		LEFT JOIN reports_header h ON r.report_id = h.id
         		WHERE h.report_type =  'ANN'
         		AND h.fiscal_year = ".$rowy["fiscal_year"]."
-        		ORDER BY pioTotal DESC 
+        		ORDER BY pioTotal DESC, ticker_id 
         	";
                 try {
                         $res = $db->query($query);
@@ -475,25 +475,25 @@ function update_ratings() {
                         $query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//20par
                         $params = array();
                         $params[] = $id;
-                        $params[] = ($values[$id]["QPW1"] =='null' ? null:$values[$id]["QPW1"]);
-                        $params[] = ($values[$id]["QPW2"] =='null' ? null:$values[$id]["QPW2"]);
-                        $params[] = ($values[$id]["QPW3"] =='null' ? null:$values[$id]["QPW3"]);
-                        $params[] = ($values[$id]["QF"] =='null' ? null:$values[$id]["QF"]);
-                        $params[] = ($values[$id]["GPW1"] =='null' ? null:$values[$id]["GPW1"]);
-                        $params[] = ($values[$id]["GPW2"] =='null' ? null:$values[$id]["GPW2"]);
-                        $params[] = ($values[$id]["GPW3"] =='null' ? null:$values[$id]["GPW3"]);
-                        $params[] = ($values[$id]["GPW4"] =='null' ? null:$values[$id]["GPW4"]);
-                        $params[] = ($values[$id]["GF"] =='null' ? null:$values[$id]["GF"]);
-                        $params[] = ($values[$id]["VPW1"] =='null' ? null:$values[$id]["VPW1"]);
-                        $params[] = ($values[$id]["VPW2"] =='null' ? null:$values[$id]["VPW2"]);
-                        $params[] = ($values[$id]["VPW3"] =='null' ? null:$values[$id]["VPW3"]);
-                        $params[] = ($values[$id]["VPW4"] =='null' ? null:$values[$id]["VPW4"]);
-                        $params[] = ($values[$id]["VF"] =='null' ? null:$values[$id]["VF"]);
-                        $params[] = ($values[$id]["AS"] =='null' ? null:$values[$id]["AS"]);
-                        $params[] = ($values[$id]["RS"] =='null' ? null:$values[$id]["RS"]);
-                        $params[] = ($values[$id]["QG"] =='null' ? null:$values[$id]["QG"]);
-                        $params[] = ($values[$id]["VG"] =='null' ? null:$values[$id]["VG"]);
-                        $params[] = ($values[$id]["GG"] =='null' ? null:$values[$id]["GG"]);
+                        $params[] = $values[$id]["QPW1"];
+                        $params[] = $values[$id]["QPW2"];
+                        $params[] = $values[$id]["QPW3"];
+                        $params[] = $values[$id]["QF"];
+                        $params[] = $values[$id]["GPW1"];
+                        $params[] = $values[$id]["GPW2"];
+                        $params[] = $values[$id]["GPW3"];
+                        $params[] = $values[$id]["GPW4"];
+                        $params[] = $values[$id]["GF"];
+                        $params[] = $values[$id]["VPW1"];
+                        $params[] = $values[$id]["VPW2"];
+                        $params[] = $values[$id]["VPW3"];
+                        $params[] = $values[$id]["VPW4"];
+                        $params[] = $values[$id]["VF"];
+                        $params[] = $values[$id]["AS"];
+                        $params[] = $values[$id]["RS"];
+                        $params[] = $values[$id]["QG"];
+                        $params[] = $values[$id]["VG"];
+                        $params[] = $values[$id]["GG"];
                         try {
                                 $save = $db->prepare($query);
                                 $save->execute($params);

@@ -86,7 +86,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 $position = 1;
 $query = "
 select ticker_id, pioTotal AS value from
-    ttm_pio_checks a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by pioTotal desc
+    ttm_pio_checks a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by pioTotal desc, ticker_id
 ";
 try {
     $res = $db->query($query);

@@ -96,7 +96,7 @@ while($rowy = $resy->fetch(PDO::FETCH_ASSOC)) {
 		LEFT JOIN reports_header h ON r.report_id = h.id
 		WHERE h.report_type =  'ANN'
 		AND h.fiscal_year = ".$rowy["fiscal_year"]."
-		ORDER BY pioTotal DESC 
+		ORDER BY pioTotal DESC, ticker_id 
 	";
         try {
             $res = $db->query($query);
