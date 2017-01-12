@@ -37,9 +37,13 @@ if (!isset($_GET["ticker"])) {
 	exit;
 }
 echo "Updating ticker ".$_GET["ticker"]."... <br>";
-$query = "SELECT count(*) as C FROM tickers WHERE ticker = '".$_GET['ticker']."'";
+$query = "SELECT count(*) as C FROM tickers WHERE ticker = ? ";
+$params = array();
+$params[] = $_GET['ticker'];
+        
 try {
-        $res = $db->query($query);
+        $res = $db->prepare($query);
+        $res->execute($params);
 } catch(PDOException $ex) {
         echo "\nDatabase Error"; //user message
         die("- Line: ".__LINE__." - ".$ex->getMessage());

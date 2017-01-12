@@ -29,8 +29,12 @@ if (!isset($_GET["ticker"])) {
 echo "Deleting ticker ".$_GET["ticker"]."... <br>";
 
 try {
-        $query = "SELECT count(*) as C FROM tickers WHERE ticker = '".$_GET['ticker']."'";
-        $res = $db->query($query);
+        $query = "SELECT count(*) as C FROM tickers WHERE ticker = ? ";
+        $params = array();
+        $params[] = $_GET['ticker'];
+
+        $res = $db->prepare($query);
+        $res->execute($params);
 } catch(PDOException $ex) {
         echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -43,8 +47,12 @@ if ($counter->C == 0) {
 }
 
 try {
-        $query = "SELECT * FROM tickers WHERE ticker = '".$_GET['ticker']."'";
-        $res = $db->query($query);
+        $query = "SELECT * FROM tickers WHERE ticker = ? ";
+        $params = array();
+        $params[] = $_GET['ticker'];
+        
+        $res = $db->prepare($query);
+        $res->execute($params);
         //$row = mysql_fetch_assoc($res);
         $row = $res->fetch(PDO::FETCH_ASSOC);
         $ticker_id = $row["id"];
