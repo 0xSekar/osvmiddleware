@@ -126,7 +126,7 @@ function beneishTTM($ppid,$prawdata,$querypre) {
         echo "\nDatabase Error"; //user message
         die("- Line: ".__LINE__." - ".$ex->getMessage());
     }
-    $rawqtr = $resqtr->fetch(PDO::FETCH_ASSOC);
+    $rowqtr = $resqtr->fetch(PDO::FETCH_ASSOC);
     if ($rowqtr["fiscal_year"] == $prawdata["fiscal_year"] && $rowqtr["fiscal_quarter"] == $prawdata["fiscal_quarter"]) {
             $query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $params = $querypre;
