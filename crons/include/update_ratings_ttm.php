@@ -50,7 +50,7 @@ select ticker_id, FCF_S AS value from
         }
     while($row = $res->fetch(PDO::FETCH_ASSOC)) {
     	$values[$row["ticker_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
-    	$values[$row["ticker_id"]]["QP1"] = $row["position"];
+    	$values[$row["ticker_id"]]["QP1"] = $position;
         $position++;
     	$tickerCount++;
     }
@@ -72,7 +72,7 @@ select ticker_id, CROIC AS value from
         }
     while($row = $res->fetch(PDO::FETCH_ASSOC)) {
     	$values[$row["ticker_id"]]["Q2"] = is_null($row["value"])?null:($row["value"] * 100);
-    	$values[$row["ticker_id"]]["QP2"] = $row["position"];
+    	$values[$row["ticker_id"]]["QP2"] = $position;
         $position++;
     }
     //PIO F Score
@@ -89,7 +89,7 @@ select ticker_id, pioTotal AS value from
         }
     while($row = $res->fetch(PDO::FETCH_ASSOC)) {
     	$values[$row["ticker_id"]]["Q3"] = $row["value"];
-    	$values[$row["ticker_id"]]["QP3"] = $row["position"];
+    	$values[$row["ticker_id"]]["QP3"] = $position;
         $position++;
     }
 

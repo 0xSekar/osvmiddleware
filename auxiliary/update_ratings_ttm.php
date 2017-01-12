@@ -57,7 +57,7 @@ try {
 }
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$values[$row["ticker_id"]]["Q1"] = is_null($row["value"])?null:($row["value"] * 100);
-	$values[$row["ticker_id"]]["QP1"] = $row["position"];
+	$values[$row["ticker_id"]]["QP1"] = $position;
 	$position++;
 	$tickerCount++;
 }
@@ -79,7 +79,7 @@ try {
 }
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$values[$row["ticker_id"]]["Q2"] = is_null($row["value"])?null:($row["value"] * 100);
-	$values[$row["ticker_id"]]["QP2"] = $row["position"];
+	$values[$row["ticker_id"]]["QP2"] = $position;
 	$position++;
 }
 //PIO F Score
@@ -96,7 +96,7 @@ try {
 }
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$values[$row["ticker_id"]]["Q3"] = $row["value"];
-	$values[$row["ticker_id"]]["QP3"] = $row["position"];
+	$values[$row["ticker_id"]]["QP3"] = $position;
 	$position++;
 }
 
