@@ -149,10 +149,9 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
                 echo "\nDatabase Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
         }
-
         $row_count_a = $rquote_a->rowCount();
                 if($row_count_a > 0) {                                        
-                $price = $rquote_a->fetch(PDO::FETCH_ASSOC);
+                $price_a = $rquote_a->fetch(PDO::FETCH_ASSOC);
             $price_a = $price_a["adj_close"];
     }
     $rdate_v = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i-$years]));
@@ -166,7 +165,7 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
         }
         $row_count_v = $rquote_v->rowCount();
                 if($row_count_v > 0) {
-                $price = $rquote_v->fetch(PDO::FETCH_ASSOC);
+                $price_v = $rquote_v->fetch(PDO::FETCH_ASSOC);
             $price_v = $price_v["adj_close"];
     }
         $entValue_a = (($rawdata["SharesOutstandingDiluted"][$i]=='null' && is_null($price_a) && $rawdata["TotalLongtermDebt"][$i]=='null' && $rawdata["TotalShorttermDebt"][$i]=='null' && $rawdata["PreferredStock"][$i]=='null' && $rawdata["MinorityInterestEquityEarnings"][$i]=='null' && $rawdata["CashCashEquivalentsandShorttermInvestments"][$i]=='null')?null:((toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price_a)+$rawdata["TotalLongtermDebt"][$i]+$rawdata["TotalShorttermDebt"][$i]+$rawdata["PreferredStock"][$i]+$rawdata["MinorityInterestEquityEarnings"][$i]-$rawdata["CashCashEquivalentsandShorttermInvestments"][$i]));

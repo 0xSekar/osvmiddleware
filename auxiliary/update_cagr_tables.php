@@ -70,6 +70,7 @@ while($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 }
 	}
 	$dates->ticker_id = $row["id"];
+	$rawdata["PeriodEndDate"] = $rawdata["report_date"];
 	array_walk_recursive($rawdata, 'nullValues');
 
         foreach($report_tables as $table) {
