@@ -2,13 +2,11 @@
 // Database Connection
 error_reporting(E_ALL & ~E_NOTICE);
 include_once('../config.php');
-//include_once('../db/database.php');
 include_once('../db/db.php');
 include_once('../crons/include/update_cagr_tables_functions.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-//connectfe();
 $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
@@ -20,7 +18,6 @@ $areports = AREPORTS;
 
 //Get full list of symbols from backend
 $query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id group by a.id";
-//$res = mysql_query($query) or die (mysql_error());
 try {
 	$res = $db->query($query);
 } catch(PDOException $ex) {
