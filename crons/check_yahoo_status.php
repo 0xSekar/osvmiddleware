@@ -25,8 +25,8 @@ echo "Checking up to 10 tickets...\n";
 try {
 	$res = $db->query("SELECT g.* FROM tickers g JOIN (SELECT id FROM tickers WHERE RAND() < (SELECT ((10 / COUNT(*)) * 10) FROM tickers) ORDER BY RAND() LIMIT 10) AS z ON z.id = g.id");
 } catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die($ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die($ex->getMessage());
 }
 
 while (($row = $res->fetch(PDO::FETCH_ASSOC)) && $count < 4) {
@@ -49,8 +49,8 @@ $output .= "\nFound $count errors... ";
 try {
 	$res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
 } catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die($ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die($ex->getMessage());
 }
 $row = $res->fetch(PDO::FETCH_ASSOC);
 
@@ -72,7 +72,7 @@ if ($count > 3) {
 try {
 	$res = $db->exec($query);
 } catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die($ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die($ex->getMessage());
 }
 ?>

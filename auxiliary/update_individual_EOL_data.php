@@ -27,10 +27,10 @@ $treports = $areports+$qreports;
 $username = 'osv';
 $password = 'test1234!';
 $context = stream_context_create(array(
-        'http' => array(
-                'header'  => "Authorization: Basic " . base64_encode("$username:$password")
-        )
-));
+			'http' => array(
+				'header'  => "Authorization: Basic " . base64_encode("$username:$password")
+				)
+			));
 
 if (!isset($_GET["ticker"])) {
 	echo "Missing Ticker parameter";
@@ -40,13 +40,13 @@ echo "Updating ticker ".$_GET["ticker"]."... <br>";
 $query = "SELECT count(*) as C FROM tickers WHERE ticker = ? ";
 $params = array();
 $params[] = $_GET['ticker'];
-        
+
 try {
-        $res = $db->prepare($query);
-        $res->execute($params);
+	$res = $db->prepare($query);
+	$res->execute($params);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 $counter = $res->fetch(PDO::FETCH_OBJ);
 if ($counter->C == 0) {
@@ -62,19 +62,19 @@ $fixticker = $result[0]->ticker;
 
 
 if (!is_null($fixdate) && $fixtype != "Dummy") {
-        $query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$fixticker'";
-        try {
-		        $res = $db->query($query);
-		} catch(PDOException $ex) {
-		        echo "\nDatabase Error"; //user message
-		        die("- Line: ".__LINE__." - ".$ex->getMessage());
-		}
-        if($res->rowCount() == 0) {
-	        echo "Ticker not found in Backend database";
-        	exit;
+	$query = "SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$fixticker'";
+	try {
+		$res = $db->query($query);
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
+	}
+	if($res->rowCount() == 0) {
+		echo "Ticker not found in Backend database";
+		exit;
 	}
 	echo "Downloading new data... <br>";
-        $dates = $res->fetch(PDO::FETCH_OBJ);
+	$dates = $res->fetch(PDO::FETCH_OBJ);
 
 	$csv = file_get_contents("http://".SERVERHOST."/webservice/createcsv.php?source=frontend&ticker=".$fixticker, false, $context);
 	$csvst = fopen('php://memory', 'r+');
@@ -83,11 +83,11 @@ if (!is_null($fixdate) && $fixtype != "Dummy") {
 	fseek($csvst, 0);
 	$rawdata = array();
 	while ($data = fgetcsv($csvst)) {
-                for($i=1; $i<=$treports;$i++) {
-                        if(!isset($data[$i])) {
-                                $data[$i] = "null";
-                        }
-                }
+		for($i=1; $i<=$treports;$i++) {
+			if(!isset($data[$i])) {
+				$data[$i] = "null";
+			}
+		}
 		$rawdata[$data[0]] = $data;
 	}
 	array_walk_recursive($rawdata, 'nullValues');
@@ -96,14 +96,14 @@ if (!is_null($fixdate) && $fixtype != "Dummy") {
 	if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
 		update_raw_data_tickers($dates, $rawdata);
 	}
-		
+
 	//Finally update local report date
 	$query = "UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id";
 	try {
-	        $db->exec($query);
+		$db->exec($query);
 	} catch(PDOException $ex) {
-	        echo "\nDatabase Error"; //user message
-	        die("- Line: ".__LINE__." - ".$ex->getMessage());
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	fclose($csvst);
 }
@@ -117,28 +117,28 @@ echo "Done <br>";
 echo "Removing old Quality Checks (PIO)... ";
 $query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
 try {
-        $db->exec($query);
+	$db->exec($query);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "done<br>\n";
 echo "Removing old Quality Checks (ALTMAN)... ";
 $query = "delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
 try {
-        $db->exec($query);
+	$db->exec($query);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "done<br>\n";
 echo "Removing old Quality Checks (BENEISH)... ";
 $query = "delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
 try {
-        $db->exec($query);
+	$db->exec($query);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "done<br>\n";
 echo "Updating Ratings... ";
@@ -154,10 +154,10 @@ echo "done<br>\n";
 exit;
 
 function nullValues(&$item, $key) {
-        if(strlen(trim($item)) == 0) {
-                $item = 'null';
-        } else if($item == "-") {
-                $item = 'null';
-        }
+	if(strlen(trim($item)) == 0) {
+		$item = 'null';
+	} else if($item == "-") {
+		$item = 'null';
+	}
 }
 ?>

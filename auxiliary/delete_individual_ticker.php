@@ -17,10 +17,10 @@ ob_implicit_flush(true);             // output stuff directly
 $username = 'osv';
 $password = 'test1234!';
 $context = stream_context_create(array(
-        'http' => array(
-                'header'  => "Authorization: Basic " . base64_encode("$username:$password")
-        )
-));
+			'http' => array(
+				'header'  => "Authorization: Basic " . base64_encode("$username:$password")
+				)
+			));
 
 if (!isset($_GET["ticker"])) {
 	echo "Missing Ticker parameter";
@@ -29,36 +29,36 @@ if (!isset($_GET["ticker"])) {
 echo "Deleting ticker ".$_GET["ticker"]."... <br>";
 
 try {
-        $query = "SELECT count(*) as C FROM tickers WHERE ticker = ? ";
-        $params = array();
-        $params[] = $_GET['ticker'];
+	$query = "SELECT count(*) as C FROM tickers WHERE ticker = ? ";
+	$params = array();
+	$params[] = $_GET['ticker'];
 
-        $res = $db->prepare($query);
-        $res->execute($params);
+	$res = $db->prepare($query);
+	$res->execute($params);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 
 $counter = $res->fetch(PDO::FETCH_OBJ);
 if ($counter->C == 0) {
-        echo "Ticker not found in Frontend database";
-        exit;        
+	echo "Ticker not found in Frontend database";
+	exit;        
 }
 
 try {
-        $query = "SELECT * FROM tickers WHERE ticker = ? ";
-        $params = array();
-        $params[] = $_GET['ticker'];
-        
-        $res = $db->prepare($query);
-        $res->execute($params);
-        //$row = mysql_fetch_assoc($res);
-        $row = $res->fetch(PDO::FETCH_ASSOC);
-        $ticker_id = $row["id"];
+	$query = "SELECT * FROM tickers WHERE ticker = ? ";
+	$params = array();
+	$params[] = $_GET['ticker'];
+
+	$res = $db->prepare($query);
+	$res->execute($params);
+	//$row = mysql_fetch_assoc($res);
+	$row = $res->fetch(PDO::FETCH_ASSOC);
+	$ticker_id = $row["id"];
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 
 
@@ -70,89 +70,89 @@ $pttm_tables = array("pttm_balanceconsolidated","pttm_balancefull","pttm_cashflo
 echo "Deleting Reports... ";
 foreach($report_tables as $table) {
 	$query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$ticker_id.")";
-        try {
-                $db->exec($query);
-        } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
-                die("- Line: ".__LINE__." - ".$ex->getMessage());
-        }
+	try {
+		$db->exec($query);
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
+	}
 }
 $query = "DELETE FROM reports_header WHERE ticker_id = ".$ticker_id;
 try {
-        $db->exec($query);
-        } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
-                die("- Line: ".__LINE__." - ".$ex->getMessage());
-        }
+	$db->exec($query);
+} catch(PDOException $ex) {
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
+}
 echo "Done<br>";
 
 echo "Deleting Tickers and TTM tables... ";
 foreach($ticker_tables as $table) {
-        $query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-        try {
-                $db->exec($query);
-        } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
-                die("- Line: ".__LINE__." - ".$ex->getMessage());
-        }
+	$query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
+	try {
+		$db->exec($query);
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
+	}
 }
 foreach($ttm_tables as $table) {
-        $query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-        try {
-                $db->exec($query);
-        } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
-                die("- Line: ".__LINE__." - ".$ex->getMessage());
-        }
+	$query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
+	try {
+		$db->exec($query);
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
+	}
 }
 foreach($pttm_tables as $table) {
-        $query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-        try {
-                $db->exec($query);
-        } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
-                die("- Line: ".__LINE__." - ".$ex->getMessage());
-        }
+	$query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
+	try {
+		$db->exec($query);
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
+	}
 }
 echo "Done<br>";
 
 echo "Deleting from demo_tickers table if applicable... ";
 $query = "DELETE FROM demo_tickers WHERE ticker = '".$row["ticker"]."'";
 try {
-        $db->exec($query);
+	$db->exec($query);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "Done<br>";
 
 echo "Deleting from tickers_conversion table if applicable... ";
 $query = "DELETE FROM tickers_conversion WHERE name_from = '".$row["ticker"]."'";
 try {
-        $db->exec($query);
+	$db->exec($query);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "Done<br>";
 
 echo "Deleting from control table... ";
 $query = "DELETE FROM tickers_control WHERE ticker_id = ".$ticker_id;
 try {
-        $db->exec($query);
+	$db->exec($query);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "Done<br>";
 
 echo "Deleting from tickers table... ";
 $query = "DELETE FROM tickers WHERE id = ".$ticker_id;
 try {
-        $db->exec($query);
+	$db->exec($query);
 } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 echo "Done<br>";
 

@@ -28,8 +28,8 @@ try {
 }
 $row = $res->fetch(PDO::FETCH_ASSOC);
 if($row["value"] == 0) {
-        echo "Skip process as yahoo queries are currently dissabled.\n";
-        exit;
+	echo "Skip process as yahoo queries are currently dissabled.\n";
+	exit;
 }
 
 //Using customized Yahoo Social SDK (The default version does not work)
@@ -45,8 +45,8 @@ echo "Updating Tickers...\n";
 try {
 	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id");
 } catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die("Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$count2++;
@@ -153,22 +153,22 @@ echo "\t".$enotfound." tickers not found on yahoo\n";
 echo "\t".$eerrors." errors updating tickers\n";
 
 function toFloat($num) {
-    if (is_null($num)) {
-        return 'null';
-    }
+	if (is_null($num)) {
+		return 'null';
+	}
 
-    $dotPos = strrpos($num, '.');
-    $commaPos = strrpos($num, ',');
-    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
-        ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+	$dotPos = strrpos($num, '.');
+	$commaPos = strrpos($num, ',');
+	$sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
+		((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
 
-    if (!$sep) {
-        return floatval(preg_replace("/[^\-0-9]/", "", $num));
-    }
+	if (!$sep) {
+		return floatval(preg_replace("/[^\-0-9]/", "", $num));
+	}
 
-    return floatval(
-        preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
-        preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
-    );
+	return floatval(
+			preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
+			preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
+		       );
 }
 ?>

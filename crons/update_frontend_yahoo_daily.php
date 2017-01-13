@@ -22,8 +22,8 @@ ob_implicit_flush(true);             // output stuff directly
 try {
 	$res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
 } catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die("Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 $row = $res->fetch(PDO::FETCH_ASSOC);
 if($row["value"] == 0) {
@@ -35,10 +35,10 @@ if($row["value"] == 0) {
 $username = 'osv';
 $password = 'test1234!';
 $context = stream_context_create(array(
-        'http' => array(
-                'header'  => "Authorization: Basic " . base64_encode("$username:$password")
-        )
-));
+			'http' => array(
+				'header'  => "Authorization: Basic " . base64_encode("$username:$password")
+				)
+			));
 
 //Using customized Yahoo Social SDK (The default version does not work)
 $yql = new YahooYQLQuery();
@@ -63,8 +63,8 @@ echo "Updating Tickers...\n";
 try {
 	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380");
 } catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die("Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {	
 	$count ++;
@@ -84,19 +84,19 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 				$params[] = (is_null($element->Dividends)?NULL:$element->Dividends);
 				try {
 					$res1 = $db->prepare($query_div);
-                	$res1->execute($params);
+					$res1->execute($params);
 				} catch(PDOException $ex) {
-					    echo "\nDatabase Error"; //user message
-					    die("Line: ".__LINE__." - ".$ex->getMessage());
+					echo "\nDatabase Error"; //user message
+					die("Line: ".__LINE__." - ".$ex->getMessage());
 				}
 			}
 		}
 		$dupdated ++;
-        } elseif(isset($response->error)) {
-                $derrors ++;
-        } else {
-                $dnotfound ++;
-        }
+	} elseif(isset($response->error)) {
+		$derrors ++;
+	} else {
+		$dnotfound ++;
+	}
 
 	//UPDATE HISTORICAL DATA
 	try {
@@ -104,10 +104,10 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		//$r_row = mysql_fetch_assoc($r_count);
 		$r_row = $r_count->fetch(PDO::FETCH_ASSOC);
 	} catch(PDOException $ex) {
-	    echo "\nDatabase Error"; //user message
-	    die("Line: ".__LINE__." - ".$ex->getMessage());
+		echo "\nDatabase Error"; //user message
+		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
-	
+
 
 	$split_date = date("Ymd",strtotime($row["last_split_date"]));
 	$sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
@@ -137,22 +137,22 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
 					try {
 						$res1 = $db->prepare($query_div);
-                		$res1->execute($params);
+						$res1->execute($params);
 					} catch(PDOException $ex) {
-					    echo "\nDatabase Error"; //user message
-					    die("Line: ".__LINE__." - ".$ex->getMessage());
+						echo "\nDatabase Error"; //user message
+						die("Line: ".__LINE__." - ".$ex->getMessage());
 					}
 				}
 			}
 		}
 		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
-        		try {
-        			$res1 = $db->prepare("UPDATE tickers_control SET last_split_date = ? WHERE ticker_id = ?");
-					$res1->execute(array((date("Y-m-d",strtotime($sresponse->query->results->SplitDate))), $row["id"])); 
-					} catch(PDOException $ex) {
-					    echo "\nDatabase Error"; //user message
-					    die("Line: ".__LINE__." - ".$ex->getMessage());
-					}
+			try {
+				$res1 = $db->prepare("UPDATE tickers_control SET last_split_date = ? WHERE ticker_id = ?");
+				$res1->execute(array((date("Y-m-d",strtotime($sresponse->query->results->SplitDate))), $row["id"])); 
+			} catch(PDOException $ex) {
+				echo "\nDatabase Error"; //user message
+				die("Line: ".__LINE__." - ".$ex->getMessage());
+			}
 
 			//Need to get latest shares outstandings from yahoo quotes to compare on webservices
 			$response = $yql->execute("select * from osv.finance.quotes where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
@@ -189,44 +189,44 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
 					try {
 						$res1 = $db->prepare($query_div);
-                		$res1->execute($params);
+						$res1->execute($params);
 					} catch(PDOException $ex) {
-						    echo "\nDatabase Error"; //user message
-						    die("Line: ".__LINE__." - ".$ex->getMessage());
+						echo "\nDatabase Error"; //user message
+						die("Line: ".__LINE__." - ".$ex->getMessage());
 					}
 				}
 			}
 			$hupdated ++;
-        } elseif(isset($response->error)) {
-    	        $herrors ++;
-        } else {
-    	        $hnotfound ++;
-        }
+		} elseif(isset($response->error)) {
+			$herrors ++;
+		} else {
+			$hnotfound ++;
+		}
 	}
-        //UPDATE KEYSTATS, SECTOR, INDUSTRY AND DESCRIPTION
-        //Try to get yahoo data for the ticker
+	//UPDATE KEYSTATS, SECTOR, INDUSTRY AND DESCRIPTION
+	//Try to get yahoo data for the ticker
 	$sharesOut = 0;
-        $response = $yql->execute("select * from osv.finance.keystats_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
-        if(isset($response->query) && isset($response->query->results)) {
-                //Check if the symbol exists
+	$response = $yql->execute("select * from osv.finance.keystats_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+	if(isset($response->query) && isset($response->query->results)) {
+		//Check if the symbol exists
 		//Keystats
-                if(isset($response->query->results->result->marketCap)) {
-                        update_raw_data_yahoo_keystats($row["id"], $response->query->results->result);
-                        $kupdated ++;
-                } else {
-                        $knotfound ++;
-                }
+		if(isset($response->query->results->result->marketCap)) {
+			update_raw_data_yahoo_keystats($row["id"], $response->query->results->result);
+			$kupdated ++;
+		} else {
+			$knotfound ++;
+		}
 
 		//Sector and Industry
 		if(isset($response->query->results->result->assetProfile->sector) && !empty($response->query->results->result->assetProfile->sector)) {
 			$supdated ++;
-                        try {
-							$res1 = $db->prepare("UPDATE `tickers` SET industry = ?, sector = ? WHERE id = ?");
-							$res1->execute(array((is_null($response->query->results->result->assetProfile->industry)?'':$response->query->results->result->assetProfile->industry), (is_null($response->query->results->result->assetProfile->sector)?'':$response->query->results->result->assetProfile->sector), $row["id"]));					
-						} catch(PDOException $ex) {
-							echo "\nDatabase Error"; //user message
-					    	die("Line: ".__LINE__." - ".$ex->getMessage());
-						}
+			try {
+				$res1 = $db->prepare("UPDATE `tickers` SET industry = ?, sector = ? WHERE id = ?");
+				$res1->execute(array((is_null($response->query->results->result->assetProfile->industry)?'':$response->query->results->result->assetProfile->industry), (is_null($response->query->results->result->assetProfile->sector)?'':$response->query->results->result->assetProfile->sector), $row["id"]));					
+			} catch(PDOException $ex) {
+				echo "\nDatabase Error"; //user message
+				die("Line: ".__LINE__." - ".$ex->getMessage());
+			}
 
 		} else {
 			$snotfound ++;
@@ -235,22 +235,22 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		//Description
 		if(isset($response->query->results->result->assetProfile->longBusinessSummary)) {
 			$supdated2 ++;
-                        try {
-							$res1 = $db->prepare("UPDATE `tickers` SET description = ? WHERE id = ?");
-							$res1->execute(array((is_null($response->query->results->result->assetProfile->longBusinessSummary)?'':$response->query->results->result->assetProfile->longBusinessSummary), $row["id"]));					
-						} catch(PDOException $ex) {
-							echo "\nDatabase Error"; //user message
-					    	die("Line: ".__LINE__." - ".$ex->getMessage());
-						}
+			try {
+				$res1 = $db->prepare("UPDATE `tickers` SET description = ? WHERE id = ?");
+				$res1->execute(array((is_null($response->query->results->result->assetProfile->longBusinessSummary)?'':$response->query->results->result->assetProfile->longBusinessSummary), $row["id"]));					
+			} catch(PDOException $ex) {
+				echo "\nDatabase Error"; //user message
+				die("Line: ".__LINE__." - ".$ex->getMessage());
+			}
 		} else {
 			$snotfound2 ++;
 		}
 
-        } elseif(isset($response->error)) {
-                $kerrors ++;
-        } else {
-                $kerrors ++;
-        }
+	} elseif(isset($response->error)) {
+		$kerrors ++;
+	} else {
+		$kerrors ++;
+	}
 
 	//Update key ratios ttm
 	update_key_ratios_ttm($row["id"]);
@@ -261,10 +261,10 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$params[] = $row["id"];
 	try {
 		$res1 = $db->prepare($query_up);
-        $res1->execute($params);
+		$res1->execute($params);
 	} catch(PDOException $ex) {
-		    echo "\nDatabase Error"; //user message
-		    die("Line: ".__LINE__." - ".$ex->getMessage());
+		echo "\nDatabase Error"; //user message
+		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	echo " Done\n";
 }
@@ -295,22 +295,22 @@ update_ratings_ttm();
 echo "done\n";
 
 function toFloat($num) {
-    if (is_null($num)) {
-        return 'null';
-    }
+	if (is_null($num)) {
+		return 'null';
+	}
 
-    $dotPos = strrpos($num, '.');
-    $commaPos = strrpos($num, ',');
-    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
-        ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+	$dotPos = strrpos($num, '.');
+	$commaPos = strrpos($num, ',');
+	$sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
+		((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
 
-    if (!$sep) {
-        return floatval(preg_replace("/[^\-0-9]/", "", $num));
-    }
+	if (!$sep) {
+		return floatval(preg_replace("/[^\-0-9]/", "", $num));
+	}
 
-    return floatval(
-        preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
-        preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
-    );
+	return floatval(
+			preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
+			preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
+		       );
 }
 ?>

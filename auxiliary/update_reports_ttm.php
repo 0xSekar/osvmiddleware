@@ -32,10 +32,10 @@ $treports = $areports+$qreports;
 //Get full list of symbols from backend
 $query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id group by a.id";
 try {
-    $res = $db->query($query);
+	$res = $db->query($query);
 } catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die("- Line: ".__LINE__." - ".$ex->getMessage());
+	echo "\nDatabase Error"; //user message
+	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 
 $count = 0;
@@ -46,19 +46,19 @@ echo "Updating data points...<br>\n";
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$query = "Select count(*) as c from reports_header a where a.ticker_id=".$row["id"]." AND a.report_type='ANN'";
 	try {
-	    $res2 = $db->query($query);
+		$res2 = $db->query($query);
 	} catch(PDOException $ex) {
-	    echo "\nDatabase Error"; //user message
-	    die("- Line: ".__LINE__." - ".$ex->getMessage());
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$annCount =  $res2->fetch(PDO::FETCH_ASSOC);
 	$annCount = $annCount["c"];
 	$query = "Select count(*) as c from reports_header a where a.ticker_id=".$row["id"]." AND a.report_type='QTR'";
 	try {
-	    $res2 = $db->query($query);
+		$res2 = $db->query($query);
 	} catch(PDOException $ex) {
-	    echo "\nDatabase Error"; //user message
-	    die("- Line: ".__LINE__." - ".$ex->getMessage());
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$qtrCount = $res2->fetch(PDO::FETCH_ASSOC);
 	$qtrCount = $qtrCount["c"];
@@ -66,10 +66,10 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$rawdata = array();
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='ANN' order by a.fiscal_year";
 	try {
-	    $res2 = $db->query($query);
+		$res2 = $db->query($query);
 	} catch(PDOException $ex) {
-	    echo "\nDatabase Error"; //user message
-	    die("- Line: ".__LINE__." - ".$ex->getMessage());
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$pos = $areports - $annCount;
 	while($row2 = $res2->fetch(PDO::FETCH_ASSOC)) {
@@ -81,17 +81,17 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		}
 	}
 	for ($i = 1; $i <= $areports - $annCount; $i++) {
-                foreach ($row2b as $v=>$y) {
-                        $rawdata[$v][$i] = null;
-                }
+		foreach ($row2b as $v=>$y) {
+			$rawdata[$v][$i] = null;
+		}
 	}
 
 	$query = "SELECT * FROM `reports_header` a, reports_variable_ratios b, reports_metadata_eol c, reports_incomefull d, reports_incomeconsolidated e, reports_financialheader f, reports_cashflowfull g, reports_cashflowconsolidated h, reports_balancefull i, reports_balanceconsolidated j, reports_gf_data k, reports_financialscustom l WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id=e.report_id AND a.id=f.report_id AND a.id=g.report_id AND a.id=h.report_id AND a.id=i.report_id AND a.id=j.report_id AND a.id=k.report_id AND a.id=l.report_id AND a.ticker_id=".$row["id"]." AND a.report_type='QTR' order by a.fiscal_year, a.fiscal_quarter";
 	try {
-	    $res2 = $db->query($query);
+		$res2 = $db->query($query);
 	} catch(PDOException $ex) {
-	    echo "\nDatabase Error"; //user message
-	    die("- Line: ".__LINE__." - ".$ex->getMessage());
+		echo "\nDatabase Error"; //user message
+		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$pos = $treports - $qtrCount;
 	while($row2 = $res2->fetch(PDO::FETCH_ASSOC)) {
@@ -102,25 +102,25 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		}
 	}
 	for($i = 1; $i <= $qreports - $qtrCount; $i++) {
-                foreach ($row2b as $v=>$y) {
-                        $rawdata[$v][$areports+$i] = null;
-                }
+		foreach ($row2b as $v=>$y) {
+			$rawdata[$v][$areports+$i] = null;
+		}
 	}
 	$dates->ticker_id = $row["id"];
 	array_walk_recursive($rawdata, 'nullValues');
-    update_raw_data_tickers($dates, $rawdata);
-	
+	update_raw_data_tickers($dates, $rawdata);
+
 }
 
 echo "$count total rows. $updated stocks has new reports<br>\n";
 
 function nullValues(&$item, $key) {
 	if (is_null($item)) {
-                $item = 'null';
-        } else if(strlen(trim($item)) == 0) {
-                $item = 'null';
-        } else if($item == "-") {
-                $item = 'null';
-        }
+		$item = 'null';
+	} else if(strlen(trim($item)) == 0) {
+		$item = 'null';
+	} else if($item == "-") {
+		$item = 'null';
+	}
 }
 ?>
