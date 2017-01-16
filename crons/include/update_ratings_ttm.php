@@ -438,6 +438,7 @@ function update_ratings_ttm() {
 		$query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//20par
 		$params = array();
 		$params[] = $id;
+		$params[] = $values[$id]["QPW1"];
 		$params[] = $values[$id]["QPW2"];
 		$params[] = $values[$id]["QPW3"];
 		$params[] = $values[$id]["QF"];

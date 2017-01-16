@@ -118,6 +118,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			if(isset($response->query) && isset($response->query->results)) {
 				foreach($response->query->results->quote as $element) {
 
+					if($response->query->count == 1) {
+						$element = $response->query->results->quote;
+					}
 					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
 					$params = array();
 					$params[] = $row["id"];
