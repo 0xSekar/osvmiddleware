@@ -28,7 +28,12 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	echo "Updating ".$row["ticker"]." Quote...";
 
 	$query = "delete from tickers_alt_aux where ticker_id = " . $row["id"];
-	mysql_query($query) or die (mysql_error());
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("- Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
 	$query1 = "SELECT *,
 		(CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL OR X5 IS NULL)
