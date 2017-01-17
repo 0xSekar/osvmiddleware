@@ -17,6 +17,7 @@ ob_implicit_flush(true);             // output stuff directly
 $count2 = 0;
 $eupdated = 0;
 $enotfound = 0;
+$eerror = 0;
 echo "Updating Tickers...\n";
 try {
 	$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id";
@@ -93,11 +94,12 @@ try {
 	}
 } catch (Exception $e) {
 	var_dump($e);
-	exit;
+	$eerror++;
 }
 
 echo $count2 . " rows processed\n";
 echo "Estimates:\n";
 echo "\t".$eupdated." tickers updates\n";
 echo "\t".$enotfound." tickers not found on xignite\n";
+echo "\t".$eerror." errors procesing tickers\n";
 ?>
