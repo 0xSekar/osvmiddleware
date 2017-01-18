@@ -69,7 +69,7 @@ $pttm_tables = array("pttm_balanceconsolidated","pttm_balancefull","pttm_cashflo
 
 echo "Deleting Reports... ";
 foreach($report_tables as $table) {
-	$query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$ticker_id.")";
+	$query = "DELETE $table FROM $table INNER JOIN reports_header WHERE $table.report_id = reports_header.id AND ticker_id = ".$ticker_id;
 	try {
 		$db->exec($query);
 	} catch(PDOException $ex) {
