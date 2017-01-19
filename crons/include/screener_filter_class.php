@@ -557,12 +557,21 @@ class screener_filter {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
 				$table = $value["table"];
-				$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key'";
+				if($i == 1 || $i == 2) {
+					$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key' and report_type = ?";
+				} else {
+					$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key'";
+				}
 				$params[] = $value["title"];
 				$params[] = $value["comment"];
 				$params[] = $value["format"];
 				$params[] = $value["min"];
 				$params[] = $value["max"];
+                                if($i == 1) {
+                                        $params[] = "ANN";
+                                } else if($i == 2) {
+                                        $params[] = "QTR";
+                                }
 				$q = $this->db->prepare($query);
 				$q->execute($params);
 			}
