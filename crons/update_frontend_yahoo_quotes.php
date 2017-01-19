@@ -116,6 +116,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 				die("Line: ".__LINE__." - ".$ex->getMessage());
 			}
 
+			
 			$query = "INSERT INTO `tickers_yahoo_quotes_2` (`ticker_id`, `LastTradeWithTime`, `LastTradePriceOnly`, `HighLimit`, `LowLimit`, `FiftyDayMovingAverage`, `TwoHundredDayMovingAverage`, `ChangeFromTwoHundredDayMovingAverage`, `PercentageChangeFromTwoHundredDayMovingAverage`, `ChangeFromFiftyDayMovingAverage`, `PercentChangeFromFiftyDayMovingAverage`, `Name`, `Notes`, `Open`, `PreviousClose`, `PricePaid`, `ChangeInPercent`, `PriceSales`, `PriceBook`, `ExDividendDate`, `PERatio`, `DividendPayDate`, `PERatioRealTime`, `PEGRatio`, `PriceEPSEstimateCurrentYear`, `PriceEPSEstimateNextYear`, `SharesOwned`, `ShortRatio`, `LastTradeTime`, `TickerTrend`, `OneYrTargetPrice`, `Volume`, `HoldingsValue`, `HoldingsValueRealTime`, `DaysValueChange`, `DaysValueChangeRealTime`, `StockExchange`, `DividendYield`, `PercentChange`, `SharesOutstanding`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //40par
 			$params = array();
 			$params[] = $row["id"];
@@ -252,6 +253,88 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	} else {
 		$eerrors ++;
 	}
+
+	//Update from Barchart
+			$sym = $row["ticker"]; //get symbol from yahoo rawdata
+			echo "\nUpdating from Barchart:".$sym."\n";
+		
+			$queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$sym."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding";
+			$resOD = file_get_contents($queryOD);
+			$resJS = json_decode($resOD, true);
+			//echo "\nData:".$resOD;
+			$code = $resJS['status']['code'];
+			//echo "\nCode:".$code."\n";
+
+			if($code == 200){
+				$query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id` , `Ask`, `AverageDailyVolume`, `Bid`, `Change`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE `Ask` = ?, `AverageDailyVolume` = ?, `Bid` = ?, `Change` = ?, `DaysLow` = ?, `DaysHigh` = ?, `YearLow` = ?, `YearHigh` = ?";
+				$params = array();
+				$params[] = $row["id"];
+				$params[] = $resJS['results'][0]['ask'];
+				$params[] = $resJS['results'][0]['avgVolume'];
+				$params[] = $resJS['results'][0]['bid'];
+				$params[] = $resJS['results'][0]['netChange'];		
+				$params[] = $resJS['results'][0]['low'];
+				$params[] = $resJS['results'][0]['high'];
+				$params[] = $resJS['results'][0]['fiftyTwoWkLow'];
+				$params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
+				
+				$params[] = $resJS['results'][0]['ask'];
+				$params[] = $resJS['results'][0]['avgVolume'];
+				$params[] = $resJS['results'][0]['bid'];
+				$params[] = $resJS['results'][0]['netChange'];		
+				$params[] = $resJS['results'][0]['low'];
+				$params[] = $resJS['results'][0]['high'];
+				$params[] = $resJS['results'][0]['fiftyTwoWkLow'];
+				$params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
+				try {
+					$resb = $db->prepare($query);
+					$resb->execute($params);
+				} catch(PDOException $ex) {
+					echo "\nDatabase Error"; //user message
+					die("Line: ".__LINE__." - ".$ex->getMessage());
+				}
+
+				$query = "INSERT INTO `tickers_yahoo_quotes_2` (`ticker_id`, `LastTradePriceOnly` , `Name` , `Open` , `PreviousClose` , `ChangeInPercent` , `ExDividendDate` , `LastTradeTime` , `Volume` ,`DaysValueChange` , `DividendYield` , `PercentChange` , `SharesOutstandingBC`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `LastTradePriceOnly` = ?, `Name` = ?, `Open` = ?, `PreviousClose` = ?, `ChangeInPercent` = ?, `ExDividendDate` = ?, `LastTradeTime` = ?, `Volume` = ?,`DaysValueChange` = ?, `DividendYield` = ?, `PercentChange` = ?, `SharesOutstandingBC` = ?";
+				
+				$params = array();				
+				$params[] = $row["id"];
+				$params[] = $resJS['results'][0]['lastPrice'];
+				$params[] = $resJS['results'][0]['name'];
+				$params[] = $resJS['results'][0]['open'];
+				$params[] = $resJS['results'][0]['previousClose'];
+				$params[] = $resJS['results'][0]['percentChange'];
+				$params[] = $resJS['results'][0]['exDividendDate'];
+				$params[] = date("H:i:s", strtotime($resJS['results'][0]['tradeTimestamp']));
+				$params[] = $resJS['results'][0]['volume'];
+				$params[] = $resJS['results'][0]['netChange'];
+				$params[] = $resJS['results'][0]['dividendYieldAnnual'];
+				$params[] = $resJS['results'][0]['percentChange'];
+				$params[] = $resJS['results'][0]['sharesOutstanding'];
+				
+				$params[] = $resJS['results'][0]['lastPrice'];
+				$params[] = $resJS['results'][0]['name'];
+				$params[] = $resJS['results'][0]['open'];
+				$params[] = $resJS['results'][0]['previousClose'];
+				$params[] = $resJS['results'][0]['percentChange'];
+				$params[] = $resJS['results'][0]['exDividendDate'];
+				$params[] = date("H:i:s", strtotime($resJS['results'][0]['tradeTimestamp']));
+				$params[] = $resJS['results'][0]['volume'];
+				$params[] = $resJS['results'][0]['netChange'];
+				$params[] = $resJS['results'][0]['dividendYieldAnnual'];
+				$params[] = $resJS['results'][0]['percentChange'];
+				$params[] = $resJS['results'][0]['sharesOutstanding'];				
+				try {
+					$resbc = $db->prepare($query);
+					$resbc->execute($params);
+				} catch(PDOException $ex) {
+					echo "\nDatabase Error"; //user message
+					die("Line: ".__LINE__." - ".$ex->getMessage());
+				}
+
+			}else{
+				echo "\nError on Barchart Update for ticker ".$sym."\n";
+			}
+
 	echo " Done\n";
 }
 echo $count2 . " rows processed\n";

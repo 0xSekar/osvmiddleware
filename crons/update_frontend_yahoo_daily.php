@@ -216,6 +216,11 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		} else {
 			$knotfound ++;
 		}
+		//Keystats From Barchart
+		$queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=fiftyTwoWkHigh,fiftyTwoWkHighDate,fiftyTwoWkLow,fiftyTwoWkLowDate,dividendRateAnnual,dividendYieldAnnual,exDividendDate,twentyDayAvgVol";
+		$resOD = file_get_contents($queryOD);
+		$resJS = json_decode($resOD, true);
+		update_raw_data_barchart_keystats($row["id"], $resJS);
 
 		//Sector and Industry
 		if(isset($response->query->results->result->assetProfile->sector) && !empty($response->query->results->result->assetProfile->sector)) {
