@@ -57,6 +57,7 @@ $supdated = 0;
 $snotfound = 0;
 $supdated2 = 0;
 $snotfound2 = 0;
+$kbnotfound = 0;
 echo "Updating Tickers...\n";
 
 //Select all tickers not updated for at least a day
@@ -217,10 +218,14 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			$knotfound ++;
 		}
 		//Keystats From Barchart
-		$queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=fiftyTwoWkHigh,fiftyTwoWkHighDate,fiftyTwoWkLow,fiftyTwoWkLowDate,dividendRateAnnual,dividendYieldAnnual,exDividendDate,twentyDayAvgVol";
+		$queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=fiftyTwoWkHigh,fiftyTwoWkHighDate,fiftyTwoWkLow,fiftyTwoWkLowDate,dividendRateAnnual,dividendYieldAnnual,exDividendDate,twentyDayAvgVol,averageQuarterlyVolume";
 		$resOD = file_get_contents($queryOD);
 		$resJS = json_decode($resOD, true);
-		update_raw_data_barchart_keystats($row["id"], $resJS);
+		if($resJS['status']['code'] == 200){
+			update_raw_data_barchart_keystats($row["id"], $resJS);
+		} else {
+			$kbnotfound++;
+		}
 
 		//Sector and Industry
 		if(isset($response->query->results->result->assetProfile->sector) && !empty($response->query->results->result->assetProfile->sector)) {
@@ -286,6 +291,7 @@ echo "\t".$herrors." errors updating tickers\n";
 echo "Key Stats:\n";
 echo "\t".$kupdated." tickers updates\n";
 echo "\t".$knotfound." tickers not found on yahoo\n";
+echo "\t".$kbnotfound." tickers not found on barchart\n";
 echo "\t".$kerrors." errors updating tickers\n";
 echo "Sector & Industry:\n";
 echo "\t".$supdated." tickers updates\n";

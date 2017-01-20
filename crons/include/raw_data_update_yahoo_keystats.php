@@ -107,18 +107,10 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 }
 
 function update_raw_data_barchart_keystats($ticker_id, $resOD) {
+	//Updating Keystats 2 from Barchart
 	$db = Database::GetInstance();
-//Updating Keystats 2 from Barchart
 
-echo "\nUpdating from Barchart:".$resOD['results'][0]['symbol']."\n";
-
-//$queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$sym."&mode=I&fields=tradeSize,tick,previousLastPrice,previousTimestamp,bid,bidSize,ask,askSize,previousClose,fiftyTwoWkHigh,fiftyTwoWkHighDate,fiftyTwoWkLow,fiftyTwoWkLowDate,avgVolume,sharesOutstanding,dividendRateAnnual,dividendYieldAnnual,exDividendDate,impliedVolatility,twentyDayAvgVol,twelveMnthPct,twelveMnthPctDate,averageWeeklyVolume,averageMonthlyVolume,oneMonthHigh,oneMonthHighDate,oneMonthLow,oneMonthLowDate,threeMonthHigh,threeMonthHighDate,threeMonthLow,threeMonthLowDate,sixMonthHigh,sixMonthHighDate,sixMonthLow,sixMonthLowDate"; //Jae query
-
-//$queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$sym."&mode=I&fields=fiftyTwoWkHigh,fiftyTwoWkHighDate,fiftyTwoWkLow,fiftyTwoWkLowDate,dividendRateAnnual,dividendYieldAnnual,exDividendDate,twentyDayAvgVol";
-//$resOD = file_get_contents($queryOD);
-
-if($resOD['status']['code'] == 200){
-	$query = "INSERT INTO`tickers_yahoo_keystats_2` (`ticker_id`, `52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`AvgVolume10Days`  ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` , `ExDividendDate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `52WeekHighDate`= ? ,`52WeekHighValue` = ? ,`52WeekLowDate` = ? ,`52WeekLowValue` = ? ,`AvgVolume10Days` = ? ,`ForwardAnnualDividendRate` = ? ,`ForwardAnnualDividendYield` = ?, `ExDividendDate` = ?";
+	$query = "INSERT INTO`tickers_yahoo_keystats_2` (`ticker_id`, `52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`AvgVolume10Days`  ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` , `ExDividendDate`, `AvgVolume3Month`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `52WeekHighDate`= ? ,`52WeekHighValue` = ? ,`52WeekLowDate` = ? ,`52WeekLowValue` = ? ,`AvgVolume10Days` = ? ,`ForwardAnnualDividendRate` = ? ,`ForwardAnnualDividendYield` = ?, `ExDividendDate` = ?, `AvgVolume3Month` = ?";
 	$params = array();
 	$params[] = $ticker_id;
 	$params[] = $resOD['results'][0]['fiftyTwoWkHighDate'];
@@ -129,6 +121,7 @@ if($resOD['status']['code'] == 200){
 	$params[] = $resOD['results'][0]['dividendRateAnnual'];
 	$params[] = $resOD['results'][0]['dividendYieldAnnual'];
 	$params[] = $resOD['results'][0]['exDividendDate'];
+	$params[] = $resOD['results'][0]['averageQuarterlyVolume'];
 
 	$params[] = $resOD['results'][0]['fiftyTwoWkHighDate'];
 	$params[] = $resOD['results'][0]['fiftyTwoWkHigh'];
@@ -138,6 +131,7 @@ if($resOD['status']['code'] == 200){
 	$params[] = $resOD['results'][0]['dividendRateAnnual'];
 	$params[] = $resOD['results'][0]['dividendYieldAnnual'];
 	$params[] = $resOD['results'][0]['exDividendDate'];
+	$params[] = $resOD['results'][0]['averageQuarterlyVolume'];
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -145,9 +139,5 @@ if($resOD['status']['code'] == 200){
 		echo "\nDatabase Error"; //user message
 		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
-
-}else{
-	echo "\nError on Barchart Update for ticker ".$ticker_id."\n";
-}
 }
 ?>
