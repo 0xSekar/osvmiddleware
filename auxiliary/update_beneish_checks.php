@@ -55,10 +55,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	if($idChange && !$first) {
 		beneishTTM($ppid,$prawdata,$querypre);
 	}
-	//Skip calculations for first report of each ticket
-	if($idChange) {
-		continue;
-	}
+
 	$query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	$params = array();
 	$params[] = $row["id"];
@@ -106,6 +103,13 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$params[] = $bm8;
 	$query2 = $params;
 	array_shift($query2);
+
+        $first = false;
+        //Skip calculations for first report of each ticket
+        if($idChange) {
+                continue;
+        }
+
 	try {
 		$res1 = $db->prepare($query1);
 		$res1->execute($params);
