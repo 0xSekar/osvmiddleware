@@ -215,22 +215,22 @@ foreach ($result as $symbol) {
 		//Update Raw data
 		if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
 			update_raw_data_tickers($dates, $rawdata);
-		}
 
-		//Update Key ratios TTM
-		update_key_ratios_ttm($dates->ticker_id);
+			//Update Key ratios TTM
+			update_key_ratios_ttm($dates->ticker_id);
 
-		//Update Quality Checks
-		update_pio_checks($dates->ticker_id);
-		update_altman_checks($dates->ticker_id);
-		update_beneish_checks($dates->ticker_id);
+			//Update Quality Checks
+			update_pio_checks($dates->ticker_id);
+			update_altman_checks($dates->ticker_id);
+			update_beneish_checks($dates->ticker_id);
 
-		//Finally update local report date
-		try {
-			$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
+			//Finally update local report date
+			try {
+				$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
+			} catch(PDOException $ex) {
+				echo "\nDatabase Error"; //user message
+				die("Line: ".__LINE__." - ".$ex->getMessage());
+			}
 		}
 		fclose($csvst);
 	}
@@ -280,22 +280,22 @@ foreach ($result2 as $symbol) {
 		//Update Raw data
 		if(isset($rawdata["AccountsPayableTurnoverDaysFY"])) {
 			update_raw_data_tickers($dates, $rawdata);
-		}
 
-		//Update Key ratios TTM
-		update_key_ratios_ttm($dates->ticker_id);
+			//Update Key ratios TTM
+			update_key_ratios_ttm($dates->ticker_id);
 
-		//Update Quality Checks
-		update_pio_checks($dates->ticker_id);
-		update_altman_checks($dates->ticker_id);
-		update_beneish_checks($dates->ticker_id);
+			//Update Quality Checks
+			update_pio_checks($dates->ticker_id);
+			update_altman_checks($dates->ticker_id);
+			update_beneish_checks($dates->ticker_id);
 
-		//Finally update local report date
-		try {
-			$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
+			//Finally update local report date
+			try {
+				$res = $db->query("UPDATE tickers_control SET last_eol_date = '$fixdate' WHERE ticker_id = $dates->ticker_id");
+			} catch(PDOException $ex) {
+				echo "\nDatabase Error"; //user message
+				die("Line: ".__LINE__." - ".$ex->getMessage());
+			}
 		}
 		fclose($csvst);
 	}
