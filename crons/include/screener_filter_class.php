@@ -452,10 +452,6 @@ class screener_filter {
 					case "pttm_gf_data":
 					case "ttm_gf_data":
 					case "reports_gf_data":
-					case "reports_gf_data_3cagr":
-					case "reports_gf_data_5cagr":
-					case "reports_gf_data_7cagr":
-					case "reports_gf_data_10cagr":
 						switch ($key) {
 							case "Interest Income":
 							case "Interest Expense":
@@ -463,12 +459,29 @@ class screener_filter {
 							case "Diluted Earnings per Share":
 							case "Diluted Shares Outstanding":
 							case "Basic Shares Outstanding":
-								$params[] = 10;
+								$params[] = 9;
 								break;
 							default:
-								$params[] = 3;
+								$params[] = 2;
 						}
 						break;
+                                        case "reports_gf_data_3cagr":
+                                        case "reports_gf_data_5cagr":
+                                        case "reports_gf_data_7cagr":
+                                        case "reports_gf_data_10cagr":
+                                                switch ($key) {
+                                                        case "Interest Income":
+                                                        case "Interest Expense":
+                                                        case "Basic Earnings per Share":
+                                                        case "Diluted Earnings per Share":
+                                                        case "Diluted Shares Outstanding":
+                                                        case "Basic Shares Outstanding":
+                                                                $params[] = 10;
+                                                                break;
+                                                        default:
+                                                                $params[] = 3;
+                                                }
+                                                break;
 					case "pttm_incomefull":
 					case "ttm_incomefull":
 					case "reports_incomefull":
