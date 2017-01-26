@@ -102,40 +102,41 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	//UPDATE HISTORICAL DATA
 	try {
 		$r_count = $db->query("select count(*) as a from `tickers_yahoo_historical_data` where ticker_id = '".$row["id"]."'"); 
-		//$r_row = mysql_fetch_assoc($r_count);
 		$r_row = $r_count->fetch(PDO::FETCH_ASSOC);
 	} catch(PDOException $ex) {
 		echo "\nDatabase Error"; //user message
 		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 
-
 	$split_date = date("Ymd",strtotime($row["last_split_date"]));
 	$sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+	$sym = $row["ticker"]; //get symbol from yahoo rawdata
 
 	if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date)) {
-		for ($years = -15; $years < 0; $years++) {
-			$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime($years ." years"))."' and endDate = '".date("Y-m-d", strtotime(($years+1) ." years"))."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
-			if(isset($response->query) && isset($response->query->results)) {
-				foreach($response->query->results->quote as $element) {
+			$queryOD = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
+			$resOD = file_get_contents($queryOD);
+			$resJS = json_decode($resOD, true);
+			$code = $resJS['status']['code'];
 
+			if($code == 200){	
+				foreach($resJS['results'] as $record) {
 					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
 					$params = array();
 					$params[] = $row["id"];
-					$params[] = $element->Date;
-					$params[] = (is_null($element->Open)?NULL:$element->Open);
-					$params[] = (is_null($element->High)?NULL:$element->High);
-					$params[] = (is_null($element->Low)?NULL:$element->Low);
-					$params[] = (is_null($element->Close)?NULL:$element->Close);
-					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
-					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
+					$params[] = $record['tradingDay'];
+					$params[] = $record['open'];
+					$params[] = $record['high'];
+					$params[] = $record['low'];
+					$params[] = $record['close'];
+					$params[] = $record['volume'];
+					$params[] = $record['close'];
 
-					$params[] = (is_null($element->Open)?NULL:$element->Open);
-					$params[] = (is_null($element->High)?NULL:$element->High);
-					$params[] = (is_null($element->Low)?NULL:$element->Low);
-					$params[] = (is_null($element->Close)?NULL:$element->Close);
-					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
-					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
+					$params[] = $record['open'];
+					$params[] = $record['high'];
+					$params[] = $record['low'];
+					$params[] = $record['close'];
+					$params[] = $record['volume'];
+					$params[] = $record['close'];
 					try {
 						$res1 = $db->prepare($query_div);
 						$res1->execute($params);
@@ -144,8 +145,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 						die("Line: ".__LINE__." - ".$ex->getMessage());
 					}
 				}
-			}
-		}
+			}		
 		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
 			try {
 				$res1 = $db->prepare("UPDATE tickers_control SET last_split_date = ? WHERE ticker_id = ?");
@@ -166,28 +166,31 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 
 		}
 	} else {
-		$response = $yql->execute("select * from yahoo.finance.historicaldata where startDate = '".date("Y-m-d", strtotime("-1 month"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
-		if(isset($response->query) && isset($response->query->results)) {
-			foreach($response->query->results->quote as $element) {
-				if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
+		$queryOD = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-1 month"))."&endDate=".date("Ymd")."";
+		$resOD = file_get_contents($queryOD);
+		$resJS = json_decode($resOD, true);
+		$code = $resJS['status']['code'];
 
+		if($code == 200){		
+			foreach($resJS['results'] as $record) { 
+				if (isset($record['tradingDay']) && !is_null($record['tradingDay']) && $record['tradingDay']!="00000000") {
 					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
 					$params = array();
 					$params[] = $row["id"];
-					$params[] = $element->Date;
-					$params[] = (is_null($element->Open)?NULL:$element->Open);
-					$params[] = (is_null($element->High)?NULL:$element->High);
-					$params[] = (is_null($element->Low)?NULL:$element->Low);
-					$params[] = (is_null($element->Close)?NULL:$element->Close);
-					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
-					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
+					$params[] = $record['tradingDay'];
+					$params[] = $record['open'];
+					$params[] = $record['high'];
+					$params[] = $record['low'];
+					$params[] = $record['close'];
+					$params[] = $record['volume'];
+					$params[] = $record['close'];
 
-					$params[] = (is_null($element->Open)?NULL:$element->Open);
-					$params[] = (is_null($element->High)?NULL:$element->High);
-					$params[] = (is_null($element->Low)?NULL:$element->Low);
-					$params[] = (is_null($element->Close)?NULL:$element->Close);
-					$params[] = (is_null($element->Volume)?NULL:$element->Volume);
-					$params[] = (is_null($element->Adj_Close)?NULL:$element->Adj_Close);
+					$params[] = $record['open'];
+					$params[] = $record['high'];
+					$params[] = $record['low'];
+					$params[] = $record['close'];
+					$params[] = $record['volume'];
+					$params[] = $record['close'];
 					try {
 						$res1 = $db->prepare($query_div);
 						$res1->execute($params);
@@ -198,10 +201,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 				}
 			}
 			$hupdated ++;
-		} elseif(isset($response->error)) {
-			$herrors ++;
 		} else {
-			$hnotfound ++;
+			$herrors ++;		
 		}
 	}
 	//UPDATE KEYSTATS, SECTOR, INDUSTRY AND DESCRIPTION
