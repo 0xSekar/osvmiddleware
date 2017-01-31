@@ -105,6 +105,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	if($idChange && !$first) {
 		altmanTTM($ppid);
 	}
+	$first = false;
 }
 altmanTTM($pid);
 

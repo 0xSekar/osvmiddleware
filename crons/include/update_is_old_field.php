@@ -16,7 +16,7 @@ function update_is_old_field() {
 		}
 		$query .= " WHERE id = ".$row["id"];
 		try {
-			$res = $db->query($query);		
+			$res1 = $db->query($query);		
 		} catch(PDOException $ex) {
 			echo "\nDatabase Error"; //user message
 			die("Line: ".__LINE__." - ".$ex->getMessage());

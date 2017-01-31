@@ -114,7 +114,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		if ($pprawdata["ticker_id"] == $prawdata["ticker_id"]) {
 			$vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
 		} else {
-			$vv = (is_null($prawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/$prawdata["TotalAssets"]);
+			$vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/$prawdata["TotalAssets"]);
 		}
 		$value = ($vn <= $vv ? 1 : 0);
 		$total += $value;
@@ -163,6 +163,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	if($idChange && !$first) {
 		pioTTM($ppid,$prawdata,$querypre,$pprawdata);
 	}
+	$first = false;
 }
 pioTTM($pid,$rawdata,$query2,$prawdata);
 
@@ -221,7 +222,11 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
 		$params[] = ($value);
 		//Pio 5
 		$vn = (($trawdata["TotalAssets"]+$prawdata["TotalAssets"]) == 0) ? 0 : (($trawdata["TotalLongtermDebt"])/(($trawdata["TotalAssets"]+$prawdata["TotalAssets"])/2));
-		$vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
+                if ($pprawdata["ticker_id"] == $prawdata["ticker_id"]) {
+                        $vv = (($prawdata["TotalAssets"]+$pprawdata["TotalAssets"]) == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/(($prawdata["TotalAssets"]+$pprawdata["TotalAssets"])/2));
+                } else {
+                        $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : (($prawdata["TotalLongtermDebt"])/$prawdata["TotalAssets"]);
+                }
 		$value = ($vn <= $vv ? 1 : 0);
 		$total += $value;
 		$params[] = ($value);
@@ -243,7 +248,11 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
 		$params[] = ($value);
 		//Pio 9
 		$vn = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? 0 : ($trawdata["TotalRevenue"]/$prawdata["TotalAssets"]);
-		$vv = (is_null($pprawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : ($prawdata["TotalRevenue"]/$pprawdata["TotalAssets"]);
+                if($pprawdata["ticker_id"] == $prawdata["ticker_id"]) {
+                        $vv = (is_null($pprawdata["TotalAssets"]) || $pprawdata["TotalAssets"] == 0) ? 0 : ($prawdata["TotalRevenue"]/$pprawdata["TotalAssets"]);
+                } else {
+                        $vv = 0;
+                }
 		$value = ($vn >= $vv ? 1 : 0);
 		$total += $value;
 		$params[] = ($value);

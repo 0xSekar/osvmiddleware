@@ -452,10 +452,6 @@ class screener_filter {
 					case "pttm_gf_data":
 					case "ttm_gf_data":
 					case "reports_gf_data":
-					case "reports_gf_data_3cagr":
-					case "reports_gf_data_5cagr":
-					case "reports_gf_data_7cagr":
-					case "reports_gf_data_10cagr":
 						switch ($key) {
 							case "Interest Income":
 							case "Interest Expense":
@@ -463,12 +459,29 @@ class screener_filter {
 							case "Diluted Earnings per Share":
 							case "Diluted Shares Outstanding":
 							case "Basic Shares Outstanding":
-								$params[] = 10;
+								$params[] = 9;
 								break;
 							default:
-								$params[] = 3;
+								$params[] = 2;
 						}
 						break;
+                                        case "reports_gf_data_3cagr":
+                                        case "reports_gf_data_5cagr":
+                                        case "reports_gf_data_7cagr":
+                                        case "reports_gf_data_10cagr":
+                                                switch ($key) {
+                                                        case "Interest Income":
+                                                        case "Interest Expense":
+                                                        case "Basic Earnings per Share":
+                                                        case "Diluted Earnings per Share":
+                                                        case "Diluted Shares Outstanding":
+                                                        case "Basic Shares Outstanding":
+                                                                $params[] = 10;
+                                                                break;
+                                                        default:
+                                                                $params[] = 3;
+                                                }
+                                                break;
 					case "pttm_incomefull":
 					case "ttm_incomefull":
 					case "reports_incomefull":
@@ -557,12 +570,21 @@ class screener_filter {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
 				$table = $value["table"];
-				$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key'";
+				if($i == 1 || $i == 2) {
+					$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key' and report_type = ?";
+				} else {
+					$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key'";
+				}
 				$params[] = $value["title"];
 				$params[] = $value["comment"];
 				$params[] = $value["format"];
 				$params[] = $value["min"];
 				$params[] = $value["max"];
+                                if($i == 1) {
+                                        $params[] = "ANN";
+                                } else if($i == 2) {
+                                        $params[] = "QTR";
+                                }
 				$q = $this->db->prepare($query);
 				$q->execute($params);
 			}

@@ -113,39 +113,39 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$sym = $row["ticker"]; //get symbol from yahoo rawdata
 
 	if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date)) {
-			$queryOD = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
-			$resOD = file_get_contents($queryOD);
-			$resJS = json_decode($resOD, true);
-			$code = $resJS['status']['code'];
+		$queryOD = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
+		$resOD = file_get_contents($queryOD);
+		$resJS = json_decode($resOD, true);
+		$code = $resJS['status']['code'];
 
-			if($code == 200){	
-				foreach($resJS['results'] as $record) {
-					$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
-					$params = array();
-					$params[] = $row["id"];
-					$params[] = $record['tradingDay'];
-					$params[] = $record['open'];
-					$params[] = $record['high'];
-					$params[] = $record['low'];
-					$params[] = $record['close'];
-					$params[] = $record['volume'];
-					$params[] = $record['close'];
+		if($code == 200){	
+			foreach($resJS['results'] as $record) {
+				$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
+				$params = array();
+				$params[] = $row["id"];
+				$params[] = $record['tradingDay'];
+				$params[] = $record['open'];
+				$params[] = $record['high'];
+				$params[] = $record['low'];
+				$params[] = $record['close'];
+				$params[] = $record['volume'];
+				$params[] = $record['close'];
 
-					$params[] = $record['open'];
-					$params[] = $record['high'];
-					$params[] = $record['low'];
-					$params[] = $record['close'];
-					$params[] = $record['volume'];
-					$params[] = $record['close'];
-					try {
-						$res1 = $db->prepare($query_div);
-						$res1->execute($params);
-					} catch(PDOException $ex) {
-						echo "\nDatabase Error"; //user message
-						die("Line: ".__LINE__." - ".$ex->getMessage());
-					}
+				$params[] = $record['open'];
+				$params[] = $record['high'];
+				$params[] = $record['low'];
+				$params[] = $record['close'];
+				$params[] = $record['volume'];
+				$params[] = $record['close'];
+				try {
+					$res1 = $db->prepare($query_div);
+					$res1->execute($params);
+				} catch(PDOException $ex) {
+					echo "\nDatabase Error"; //user message
+					die("Line: ".__LINE__." - ".$ex->getMessage());
 				}
-			}		
+			}
+		}		
 		if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
 			try {
 				$res1 = $db->prepare("UPDATE tickers_control SET last_split_date = ? WHERE ticker_id = ?");
