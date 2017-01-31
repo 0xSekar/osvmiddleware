@@ -62,7 +62,7 @@ echo "Updating Tickers...\n";
 
 //Select all tickers not updated for at least a day
 try {
-	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380");
+	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380 AND is_old = FALSE");
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
 	die("Line: ".__LINE__." - ".$ex->getMessage());

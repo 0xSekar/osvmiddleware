@@ -20,7 +20,7 @@ $enotfound = 0;
 $eerror = 0;
 echo "Updating Tickers...\n";
 try {
-	$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id";
+	$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE";
 	$res = $db->query($query);
 	while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		$count2++;
