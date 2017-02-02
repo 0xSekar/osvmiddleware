@@ -110,7 +110,7 @@ function update_raw_data_barchart_keystats($ticker_id, $resOD) {
 	//Updating Keystats 2 from Barchart
 	$db = Database::GetInstance();
 
-	$query = "INSERT INTO`tickers_yahoo_keystats_2` (`ticker_id`, `52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`AvgVolume10Days`  ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` , `ExDividendDate`, `AvgVolume3Month`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `52WeekHighDate`= ? ,`52WeekHighValue` = ? ,`52WeekLowDate` = ? ,`52WeekLowValue` = ? ,`AvgVolume10Days` = ? ,`ForwardAnnualDividendRate` = ? ,`ForwardAnnualDividendYield` = ?, `ExDividendDate` = ?, `AvgVolume3Month` = ?";
+	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id`, `52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`AvgVolume10Days`  ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` , `ExDividendDate`, `AvgVolume3Month`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `52WeekHighDate`= ? ,`52WeekHighValue` = ? ,`52WeekLowDate` = ? ,`52WeekLowValue` = ? ,`AvgVolume10Days` = ? ,`ForwardAnnualDividendRate` = ? ,`ForwardAnnualDividendYield` = ?, `ExDividendDate` = ?, `AvgVolume3Month` = ?";
 	$params = array();
 	$params[] = $ticker_id;
 	$params[] = $resOD['results'][0]['fiftyTwoWkHighDate'];

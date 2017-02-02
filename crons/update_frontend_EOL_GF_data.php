@@ -94,7 +94,7 @@ foreach ($result as $symbol) {
 						':country' => (is_null($symbol->country)?'':$symbol->country)
 					   ));
 			$id = $db->lastInsertId();
-			$res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
+			$res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_barchart_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
 		} catch(PDOException $ex) {
 			echo "\nDatabase Error"; //user message
 			die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -155,7 +155,7 @@ foreach ($result2 as $symbol2) {
 							':country' => (is_null($rawdata["Country"][$treports])?'':$rawdata["Country"][$treports])));
 				$id = $db->lastInsertId();					
 
-				$res = $db->query("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
+				$res = $db->query("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_barchart_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
 			} catch(PDOException $ex) {
 				echo "\nDatabase Error"; //user message
 				die("Line: ".__LINE__." - ".$ex->getMessage());
