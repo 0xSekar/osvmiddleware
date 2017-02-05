@@ -287,6 +287,23 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                                         echo "\nDatabase Error "; //user message
                                         die("- Line: ".__LINE__." - ".$ex->getMessage());
                                 }
+
+				//Save histical SO
+		                if(isset($rawdata->SharesOutstanding)) {
+                		        $query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, SharesOutstandingY) VALUES (?,?,?)  ON DUPLICATE KEY UPDATE SharesOutstandingY = ?";
+		                        $params = array();
+                		        $params[] = $row["id"];
+		                        $params[] = date("Y-m-d", strtotime($rawdata->LastTradeDate));
+                		        $params[] = $rawdata->SharesOutstanding;
+		                        $params[] = $rawdata->SharesOutstanding;
+                		        try {
+                                		$resbc = $db->prepare($query_div);
+		                                $resbc->execute($params);
+                		        } catch(PDOException $ex) {
+                                		echo "\nDatabase Error"; //user message
+		                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                		        }
+                		}
                         } else {
                                 $enotfound ++;
                         }
@@ -514,6 +531,22 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         echo "\nDatabase Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
+
+		if(!is_null($resJS['results'][0]['sharesOutstanding'])) {
+			$query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, SharesOutstandingBC) VALUES (?,?,?)  ON DUPLICATE KEY UPDATE SharesOutstandingBC = ?";
+        	        $params = array();
+                	$params[] = $row["id"];
+			$params[] = substr($resJS['results'][0]['tradeTimestamp'],0,10);
+			$params[] = $resJS['results'][0]['sharesOutstanding'] * 1000;
+			$params[] = $resJS['results'][0]['sharesOutstanding'] * 1000;
+	                try {
+        	                $resbc = $db->prepare($query_div);
+                	        $resbc->execute($params);
+	                } catch(PDOException $ex) {
+        	                echo "\nDatabase Error"; //user message
+                	        die("Line: ".__LINE__." - ".$ex->getMessage());
+                	}
+		}
 
                 $kbupdated ++;
 		$eupdated2 ++;
