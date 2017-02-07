@@ -125,6 +125,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			}
 
 			//Sector and Industry
+			//Loading manually so disabling for now
+			/*
 			if(isset($response->query->results->result->assetProfile->sector) && !empty($response->query->results->result->assetProfile->sector)) {
 				$supdated ++;
 				try {
@@ -137,7 +139,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 
 			} else {
 				$snotfound ++;
-			}
+			}*/
 
 			//Description
 			if(isset($response->query->results->result->assetProfile->longBusinessSummary)) {
