@@ -4,3 +4,4 @@
 12 * * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/check_yahoo_status.php
 0 2 * * * root [ `ps -ef|grep -v grep | grep update_frontend_xignite.php|wc -l` -eq 0 ] && cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_frontend_xignite.php 2>/dev/null
 45 * * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_screener_filters_details.php
+0 1 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_screener_filters_top.php
