@@ -18,10 +18,12 @@ $admin_filters = array();
 try {
 	$res = $db->query("SELECT * from screener_filter_top1");
 	$admin_filters_field = $res->fetchAll(PDO::FETCH_COLUMN);
-	$in = join(',', array_fill(0, count($admin_filters_field), '?'));
-	$res = $db->prepare("(SELECT crit_id FROM screener_filter_criteria WHERE field_id IN ($in)) UNION (SELECT crit_id FROM screener_filter_criteria2 WHERE field_id IN ($in))");
-	$res->execute(array_merge($admin_filters_field,$admin_filters_field));
-	$admin_filters = $res->fetchAll(PDO::FETCH_COLUMN);
+	if(count($admin_filters_field) > 0) {
+		$in = join(',', array_fill(0, count($admin_filters_field), '?'));
+		$res = $db->prepare("(SELECT crit_id FROM screener_filter_criteria WHERE field_id IN ($in)) UNION (SELECT crit_id FROM screener_filter_criteria2 WHERE field_id IN ($in))");
+		$res->execute(array_merge($admin_filters_field,$admin_filters_field));
+		$admin_filters = $res->fetchAll(PDO::FETCH_COLUMN);
+	}
 	$res = $db->query("SELECT criteria from screener_persistent");
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
