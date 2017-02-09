@@ -36,3 +36,6 @@ if (!defined('DB_FRONTEND_DATABASE')) {
     define('DB_FRONTEND_PASSWORD', 'ng2Xfy2SAu');
 }
 
+if (!defined('APP_DIR')) {
+    define('APP_DIR', '');
+}

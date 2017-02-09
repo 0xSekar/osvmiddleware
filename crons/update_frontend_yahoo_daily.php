@@ -9,6 +9,7 @@ include_once('./include/raw_data_update_yahoo_keystats.php');
 require_once("../include/yahoo/common.inc.php");
 include_once('./include/update_key_ratios_ttm.php');
 include_once('./include/update_ratings_ttm.php');
+include_once('./include/update_eod_valuation.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -640,6 +641,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	
         //Update key ratios ttm
         update_key_ratios_ttm($row["id"]);
+        update_eod_valuation($row["id"]);
 
         // UPDATE DATES
         if($resJS['status']['code'] == 200) {
