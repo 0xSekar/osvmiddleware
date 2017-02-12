@@ -6,7 +6,7 @@ class screener_filter {
 	private $db;
 
 	//Auxiliary private variables
-	private $tableListG0 = ["tickers", "tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios", "tickers_xignite_estimates", "tickers_yahoo_estimates_others", "tickers_yahoo_keystats_1", "tickers_yahoo_keystats_2", "tickers_yahoo_quotes_1", "tickers_yahoo_quotes_2"];
+	private $tableListG0 = ["tickers", "tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios", "tickers_xignite_estimates", "tickers_yahoo_estimates_others", "tickers_yahoo_keystats_1", "tickers_yahoo_keystats_2", "tickers_yahoo_quotes_1", "tickers_yahoo_quotes_2", "tickers_eod_valuation"];
 	private $tableListG1 = ["reports_header", "reports_balanceconsolidated", "reports_balancefull", "reports_cashflowconsolidated", "reports_cashflowfull", "reports_financialheader", "reports_financialscustom", "reports_gf_data", "reports_incomeconsolidated", "reports_incomefull", "reports_metadata_eol", "reports_variable_ratios"];
 	private $tableListG1r = ["reports_alt_checks", "reports_beneish_checks", "reports_key_ratios", "reports_pio_checks", "reports_ratings"];
 	private $tableListG3 = ["ttm_balanceconsolidated", "ttm_balancefull", "ttm_cashflowconsolidated", "ttm_cashflowfull", "ttm_financialscustom", "ttm_incomeconsolidated", "ttm_incomefull", "ttm_gf_data", "ttm_key_ratios", "ttm_beneish_checks", "ttm_pio_checks", "ttm_ratings"];
@@ -299,15 +299,21 @@ class screener_filter {
 	}
 
 	public function fullFiltersReplace() {
-		$q = $this->db->query("truncate screener_filter_fields");
-		$q = $this->db->query("truncate screener_filter_criteria");
+		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_fields_temp");
+		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_criteria_temp");
+		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_fields_temp LIKE screener_filter_fields");
+		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_criteria_temp LIKE screener_filter_criteria");
 		$counter = 0;
+		$pfinalrun = array();
 		for ($i = 0; $i<14; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
-				$query = "INSERT INTO screener_filter_fields (field_table_name, field_table_field, field_name, field_desc, field_type, field_group, field_order, report_type, format, min, max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				$parid = array();
+				$query = "INSERT INTO screener_filter_fields_temp (field_id, field_table_name, field_table_field, field_name, field_desc, field_type, field_group, field_order, report_type, format, min, max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				$params[] = $value["table"];
 				$params[] = $key;
+				$parid[] = $value["table"];
+				$parid[] = $key;
 				$params[] = $value["title"];
 				$params[] = $value["comment"];
 				$type = $value["format"];
@@ -424,6 +430,9 @@ class screener_filter {
 					case "tickers_leverage_ratios":
 						$params[] = 17;
 						break;
+					case "tickers_eod_valuation":
+						$params[] = 20;
+						break;
 					case "ttm_financialscustom":
 					case "pttm_financialscustom":
 					case "reports_financialscustom":
@@ -505,6 +514,18 @@ class screener_filter {
 							case "WorkingCapital":
 								$params[] = 2;
 								break;
+							case "P_E":
+							case "P_E_CashAdjusted":
+							case "EV_EBITDA":
+							case "EV_EBIT":
+							case "P_S":
+							case "P_BV":
+							case "P_Tang_BV":
+							case "P_CF":
+							case "P_FCF":
+							case "P_OwnerEarnings":
+								$params[] = 20;
+								break;
 							default:
 								$params[] = 17;
 						}
@@ -520,6 +541,18 @@ class screener_filter {
 							case "TotalInvestedCapital":
 							case "WorkingCapital":
 								$params[] = 3;
+								break;
+                                                        case "P_E":
+                                                        case "P_E_CashAdjusted":
+                                                        case "EV_EBITDA":
+                                                        case "EV_EBIT":
+                                                        case "P_S":
+                                                        case "P_BV":
+                                                        case "P_Tang_BV":
+                                                        case "P_CF":
+                                                        case "P_FCF":
+                                                        case "P_OwnerEarnings":
+                                                                $params[] = 21;
 								break;
 							default:
 								$params[] = 18;
@@ -540,29 +573,71 @@ class screener_filter {
 				$params[] = $counter;
 				if($i == 1) {
 					$params[] = "ANN";
+					$parid[] = "ANN";
 				} else if($i == 2) {
 					$params[] = "QTR";
+					$parid[] = "QTR";
 				} else {
 					$params[] = NULL;
 				}
 				$params[] = $type;
 				$params[] = $value["min"];
 				$params[] = $value["max"];
-				$q = $this->db->prepare($query);
-				$q->execute($params);
-				$lastId = $this->db->lastInsertId();
 
-				$query = "INSERT INTO screener_filter_criteria (field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?)";
-				$par = array();
-				$par[] = $lastId;
-				$par[] = "User Defined";
-				$par[] = "cu";
-				$par[] = 20;
-				$q = $this->db->prepare($query);
-				$q->execute($par);
-				$counter++;
+				//Get id if available
+				if($i == 1 || $i == 2) {
+					$queryid = "SELECT field_id FROM screener_filter_fields WHERE field_table_name = ? AND field_table_field = ? AND report_type = ?";
+				} else {
+					$queryid = "SELECT field_id FROM screener_filter_fields WHERE field_table_name = ? AND field_table_field = ? AND report_type IS NULL";
+				}
+				$q = $this->db->prepare($queryid);
+				$q->execute($parid);
+				$rid = $q->fetchColumn();
+				if(empty($rid)) {
+					array_unshift($params, NULL);
+					$pfinalrun[] = $params;
+				} else {
+					array_unshift($params, $rid);
+
+					$q = $this->db->prepare($query);
+					$q->execute($params);
+					$lastId = $this->db->lastInsertId();
+
+					$query = "INSERT INTO screener_filter_criteria_temp (field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?)";
+					$par = array();
+					$par[] = $lastId;
+					$par[] = "User Defined";
+					$par[] = "cu";
+					$par[] = 20;
+					$q = $this->db->prepare($query);
+					$q->execute($par);
+					$counter++;
+				}
 			}
 		}
+		//FINAL RUN
+		$query = "INSERT INTO screener_filter_fields_temp (field_id, field_table_name, field_table_field, field_name, field_desc, field_type, field_group, field_order, report_type, format, min, max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		$q = $this->db->prepare($query);
+		$query1 = "INSERT INTO screener_filter_criteria_temp (field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?)";
+		$q1 = $this->db->prepare($query1);
+		foreach($pfinalrun as $params) {
+			$q->execute($params);
+			$lastId = $this->db->lastInsertId();
+			$par = array();
+			$par[] = $lastId;
+			$par[] = "User Defined";
+			$par[] = "cu";
+			$par[] = 20;
+			$q1 = $this->db->prepare($query1);
+			$q1->execute($par);
+			$counter++;
+		}
+		$q = $this->db->query("truncate screener_filter_fields");
+		$q = $this->db->query("truncate screener_filter_criteria");
+		$q = $this->db->query("INSERT INTO screener_filter_fields SELECT * FROM screener_filter_fields_temp");
+		$q = $this->db->query("INSERT INTO screener_filter_criteria SELECT * FROM screener_filter_criteria_temp");
+		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_fields_temp");
+		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_criteria_temp");
 	}
 
 	public function updateCommentsDescriptions() {
@@ -573,7 +648,7 @@ class screener_filter {
 				if($i == 1 || $i == 2) {
 					$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key' and report_type = ?";
 				} else {
-					$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key'";
+					$query = "UPDATE screener_filter_fields SET field_name = ?, field_desc = ?, format = ? , min = ?, max = ? WHERE field_table_name = '$table' AND field_table_field = '$key' and report_type IS NULL";
 				}
 				$params[] = $value["title"];
 				$params[] = $value["comment"];

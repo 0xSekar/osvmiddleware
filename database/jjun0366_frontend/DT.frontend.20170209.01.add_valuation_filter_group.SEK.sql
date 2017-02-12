@@ -19,5 +19,6 @@ INSERT INTO `screener_filter_groups` (`group_id`, `group_name`, `group_descripti
 (17, 'Ratios', NULL, 15),
 (18, 'Ratios Growth', NULL, 16),
 (19, 'Others', NULL, 20),
-(20, 'Valuation', NULL, 18);
+(20, 'Valuation', NULL, 18),
+(21, 'Valuation Growth', NULL, 19);
 
