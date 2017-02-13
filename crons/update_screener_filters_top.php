@@ -44,15 +44,19 @@ arsort($result);
 $result = array_slice($result, 0, 30-count($admin_filters), TRUE);
 $res_val = array_keys($result);
 $in = join(',', array_fill(0, count($res_val), '?'));
-
 try {
-	$res = $db->prepare("(SELECT field_id FROM screener_filter_criteria WHERE crit_id IN ($in)) UNION (SELECT field_id FROM screener_filter_criteria2 WHERE crit_id IN ($in))"); 
+	$res = $db->prepare("(SELECT field_id,crit_id FROM screener_filter_criteria WHERE crit_id IN ($in)) UNION (SELECT field_id,crit_id FROM screener_filter_criteria2 WHERE crit_id IN ($in))"); 
 	$res->execute(array_merge($res_val,$res_val));
-	$result = $res->fetchAll(PDO::FETCH_COLUMN);
-	$in = join('),(', array_fill(0, count($result), '?'));
+	$result1 = $res->fetchAll(PDO::FETCH_ASSOC);
+	$final = array();
+	foreach ($result1 as $value) {
+		$final[] = $value["field_id"];
+		$final[] = $result[$value["crit_id"]];
+	}
+	$in = join('),(', array_fill(0, count($result1), '?,?'));
 	$db->exec("TRUNCATE TABLE screener_filter_top2");
-	$res = $db->prepare("INSERT INTO screener_filter_top2 (filter_id) VALUES ($in)");
-	$res->execute($result);
+	$res = $db->prepare("INSERT INTO screener_filter_top2 (filter_id, count) VALUES ($in)");
+	$res->execute($final);
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
 	die($ex->getMessage());

@@ -8,3 +8,5 @@ CREATE TABLE IF NOT EXISTS `screener_filter_top2` (
   PRIMARY KEY (`filter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+ALTER TABLE  `screener_filter_top2` ADD  `count` INT NOT NULL ,
+ADD INDEX (  `count` ) ;
