@@ -570,7 +570,25 @@ class screener_filter {
 					default:
 						$params[] = 19;
 				}
-				$params[] = $counter;
+				switch($i) {
+					case 3:
+					case 8:
+					case 9:
+						$params[] = $counter+10000;
+						break;
+					case 1:
+					case 2:
+						$params[] = $counter+20000;
+						break;
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+						$params[] = $counter+30000;
+						break;
+					default:
+						$params[] = $counter;
+				}
 				if($i == 1) {
 					$params[] = "ANN";
 					$parid[] = "ANN";
@@ -593,6 +611,7 @@ class screener_filter {
 				$q = $this->db->prepare($queryid);
 				$q->execute($parid);
 				$rid = $q->fetchColumn();
+				$counter++;
 				if(empty($rid)) {
 					array_unshift($params, NULL);
 					$pfinalrun[] = $params;
@@ -611,7 +630,6 @@ class screener_filter {
 					$par[] = 20;
 					$q = $this->db->prepare($query);
 					$q->execute($par);
-					$counter++;
 				}
 			}
 		}
@@ -630,7 +648,6 @@ class screener_filter {
 			$par[] = 20;
 			$q1 = $this->db->prepare($query1);
 			$q1->execute($par);
-			$counter++;
 		}
 		$q = $this->db->query("truncate screener_filter_fields");
 		$q = $this->db->query("truncate screener_filter_criteria");
