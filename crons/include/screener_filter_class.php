@@ -622,12 +622,22 @@ class screener_filter {
 					$q->execute($params);
 					$lastId = $this->db->lastInsertId();
 
-					$query = "INSERT INTO screener_filter_criteria_temp (field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?)";
+					//Also keep crit_id static
 					$par = array();
 					$par[] = $lastId;
 					$par[] = "User Defined";
 					$par[] = "cu";
 					$par[] = 20;
+					$queryid = "SELECT crit_id FROM screener_filter_criteria WHERE field_id = ?";
+					$q = $this->db->prepare($queryid);
+					$q->execute(array($lastId));
+					$rid2 = $q->fetchColumn();
+					if(empty($rid2)) {
+						array_unshift($par, NULL);
+					} else {
+						array_unshift($par, $rid2);
+					}
+					$query = "INSERT INTO screener_filter_criteria_temp (crit_id, field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?, ?)";
 					$q = $this->db->prepare($query);
 					$q->execute($par);
 				}
