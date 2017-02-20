@@ -13,7 +13,7 @@ if (!defined('AREPORTS')) {
 }
 
 if (!defined('SERVERHOST')) {
-        define('SERVERHOST', 'www.oldschoolvalue.com');
+        define('SERVERHOST', 'job.oldschoolvalue.com');
 }
 
 if (!defined('YAHOO_INTEGRATION_DEBUG')) {
@@ -37,5 +37,5 @@ if (!defined('DB_FRONTEND_DATABASE')) {
 }
 
 if (!defined('APP_DIR')) {
-    define('APP_DIR', '');
+    define('APP_DIR', '/app');
 }

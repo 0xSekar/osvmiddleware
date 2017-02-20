@@ -20,7 +20,7 @@ try {
 	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
 while ($rawdata = $res->fetch(PDO::FETCH_ASSOC)) {
-	$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$rawdata["ticker_id"]."' order by report_date desc limit 1";
+	$qquote = "SELECT * FROM tickers_yahoo_quotes_2 a LEFT JOIN tickers_yahoo_quotes_1 b on a.ticker_id=b.ticker_id WHERE a.ticker_id = '".$rawdata["ticker_id"]."'";
 	$rdate = date("Y-m-d");
 	$price = null;
 	try {
@@ -30,9 +30,11 @@ while ($rawdata = $res->fetch(PDO::FETCH_ASSOC)) {
 		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	if($rquote->rowCount() > 0) {
-		$price = $rquote ->fetch(PDO::FETCH_ASSOC);
-		$rdate = $price["report_date"];
-		$price = $price["adj_close"];
+                $pricerow  = $rquote->fetch(PDO::FETCH_ASSOC);
+                $rdate = $pricerow["LastTradeDate"];
+                $price = $pricerow["LastTradePriceOnly"];
+                $rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+                $rawdata["SharesOutstandingBasic"] = max($rawdata["SharesOutstandingBasic"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
 	}
 	$entValue = ((is_null($rawdata["SharesOutstandingDiluted"]) && is_null($price) && is_null($rawdata["TotalLongtermDebt"]) && is_null($rawdata["TotalShorttermDebt"]) && is_null($rawdata["PreferredStock"]) && is_null($rawdata["MinorityInterestEquityEarnings"]) && is_null($rawdata["CashCashEquivalentsandShorttermInvestments"]))?null:((toFloat($rawdata["SharesOutstandingDiluted"])*1000000*$price)+$rawdata["TotalLongtermDebt"]+$rawdata["TotalShorttermDebt"]+$rawdata["PreferredStock"]+$rawdata["MinorityInterestEquityEarnings"]-$rawdata["CashCashEquivalentsandShorttermInvestments"]));
 	$query = "INSERT INTO `ttm_key_ratios` (`ticker_id`, `ReportDateAdjusted`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 

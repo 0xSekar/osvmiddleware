@@ -67,8 +67,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	if($rowcount = $rquote->rowCount() > 0) {
-		$price = $rquote->fetch(PDO::FETCH_ASSOC);
-		$price = $price["adj_close"];
+		$pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
+		$price = $pricerow["adj_close"];
+		$rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
 	}
 
 	$query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarketValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -120,6 +121,19 @@ function altmanTTM($ppid) {
 	}
 	$trawdata = $tres->fetch(PDO::FETCH_ASSOC);
 	array_walk_recursive($trawdata, 'nullValues');
+	$qquote = "SELECT * FROM tickers_yahoo_quotes_2 WHERE ticker_id = '$ppid'";
+        try {
+                $rquote = $db->query($qquote);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+	$row_count = $rquote->rowCount();
+        if($row_count > 0) {
+                $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
+                $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+        }
+
 	$query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";   
 	$params = array();
 	$params[] = $ppid;

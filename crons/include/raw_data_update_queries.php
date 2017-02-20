@@ -368,6 +368,26 @@ function update_raw_data_tickers($dates, $rawdata) {
 			}
 			if ($affected_rows>0) {
 				$report_id = $db->lastInsertId();
+
+				//Get price and SO data for the report date
+                                $rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
+                                $qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date <= '".$rdate."' order by report_date desc limit 1";
+                                $price = null;
+                                try {
+                                        $rquote = $db->query($qquote);
+                                } catch(PDOException $ex) {
+                                        echo "\nDatabase Error"; //user message
+                                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                                }
+                                $row_count = $rquote->rowCount();
+                                if($row_count > 0) {
+                                        $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
+                                        $rdate = $pricerow["report_date"];
+                                        $price = $pricerow["adj_close"];
+					$rawdata["SharesOutstandingDiluted"][$i] = max($rawdata["SharesOutstandingDiluted"][$i], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+					$rawdata["SharesOutstandingBasic"][$i] = max($rawdata["SharesOutstandingBasic"][$i], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+                                }
+
 				//reports_balanceconsolidated
 				$query = "INSERT INTO `reports_balanceconsolidated` (`report_id`, `CommitmentsContingencies`, `CommonStock`, `DeferredCharges`, `DeferredIncomeTaxesCurrent`, `DeferredIncomeTaxesLongterm`, `AccountsPayableandAccruedExpenses`, `AccruedInterest`, `AdditionalPaidinCapital`, `AdditionalPaidinCapitalPreferredStock`, `CashandCashEquivalents`, `CashCashEquivalentsandShorttermInvestments`, `Goodwill`, `IntangibleAssets`, `InventoriesNet`, `LongtermDeferredIncomeTaxLiabilities`, `LongtermDeferredLiabilityCharges`, `LongtermInvestments`, `MinorityInterest`, `OtherAccumulatedComprehensiveIncome`, `OtherAssets`, `OtherCurrentAssets`, `OtherCurrentLiabilities`, `OtherEquity`, `OtherInvestments`, `OtherLiabilities`, `PartnersCapital`, `PensionPostretirementObligation`, `PreferredStock`, `PrepaidExpenses`, `PropertyPlantEquipmentNet`, `RestrictedCash`, `RetainedEarnings`, `TemporaryEquity`, `TotalAssets`, `TotalCurrentAssets`, `TotalCurrentLiabilities`, `TotalLiabilities`, `TotalLongtermDebt`, `TotalReceivablesNet`, `TotalShorttermDebt`, `TotalStockholdersEquity`, `TreasuryStock`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";	        	
 				$params = array();
@@ -949,21 +969,6 @@ function update_raw_data_tickers($dates, $rawdata) {
 					} else {
 						$arpy = $rawdata["AccountsReceivableTradeNet"][$i-1]=='null'?null:$rawdata["AccountsReceivableTradeNet"][$i-1];
 						$inpy = $rawdata["InventoriesNet"][$i-1]=='null'?null:$rawdata["InventoriesNet"][$i-1];
-					}
-					$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
-					$qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$dates->ticker_id."' and report_date <= '".$rdate."' order by report_date desc limit 1";
-					$price = null;
-					try {
-						$rquote = $db->query($qquote);
-					} catch(PDOException $ex) {
-						echo "\nDatabase Error"; //user message
-						die("Line: ".__LINE__." - ".$ex->getMessage());
-					}
-					$row_count = $rquote->rowCount();
-					if($row_count > 0) {
-						$price = $rquote->fetch(PDO::FETCH_ASSOC);
-						$rdate = $price["report_date"];
-						$price = $price["adj_close"];
 					}
 					$entValue = (($rawdata["SharesOutstandingDiluted"][$i]=='null' && is_null($price) && $rawdata["TotalLongtermDebt"][$i]=='null' && $rawdata["TotalShorttermDebt"][$i]=='null' && $rawdata["PreferredStock"][$i]=='null' && $rawdata["MinorityInterestEquityEarnings"][$i]=='null' && $rawdata["CashCashEquivalentsandShorttermInvestments"][$i]=='null')?null:((toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price)+$rawdata["TotalLongtermDebt"][$i]+$rawdata["TotalShorttermDebt"][$i]+$rawdata["PreferredStock"][$i]+$rawdata["MinorityInterestEquityEarnings"][$i]-$rawdata["CashCashEquivalentsandShorttermInvestments"][$i]));
 					$query = "INSERT INTO `reports_key_ratios` (`report_id`, `ReportYear`, `ReportDate`, `ReportDateAdjusted`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?)"; //57par				

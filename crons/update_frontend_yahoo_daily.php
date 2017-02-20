@@ -10,6 +10,7 @@ require_once("../include/yahoo/common.inc.php");
 include_once('./include/update_key_ratios_ttm.php');
 include_once('./include/update_ratings_ttm.php');
 include_once('./include/update_eod_valuation.php');
+include_once('./include/update_quality_checks.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -72,7 +73,7 @@ echo "Updating Tickers (yahoo)...\n";
 
 //Select all tickers not updated for at least a day
 try {
-	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1380 AND is_old = FALSE order by ticker");
+	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1200 AND is_old = FALSE order by ticker");
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
 	die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -337,7 +338,7 @@ echo "\nUpdating Tickers (barchart)...\n";
 
 //Select all tickers not updated for at least a day
 try {
-        $res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1380 AND is_old = FALSE order by ticker");
+        $res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1200 AND is_old = FALSE order by ticker");
 } catch(PDOException $ex) {
         echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -363,16 +364,22 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         }
         $sym = $row["ticker"]; //get symbol from yahoo rawdata
 
+	//Prequering Quotes in case we need for splits
+	$resJS = array();
+        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume";
+        $resOD = file_get_contents($queryOD);
+        $resJS = json_decode($resOD, true);
+
         if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date)) {
-		$resJS = array();
-                $queryOD = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
-                $resOD = file_get_contents($queryOD);
-                $resJS = json_decode($resOD, true);
-                $code = $resJS['status']['code'];
+		$resJS1 = array();
+                $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
+                $resOD1 = file_get_contents($queryOD1);
+                $resJS1 = json_decode($resOD1, true);
+                $code = $resJS1['status']['code'];
 
                 if($code == 200){
                         $hupdated ++;
-                        foreach($resJS['results'] as $record) {
+                        foreach($resJS1['results'] as $record) {
                                 $query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
                                 $params = array();
                                 $params[] = $row["id"];
@@ -410,26 +417,32 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                                 die("Line: ".__LINE__." - ".$ex->getMessage());
                         }
 
-                        if($yquery) {
-                                //Need to get latest shares outstandings from yahoo quotes to compare on webservices
-                                $response = $yql->execute("select * from osv.finance.quotes where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
-                                $sharesOut = 0;
-                                if(isset($response->query) && isset($response->query->results)) {
-                                        $sharesOut = $response->query->results->quote->SharesOutstanding / 1000000;
-                                }
-                                //report to webservice so backend updates his own data
-                                $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
-                        }
+			if($resJS['status']['code'] == 200 && !is_null($resJS['results'][0]['sharesOutstanding'])){
+                        	$sharesOut = $resJS['results'][0]['sharesOutstanding']/1000;
+	                        //report to webservice so backend updates his own data
+        	                $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
+			} else {
+                        	if($yquery) {
+                                	//Need to get latest shares outstandings from yahoo quotes to compare on webservices
+	                                $response = $yql->execute("select * from osv.finance.quotes where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+        	                        $sharesOut = 0;
+                	                if(isset($response->query) && isset($response->query->results)) {
+                        	                $sharesOut = $response->query->results->quote->SharesOutstanding / 1000000;
+                                	}
+	                                //report to webservice so backend updates his own data
+        	                        $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
+	                        }
+			}
                 }
         } else {
-		$resJS = array();
-                $queryOD = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-1 month"))."&endDate=".date("Ymd")."";
-                $resOD = file_get_contents($queryOD);
-                $resJS = json_decode($resOD, true);
-                $code = $resJS['status']['code'];
+		$resJS1 = array();
+                $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-1 month"))."&endDate=".date("Ymd")."";
+                $resOD1 = file_get_contents($queryOD1);
+                $resJS1 = json_decode($resOD1, true);
+                $code = $resJS1['status']['code'];
 
                 if($code == 200){
-                        foreach($resJS['results'] as $record) {
+                        foreach($resJS1['results'] as $record) {
                                 if (isset($record['tradingDay']) && !is_null($record['tradingDay']) && $record['tradingDay']!="00000000") {
                                         $query_div = "INSERT INTO `tickers_yahoo_historical_data` (ticker_id, report_date, open, high, low, close, volume, adj_close) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE open = ?, high =  ?, low = ?, close = ?, volume = ?, adj_close = ?";
                                         $params = array();
@@ -464,13 +477,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         }
 
         //Keystats & Quotes From Barchart
-	$resJS = array();
-        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume";
-        $resOD = file_get_contents($queryOD);
-        $resJS = json_decode($resOD, true);
         if($resJS['status']['code'] == 200){
                 update_raw_data_barchart_keystats($row["id"], $resJS);
-                $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id` , `Ask`, `AverageDailyVolume`, `Bid`, `Change`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE `Ask` = ?, `AverageDailyVolume` = ?, `Bid` = ?, `Change` = ?, `DaysLow` = ?, `DaysHigh` = ?, `YearLow` = ?, `YearHigh` = ?";
+                $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id` , `Ask`, `AverageDailyVolume`, `Bid`, `Change`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, LastTradeDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE `Ask` = ?, `AverageDailyVolume` = ?, `Bid` = ?, `Change` = ?, `DaysLow` = ?, `DaysHigh` = ?, `YearLow` = ?, `YearHigh` = ?, LastTradeDate = ?";
                 $params = array();
                 $params[] = $row["id"];
                 $params[] = $resJS['results'][0]['ask'];
@@ -481,6 +490,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $params[] = $resJS['results'][0]['high'];
                 $params[] = $resJS['results'][0]['fiftyTwoWkLow'];
                 $params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
+                $params[] = substr($resJS['results'][0]['tradeTimestamp'],0,10);
 
                 $params[] = $resJS['results'][0]['ask'];
                 $params[] = $resJS['results'][0]['avgVolume'];
@@ -490,6 +500,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 $params[] = $resJS['results'][0]['high'];
                 $params[] = $resJS['results'][0]['fiftyTwoWkLow'];
                 $params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
+                $params[] = substr($resJS['results'][0]['tradeTimestamp'],0,10);
                 try {
                         $resb = $db->prepare($query);
                         $resb->execute($params);
@@ -561,6 +572,19 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 
 	//Update altman data
         if($procAlt) {
+                try {
+                        $db->exec("DELETE from ttm_alt_checks where ticker_id = " . $row["id"]);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
+                try {
+                        $db->exec("DELETE from mrq_alt_checks where ticker_id = " . $row["id"]);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
+		altmanTTM($row["id"]);
                 try {
                         $db->exec("delete from tickers_alt_aux where ticker_id = " . $row["id"]);
                 } catch(PDOException $ex) {
@@ -713,5 +737,13 @@ function toFloat($num) {
 			preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
 			preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
 		       );
+}
+
+function nullValues(&$item, $key) {
+        if(strlen(trim($item)) == 0) {
+                $item = 'null';
+        } else if($item == "-") {
+                $item = 'null';
+        }
 }
 ?>
