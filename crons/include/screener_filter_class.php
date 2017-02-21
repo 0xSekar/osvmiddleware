@@ -573,18 +573,22 @@ class screener_filter {
 				switch($i) {
 					case 3:
 					case 8:
-					case 9:
 						$params[] = $counter+10000;
 						break;
-					case 1:
-					case 2:
+					case 9:
 						$params[] = $counter+20000;
+						break;
+					case 1:
+						$params[] = $counter+40000;
+						break;
+					case 2:
+						$params[] = $counter+30000;
 						break;
 					case 4:
 					case 5:
 					case 6:
 					case 7:
-						$params[] = $counter+30000;
+						$params[] = $counter+50000;
 						break;
 					default:
 						$params[] = $counter;
