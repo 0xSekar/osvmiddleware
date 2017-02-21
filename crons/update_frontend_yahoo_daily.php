@@ -585,6 +585,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
 		altmanTTM($row["id"]);
+		update_pio_checks($row["id"]);
                 try {
                         $db->exec("delete from tickers_alt_aux where ticker_id = " . $row["id"]);
                 } catch(PDOException $ex) {
