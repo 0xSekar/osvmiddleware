@@ -338,7 +338,7 @@ echo "\nUpdating Tickers (barchart)...\n";
 
 //Select all tickers not updated for at least a day
 try {
-        $res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1200 AND is_old = FALSE order by ticker");
+        $res = $db->query("SELECT * FROM tickers t INNER JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1200 AND is_old = FALSE order by ticker");
 } catch(PDOException $ex) {
         echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -585,6 +585,12 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
 		altmanTTM($row["id"]);
+		try {
+			$db->exec("DELETE b FROM reports_pio_checks b INNER JOIN reports_header f ON f.id = b.report_id WHERE f.ticker_id = " . $row["id"]);
+                } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
 		update_pio_checks($row["id"]);
                 try {
                         $db->exec("delete from tickers_alt_aux where ticker_id = " . $row["id"]);
