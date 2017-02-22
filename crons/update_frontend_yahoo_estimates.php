@@ -145,8 +145,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			if(isset($response->query->results->result->indexTrend)) {
 				$rawdata->sp500PegRatio = $response->query->results->result->indexTrend->pegRatio;
 				$rawdata->sp500PeRatio = $response->query->results->result->indexTrend->peRatio;
-				if(isset($response->query->results->result->sectorTrend->estimates)) {
-					foreach($response->query->results->result->sectorTrend->estimates as $value) {
+				if(isset($response->query->results->result->indexTrend->estimates)) {
+					foreach($response->query->results->result->indexTrend->estimates as $value) {
 						if($value->period == "0q") {
 							$rawdata->currQtr->sp500Trend = $value;
 						} elseif($value->period == "+1q") {
