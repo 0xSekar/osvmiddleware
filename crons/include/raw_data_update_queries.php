@@ -947,7 +947,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 					if($i == 1) {
 						$arpy = $inpy = 0;
 					} else {
-						$arpy = $rawdata["AccountsReceivableTradeNet"][$i-1]=='null'?null:$rawdata["AccountsReceivableTradeNet"][$i-1];
+						$arpy = $rawdata["TotalReceivablesNet"][$i-1]=='null'?null:$rawdata["TotalReceivablesNet"][$i-1];
 						$inpy = $rawdata["InventoriesNet"][$i-1]=='null'?null:$rawdata["InventoriesNet"][$i-1];
 					}
 					$rdate = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
@@ -1015,11 +1015,11 @@ function update_raw_data_tickers($dates, $rawdata) {
 					$params[] = (($rawdata["AccountsPayable"][$i]=='null'||$rawdata["CostofRevenue"][$i]=='null'||$rawdata["CostofRevenue"][$i]==0)?null:($rawdata["AccountsPayable"][$i] / $rawdata["CostofRevenue"][$i] * 365));
 					$params[] = (($rawdata["TotalRevenue"][$i]=='null'||$rawdata["TotalRevenue"][$i]==0||$rawdata["CostofRevenue"][$i]=='null'||$rawdata["CostofRevenue"][$i]==0)?null:(($rawdata["TotalReceivablesNet"][$i] / $rawdata["TotalRevenue"][$i] * 365)+($rawdata["InventoriesNet"][$i] / $rawdata["CostofRevenue"][$i] * 365)-($rawdata["AccountsPayable"][$i] / $rawdata["CostofRevenue"][$i] * 365)));
 					if($i==1) {
-						$params[] = (($rawdata["TotalRevenue"][$i]=='null'||$rawdata["AccountsReceivableTradeNet"][$i]=='null'||$rawdata["AccountsReceivableTradeNet"][$i]==0)?null:($rawdata["TotalRevenue"][$i] / ($rawdata["AccountsReceivableTradeNet"][$i])));
+						$params[] = (($rawdata["TotalRevenue"][$i]=='null'||$rawdata["TotalReceivablesNet"][$i]=='null'||$rawdata["TotalReceivablesNet"][$i]==0)?null:($rawdata["TotalRevenue"][$i] / ($rawdata["TotalReceivablesNet"][$i])));
 						$params[] = (($rawdata["CostofRevenue"][$i]=='null'||$rawdata["InventoriesNet"][$i]=='null'||$rawdata["InventoriesNet"][$i]==0)?null:($rawdata["CostofRevenue"][$i] / ($rawdata["InventoriesNet"][$i])));
 						$params[] = (($rawdata["CostofRevenue"][$i]=='null'||$rawdata["CostofRevenue"][$i]==0||$rawdata["InventoriesNet"][$i]=='null'||$rawdata["InventoriesNet"][$i]==0)?null:(365 / ($rawdata["CostofRevenue"][$i] / ($rawdata["InventoriesNet"][$i]))));
 					} else {
-						$params[] = (($rawdata["TotalRevenue"][$i]=='null'||($rawdata["AccountsReceivableTradeNet"][$i]=='null'&&is_null($arpy))||($rawdata["AccountsReceivableTradeNet"][$i]+$arpy==0))?null:($rawdata["TotalRevenue"][$i] / (($arpy + $rawdata["AccountsReceivableTradeNet"][$i])/2)));
+						$params[] = (($rawdata["TotalRevenue"][$i]=='null'||($rawdata["TotalReceivablesNet"][$i]=='null'&&is_null($arpy))||($rawdata["TotalReceivablesNet"][$i]+$arpy==0))?null:($rawdata["TotalRevenue"][$i] / (($arpy + $rawdata["TotalReceivablesNet"][$i])/2)));
 						$params[] = (($rawdata["CostofRevenue"][$i]=='null'||($rawdata["InventoriesNet"][$i]=='null'&&is_null($inpy))||($rawdata["InventoriesNet"][$i]+$inpy==0))?null:($rawdata["CostofRevenue"][$i] / (($inpy + $rawdata["InventoriesNet"][$i])/2)));
 						$params[] = (($rawdata["CostofRevenue"][$i]=='null'||($rawdata["InventoriesNet"][$i]=='null'&&is_null($inpy))||($rawdata["InventoriesNet"][$i]+$inpy==0)||$rawdata["CostofRevenue"][$i]==0)?null:(365 / ($rawdata["CostofRevenue"][$i] / (($inpy + $rawdata["InventoriesNet"][$i])/2))));
 					}
