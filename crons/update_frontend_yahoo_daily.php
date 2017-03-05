@@ -172,15 +172,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         if(isset($response->query->results->quote)) {
                                 $eupdated ++;
                                 $rawdata = $response->query->results->quote;
-                                try {
-                                        $db->exec("delete from tickers_yahoo_quotes_1 where ticker_id = " . $row["id"]);
-                                        $db->exec("delete from tickers_yahoo_quotes_2 where ticker_id = " . $row["id"]);
-                                } catch(PDOException $ex) {
-                                        echo "\nDatabase Error"; //user message
-                                        die("Line: ".__LINE__." - ".$ex->getMessage());
-                                }
 
-                                $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id`, `Ask`, `AverageDailyVolume`, `Bid`, `AskRealTime`, `BidRealTime`, `BookValue`, `Change`, `Commision`, `Currency`, `ChangeRealTime`, `AfterHoursChangeRealTime`, `DividendShare`, `LastTradeDate`, `TradeDate`, `EarningsShare`, `EPSEstimateCurrentYear`, `EPSEstimateNextYear`, `EPSEstimateNextQuarter`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, `HoldingsGainPercent`, `AnnualizedGain`, `HoldingsGain`, `HoldingsGainPercentRealTime`, `AnnualizedGainRealTime`, `MoreInfo`, `OrderBookRealTime`, `MarketCapitalization`, `MarketCapRealTime`, `EBITDA`, `ChangeFromYearLow`, `PercentChangeFromYearLow`, `LastTradeRealTimeWithTime`, `ChangePercentRealTime`, `ChangeFromYearHigh`, `PercentChangeFromYearHigh`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id`, `Ask`, `AverageDailyVolume`, `Bid`, `AskRealTime`, `BidRealTime`, `BookValue`, `Change`, `Commision`, `Currency`, `ChangeRealTime`, `AfterHoursChangeRealTime`, `DividendShare`, `LastTradeDate`, `TradeDate`, `EarningsShare`, `EPSEstimateCurrentYear`, `EPSEstimateNextYear`, `EPSEstimateNextQuarter`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, `HoldingsGainPercent`, `AnnualizedGain`, `HoldingsGain`, `HoldingsGainPercentRealTime`, `AnnualizedGainRealTime`, `MoreInfo`, `OrderBookRealTime`, `MarketCapitalization`, `MarketCapRealTime`, `EBITDA`, `ChangeFromYearLow`, `PercentChangeFromYearLow`, `LastTradeRealTimeWithTime`, `ChangePercentRealTime`, `ChangeFromYearHigh`, `PercentChangeFromYearHigh`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `AskRealTime` = ?, `BidRealTime` = ?, `BookValue` = ?, `Commision` = ?, `Currency` = ?, `ChangeRealTime` = ?, `AfterHoursChangeRealTime` = ?, `DividendShare` = ?, `TradeDate` = ?, `EarningsShare` = ?, `EPSEstimateCurrentYear` = ?, `EPSEstimateNextYear` = ?, `EPSEstimateNextQuarter` = ?, `HoldingsGainPercent` = ?, `AnnualizedGain` = ?, `HoldingsGain` = ?, `HoldingsGainPercentRealTime` = ?, `AnnualizedGainRealTime` = ?, `MoreInfo` = ?, `OrderBookRealTime` = ?, `MarketCapitalization` = ?, `MarketCapRealTime` = ?, `EBITDA` = ?, `ChangeFromYearLow` = ?, `PercentChangeFromYearLow` = ?, `LastTradeRealTimeWithTime` = ?, `ChangePercentRealTime` = ?, `ChangeFromYearHigh` = ?, `PercentChangeFromYearHigh` = ?";
                                 $params = array();
                                 $params[] = $row["id"];
                                 $params[] = (!isset($rawdata->Ask)?NULL:$rawdata->Ask);
@@ -225,6 +218,41 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                                 $params[] = (!isset($rawdata->ChangePercentRealtime)?NULL:$rawdata->ChangePercentRealtime);
                                 $params[] = (!isset($rawdata->ChangeFromYearHigh)?NULL:$rawdata->ChangeFromYearHigh);
                                 $params[] = (!isset($rawdata->PercebtChangeFromYearHigh)?NULL:$rawdata->PercebtChangeFromYearHigh);
+
+                                $params[] = (!isset($rawdata->AskRealtime)?NULL:$rawdata->AskRealtime);
+                                $params[] = (!isset($rawdata->BidRealtime)?NULL:$rawdata->BidRealtime);
+                                $params[] = (!isset($rawdata->BookValue)?NULL:$rawdata->BookValue);
+                                $params[] = (!isset($rawdata->Commision)?NULL:$rawdata->Commision);
+                                $params[] = $rawdata->Currency;
+                                $params[] = (!isset($rawdata->ChangeRealtime)?NULL:$rawdata->ChangeRealtime);
+                                $params[] = (!isset($rawdata->AfterHoursChangeRealtime)?NULL:$rawdata->AfterHoursChangeRealtime);
+                                $params[] = (!isset($rawdata->DividendShare)?NULL:$rawdata->DividendShare);
+                                $params[] = date("Y-m-d", strtotime($rawdata->TradeDate));
+                                $params[] = (!isset($rawdata->EarningsShare)?NULL:$rawdata->EarningsShare);
+                                $params[] = (!isset($rawdata->EPSEstimateCurrentYear)?NULL:$rawdata->EPSEstimateCurrentYear);
+                                $params[] = (!isset($rawdata->EPSEstimateNextYear)?NULL:$rawdata->EPSEstimateNextYear);
+                                $params[] = (!isset($rawdata->EPSEstimateNextQuarter)?NULL:$rawdata->EPSEstimateNextQuarter);
+                                $params[] = (!isset($rawdata->HoldingsGainPercent)?NULL:$rawdata->HoldingsGainPercent);
+                                $params[] = (!isset($rawdata->AnnualizedGain)?NULL:$rawdata->AnnualizedGain);
+                                $params[] = (!isset($rawdata->HoldingsGain)?NULL:$rawdata->HoldingsGain);
+                                $params[] = (!isset($rawdata->HoldingsGainPercentRealtime)?NULL:$rawdata->HoldingsGainPercentRealtime);
+                                $params[] = (!isset($rawdata->HoldingsGainRealtime)?NULL:$rawdata->HoldingsGainRealtime);
+                                $params[] = $rawdata->MoreInfo;
+                                $params[] = (!isset($rawdata->OrderBookRealtime)?NULL:$rawdata->OrderBookRealtime);
+                                $params[] = (!isset($rawdata->MarketCapitalization)?NULL:$rawdata->MarketCapitalization);
+                                $params[] = (!isset($rawdata->MarketCapRealtime)?NULL:$rawdata->MarketCapRealtime);
+                                $params[] = (!isset($rawdata->EBITDA)?NULL:$rawdata->EBITDA);
+                                $params[] = (!isset($rawdata->ChangeFromYearLow)?NULL:$rawdata->ChangeFromYearLow);
+                                $params[] = (!isset($rawdata->PercentChangeFromYearLow)?NULL:$rawdata->PercentChangeFromYearLow);
+                                if(isset($rawdata->LastTradeRealTimeWithTime)) {
+                                        $params[] = date("H:i",strtotime(substr($rawdata->LastTradeRealTimeWithTime, 0, strpos($rawdata->LastTradeRealTimeWithTime,"-")-1)));
+                                } else {
+                                        $params[] = NULL;
+                                }
+                                $params[] = (!isset($rawdata->ChangePercentRealtime)?NULL:$rawdata->ChangePercentRealtime);
+                                $params[] = (!isset($rawdata->ChangeFromYearHigh)?NULL:$rawdata->ChangeFromYearHigh);
+                                $params[] = (!isset($rawdata->PercebtChangeFromYearHigh)?NULL:$rawdata->PercebtChangeFromYearHigh);
+
                                 try {
                                         $res1 = $db->prepare($query);
                                         $res1->execute($params);
@@ -234,7 +262,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                                 }
 
 
-                                $query = "INSERT INTO `tickers_yahoo_quotes_2` (`ticker_id`, `LastTradeWithTime`, `LastTradePriceOnly`, `HighLimit`, `LowLimit`, `FiftyDayMovingAverage`, `TwoHundredDayMovingAverage`, `ChangeFromTwoHundredDayMovingAverage`, `PercentageChangeFromTwoHundredDayMovingAverage`, `ChangeFromFiftyDayMovingAverage`, `PercentChangeFromFiftyDayMovingAverage`, `Name`, `Notes`, `Open`, `PreviousClose`, `PricePaid`, `ChangeInPercent`, `PriceSales`, `PriceBook`, `ExDividendDate`, `PERatio`, `DividendPayDate`, `PERatioRealTime`, `PEGRatio`, `PriceEPSEstimateCurrentYear`, `PriceEPSEstimateNextYear`, `SharesOwned`, `ShortRatio`, `LastTradeTime`, `TickerTrend`, `OneYrTargetPrice`, `Volume`, `HoldingsValue`, `HoldingsValueRealTime`, `DaysValueChange`, `DaysValueChangeRealTime`, `StockExchange`, `DividendYield`, `PercentChange`, `SharesOutstanding`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //40par
+                                $query = "INSERT INTO `tickers_yahoo_quotes_2` (`ticker_id`, `LastTradeWithTime`, `LastTradePriceOnly`, `HighLimit`, `LowLimit`, `FiftyDayMovingAverage`, `TwoHundredDayMovingAverage`, `ChangeFromTwoHundredDayMovingAverage`, `PercentageChangeFromTwoHundredDayMovingAverage`, `ChangeFromFiftyDayMovingAverage`, `PercentChangeFromFiftyDayMovingAverage`, `Name`, `Notes`, `Open`, `PreviousClose`, `PricePaid`, `ChangeInPercent`, `PriceSales`, `PriceBook`, `ExDividendDate`, `PERatio`, `DividendPayDate`, `PERatioRealTime`, `PEGRatio`, `PriceEPSEstimateCurrentYear`, `PriceEPSEstimateNextYear`, `SharesOwned`, `ShortRatio`, `LastTradeTime`, `TickerTrend`, `OneYrTargetPrice`, `Volume`, `HoldingsValue`, `HoldingsValueRealTime`, `DaysValueChange`, `DaysValueChangeRealTime`, `StockExchange`, `DividendYield`, `PercentChange`, `SharesOutstanding`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `LastTradeWithTime` = ?, `HighLimit` = ?, `LowLimit` = ?, `FiftyDayMovingAverage` = ?, `TwoHundredDayMovingAverage` = ?, `ChangeFromTwoHundredDayMovingAverage` = ?, `PercentageChangeFromTwoHundredDayMovingAverage` = ?, `ChangeFromFiftyDayMovingAverage` = ?, `PercentChangeFromFiftyDayMovingAverage` = ?, `Notes` = ?, `PricePaid` = ?, `PriceSales` = ?, `PriceBook` = ?, `PERatio` = ?, `DividendPayDate` = ?, `PERatioRealTime` = ?, `PEGRatio` = ?, `PriceEPSEstimateCurrentYear` = ?, `PriceEPSEstimateNextYear` = ?, `SharesOwned` = ?, `ShortRatio` = ?, `TickerTrend` = ?, `OneYrTargetPrice` = ?, `HoldingsValue` = ?, `HoldingsValueRealTime` = ?, `DaysValueChangeRealTime` = ?, `StockExchange` = ?, `SharesOutstanding` = ?";
                                 $params = array();
                                 $params[] = $row["id"];
                                 if(isset($rawdata->LastTradeWithTime)) {
@@ -284,6 +312,40 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                                 $params[] = (!isset($rawdata->DividendYield)?NULL:$rawdata->DividendYield);
                                 $params[] = (!isset($rawdata->PercentChange)?NULL:$rawdata->PercentChange);
                                 $params[] = (!isset($rawdata->SharesOutstanding)?NULL:$rawdata->SharesOutstanding);
+
+                                if(isset($rawdata->LastTradeWithTime)) {
+                                        $params[] = date("H:i",strtotime(substr($rawdata->LastTradeWithTime, 0, strpos($rawdata->LastTradeWithTime,"-")-1)));
+                                } else {
+                                        $params[] = NULL;
+                                }
+                                $params[] = (!isset($rawdata->HighLimit)?NULL:$rawdata->HighLimit);
+                                $params[] = (!isset($rawdata->LowLimit)?NULL:$rawdata->LowLimit);
+                                $params[] = (!isset($rawdata->FiftydayMovingAverage)?NULL:$rawdata->FiftydayMovingAverage);
+                                $params[] = (!isset($rawdata->TwoHundreddayMovingAverage)?NULL:$rawdata->TwoHundreddayMovingAverage);
+                                $params[] = (!isset($rawdata->ChangeFromTwoHundreddayMovingAverage)?NULL:$rawdata->ChangeFromTwoHundreddayMovingAverage);
+                                $params[] = (!isset($rawdata->PercentChangeFromTwoHundreddayMovingAverage)?NULL:$rawdata->PercentChangeFromTwoHundreddayMovingAverage);
+                                $params[] = (!isset($rawdata->ChangeFromFiftydayMovingAverage)?NULL:$rawdata->ChangeFromFiftydayMovingAverage);
+                                $params[] = (!isset($rawdata->PercentChangeFromFiftydayMovingAverage)?NULL:$rawdata->PercentChangeFromFiftydayMovingAverage);
+                                $params[] = $rawdata->Notes;
+                                $params[] = (!isset($rawdata->PricePaid)?NULL:$rawdata->PricePaid);
+                                $params[] = (!isset($rawdata->PriceSales)?NULL:$rawdata->PriceSales);
+                                $params[] = (!isset($rawdata->PriceBook)?NULL:$rawdata->PriceBook);
+                                $params[] = (!isset($rawdata->PERatio)?NULL:$rawdata->PERatio);
+                                $params[] = date("Y-m-d", strtotime($rawdata->DividendPayDate));
+                                $params[] = (!isset($rawdata->PERatioRealtime)?NULL:$rawdata->PERatioRealtime);
+                                $params[] = (!isset($rawdata->PEGRatio)?NULL:$rawdata->PEGRatio);
+                                $params[] = (!isset($rawdata->PriceEPSEstimateCurrentYear)?NULL:$rawdata->PriceEPSEstimateCurrentYear);
+                                $params[] = (!isset($rawdata->PriceEPSEstimateNextYear)?NULL:$rawdata->PriceEPSEstimateNextYear);
+                                $params[] = (!isset($rawdata->SharesOwned)?NULL:$rawdata->SharesOwned);
+                                $params[] = (!isset($rawdata->ShortRatio)?NULL:$rawdata->ShortRatio);
+                                $params[] = $rawdata->TickerTrend;
+                                $params[] = (!isset($rawdata->OneyrTargetPrice)?NULL:$rawdata->OneyrTargetPrice);
+                                $params[] = (!isset($rawdata->HoldingsValue)?NULL:$rawdata->HoldingsValue);
+                                $params[] = (!isset($rawdata->HoldingsValueRealtime)?NULL:$rawdata->HoldingsValueRealtime);
+                                $params[] = (!isset($rawdata->DaysValueChangeRealtime)?NULL:$rawdata->DaysValueChangeRealtime);
+                                $params[] = $rawdata->StockExchange;
+                                $params[] = (!isset($rawdata->SharesOutstanding)?NULL:$rawdata->SharesOutstanding);
+
                                 try {
                                         $res1 = $db->prepare($query);
                                         $res1->execute($params);

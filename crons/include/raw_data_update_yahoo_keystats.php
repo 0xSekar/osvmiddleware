@@ -1,7 +1,7 @@
 <?php
 function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 	$db = Database::GetInstance();
-	$tables = array("tickers_yahoo_keystats_1","tickers_yahoo_keystats_2");
+	$tables = array("tickers_yahoo_keystats_1");
 
 	//Delete all reports before updating to be sure we do not miss any manual update
 	//as this is a batch process, it will not impact on the UE
@@ -61,7 +61,7 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 
-	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id` ,`Beta` ,`52WeekChange` ,`52WeekChangeSPS500` ,`52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`50DayMovingAverage` ,`200DayMovingAverage` ,`AvgVolume3Month` ,`AvgVolume10Days` ,`SharesOutstanding` ,`Float` ,`PercentageHeldByInsiders` ,`PercentageHeldByInstitutions` ,`SharesShortDate` ,`SharesShortValue` ,`SharesShortPriorMonth` ,`ShortRatioDate` ,`ShortRatio` ,`ShortPercentageOfFloatDate` ,`ShortPercentageOfFloat` ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` ,`TrailingAnnualDividendRate` ,`TrailingAnnualDividendYield` ,`5YearAverageDividendYield` ,`PayoutRatio` ,`DividendDate` ,`ExDividendDate` ,`LastSplitFactorTerm` ,`LastSplitFactor` ,`LastSplitDate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //34par
+	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id` ,`Beta` ,`52WeekChange` ,`52WeekChangeSPS500` ,`52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`50DayMovingAverage` ,`200DayMovingAverage` ,`AvgVolume3Month` ,`AvgVolume10Days` ,`SharesOutstanding` ,`Float` ,`PercentageHeldByInsiders` ,`PercentageHeldByInstitutions` ,`SharesShortDate` ,`SharesShortValue` ,`SharesShortPriorMonth` ,`ShortRatioDate` ,`ShortRatio` ,`ShortPercentageOfFloatDate` ,`ShortPercentageOfFloat` ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` ,`TrailingAnnualDividendRate` ,`TrailingAnnualDividendYield` ,`5YearAverageDividendYield` ,`PayoutRatio` ,`DividendDate` ,`ExDividendDate` ,`LastSplitFactorTerm` ,`LastSplitFactor` ,`LastSplitDate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `Beta` = ? ,`52WeekChange` = ? ,`52WeekChangeSPS500` = ? ,`50DayMovingAverage` = ? ,`200DayMovingAverage` = ? ,`SharesOutstanding` = ? ,`Float` = ? ,`PercentageHeldByInsiders` = ? ,`PercentageHeldByInstitutions` = ? ,`SharesShortDate` = ? ,`SharesShortValue` = ? ,`SharesShortPriorMonth` = ? ,`ShortRatioDate` = ? ,`ShortRatio` = ? ,`ShortPercentageOfFloatDate` = ? ,`ShortPercentageOfFloat` = ? ,`TrailingAnnualDividendRate` = ? ,`TrailingAnnualDividendYield` = ? ,`5YearAverageDividendYield` = ? ,`PayoutRatio` = ? ,`DividendDate` = ? ,`LastSplitFactorTerm` = ? ,`LastSplitFactor` = ? ,`LastSplitDate` = ?";
 	$params = array();
 	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->Beta->raw) || !is_numeric($rawdata->Beta->raw)?NULL:$rawdata->Beta->raw);
@@ -97,6 +97,32 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 	$params[] = NULL;
 	$params[] = str_replace('/', ':', $rawdata->lastSplitFactor);
 	$params[] = (!isset($rawdata->lastSplitDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->lastSplitDate->fmt));
+
+        $params[] = (!isset($rawdata->Beta->raw) || !is_numeric($rawdata->Beta->raw)?NULL:$rawdata->Beta->raw);
+        $params[] = (!isset($rawdata->_2WeekChange->raw) || !is_numeric($rawdata->_2WeekChange->raw)?NULL:($rawdata->_2WeekChange->raw * 100));
+        $params[] = (!isset($rawdata->SandP52WeekChange->raw) || !is_numeric($rawdata->SandP52WeekChange->raw)?NULL:($rawdata->SandP52WeekChange->raw * 100));
+        $params[] = (!isset($rawdata->fiftyDayAverage->raw) || !is_numeric($rawdata->fiftyDayAverage->raw)?NULL:$rawdata->fiftyDayAverage->raw);
+        $params[] = (!isset($rawdata->twoHundredDayAverage->raw) || !is_numeric($rawdata->twoHundredDayAverage->raw)?NULL:$rawdata->twoHundredDayAverage->raw);
+        $params[] = (!isset($rawdata->sharesOutstanding->raw) || !is_numeric($rawdata->sharesOutstanding->raw)?NULL:$rawdata->sharesOutstanding->raw);
+        $params[] = (!isset($rawdata->floatShares->raw) || !is_numeric($rawdata->floatShares->raw)?NULL:$rawdata->floatShares->raw);
+        $params[] = (!isset($rawdata->heldPercentInsiders->raw) || !is_numeric($rawdata->heldPercentInsiders->raw)?NULL:($rawdata->heldPercentInsiders->raw * 100));
+        $params[] = (!isset($rawdata->heldPercentInstitutions->raw) || !is_numeric($rawdata->heldPercentInstitutions->raw)?NULL:($rawdata->heldPercentInstitutions->raw * 100));
+        $params[] = NULL;
+        $params[] = (!isset($rawdata->sharesShort->raw) || !is_numeric($rawdata->sharesShort->raw)?NULL:$rawdata->sharesShort->raw);
+        $params[] = (!isset($rawdata->sharesShortPriorMonth->raw) || !is_numeric($rawdata->sharesShortPriorMonth->raw)?NULL:$rawdata->sharesShortPriorMonth->raw);
+        $params[] = NULL;
+        $params[] = (!isset($rawdata->shortRatio->raw) || !is_numeric($rawdata->shortRatio->raw)?NULL:$rawdata->shortRatio->raw);
+        $params[] = NULL;
+        $params[] = (!isset($rawdata->shortPercentOfFloat->raw) || !is_numeric($rawdata->shortPercentOfFloat->raw)?NULL:$rawdata->shortPercentOfFloat->raw);
+        $params[] = (!isset($rawdata->trailingAnnualDividendRate->raw) || !is_numeric($rawdata->trailingAnnualDividendRate->raw)?NULL:$rawdata->trailingAnnualDividendRate->raw);
+        $params[] = (!isset($rawdata->trailingAnnualDividendYield->raw) || !is_numeric($rawdata->trailingAnnualDividendYield->raw)?NULL:($rawdata->trailingAnnualDividendYield->raw * 100));
+        $params[] = (!isset($rawdata->fiveYearAvgDividendYield->raw) || !is_numeric($rawdata->fiveYearAvgDividendYield->raw)?NULL:$rawdata->fiveYearAvgDividendYield->raw);
+        $params[] = (!isset($rawdata->payoutRatio->raw) || !is_numeric($rawdata->payoutRatio->raw)?NULL:($rawdata->payoutRatio->raw * 100));
+        $params[] = (!isset($rawdata->dividendDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->dividendDate->fmt));
+        $params[] = NULL;
+        $params[] = str_replace('/', ':', $rawdata->lastSplitFactor);
+        $params[] = (!isset($rawdata->lastSplitDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->lastSplitDate->fmt));
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
