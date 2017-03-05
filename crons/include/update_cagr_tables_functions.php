@@ -132,12 +132,12 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
 	$FreeCashFlow_v = (($rawdata["CashfromOperatingActivities"][$i-$years]=='null' && $rawdata["CapitalExpenditures"][$i-$years]=='null')?null:($rawdata["CashfromOperatingActivities"][$i-$years]+$rawdata["CapitalExpenditures"][$i-$years]));
 	$OwnerEarningsFCF_a = (($rawdata["CFNetIncome"][$i]=='null' && $rawdata["CFDepreciationAmortization"][$i]=='null' && $rawdata["EmployeeCompensation"][$i]=='null' && $rawdata["AdjustmentforSpecialCharges"][$i]=='null' && $rawdata["DeferredIncomeTaxes"][$i]=='null' && $rawdata["CapitalExpenditures"][$i]=='null' && $rawdata["ChangeinCurrentAssets"][$i]=='null' && $rawdata["ChangeinCurrentLiabilities"][$i]=='null')?null:($rawdata["CFNetIncome"][$i]+$rawdata["CFDepreciationAmortization"][$i]+$rawdata["EmployeeCompensation"][$i]+$rawdata["AdjustmentforSpecialCharges"][$i]+$rawdata["DeferredIncomeTaxes"][$i]+$rawdata["CapitalExpenditures"][$i]+($rawdata["ChangeinCurrentAssets"][$i]+$rawdata["ChangeinCurrentLiabilities"][$i])));
 	$OwnerEarningsFCF_v = (($rawdata["CFNetIncome"][$i-$years]=='null' && $rawdata["CFDepreciationAmortization"][$i-$years]=='null' && $rawdata["EmployeeCompensation"][$i-$years]=='null' && $rawdata["AdjustmentforSpecialCharges"][$i-$years]=='null' && $rawdata["DeferredIncomeTaxes"][$i-$years]=='null' && $rawdata["CapitalExpenditures"][$i-$years]=='null' && $rawdata["ChangeinCurrentAssets"][$i-$years]=='null' && $rawdata["ChangeinCurrentLiabilities"][$i-$years]=='null')?null:($rawdata["CFNetIncome"][$i-$years]+$rawdata["CFDepreciationAmortization"][$i-$years]+$rawdata["EmployeeCompensation"][$i-$years]+$rawdata["AdjustmentforSpecialCharges"][$i-$years]+$rawdata["DeferredIncomeTaxes"][$i-$years]+$rawdata["CapitalExpenditures"][$i-$years]+($rawdata["ChangeinCurrentAssets"][$i-$years]+$rawdata["ChangeinCurrentLiabilities"][$i-$years])));
-	$arpy_a = $rawdata["AccountsReceivableTradeNet"][$i-1]=='null'?null:$rawdata["AccountsReceivableTradeNet"][$i-1];
+	$arpy_a = $rawdata["TotalReceivablesNet"][$i-1]=='null'?null:$rawdata["TotalReceivablesNet"][$i-1];
 	$inpy_a = $rawdata["InventoriesNet"][$i-1]=='null'?null:$rawdata["InventoriesNet"][$i-1];
 	if($i - $years == 1) {
 		$arpy_v = $inpy_v = 0;
 	} else {
-		$arpy_v = $rawdata["AccountsReceivableTradeNet"][$i-$years-1]=='null'?null:$rawdata["AccountsReceivableTradeNet"][$i-$years-1];
+		$arpy_v = $rawdata["TotalReceivablesNet"][$i-$years-1]=='null'?null:$rawdata["TotalReceivablesNet"][$i-$years-1];
 		$inpy_v = $rawdata["InventoriesNet"][$i-$years-1]=='null'?null:$rawdata["InventoriesNet"][$i-$years-1];
 	}
 	$rdate_a = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
@@ -300,8 +300,8 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
 	$vv = (($rawdata["TotalRevenue"][$i-$years]=='null'||$rawdata["TotalRevenue"][$i-$years]==0||$rawdata["CostofRevenue"][$i-$years]=='null'||$rawdata["CostofRevenue"][$i-$years]==0)?'null':(($rawdata["TotalReceivablesNet"][$i-$years] / $rawdata["TotalRevenue"][$i-$years] * 365)+($rawdata["InventoriesNet"][$i-$years] / $rawdata["CostofRevenue"][$i-$years] * 365)-($rawdata["AccountsPayable"][$i-$years] / $rawdata["CostofRevenue"][$i-$years] * 365)));
 	$query .= updateCAGR_concat($vv, $va, $years);
 	if($i - $years == 1) {
-		$va = (($rawdata["TotalRevenue"][$i]=='null'||($rawdata["AccountsReceivableTradeNet"][$i]=='null'&&is_null($arpy_a))||($rawdata["AccountsReceivableTradeNet"][$i]+$arpy_a==0))?'null':($rawdata["TotalRevenue"][$i] / (($arpy_a + $rawdata["AccountsReceivableTradeNet"][$i])/2)));
-		$vv = (($rawdata["TotalRevenue"][$i-$years]=='null'||$rawdata["AccountsReceivableTradeNet"][$i-$years]=='null'||$rawdata["AccountsReceivableTradeNet"][$i-$years]==0)?'null':($rawdata["TotalRevenue"][$i-$years] / ($rawdata["AccountsReceivableTradeNet"][$i-$years])));
+		$va = (($rawdata["TotalRevenue"][$i]=='null'||($rawdata["TotalReceivablesNet"][$i]=='null'&&is_null($arpy_a))||($rawdata["TotalReceivablesNet"][$i]+$arpy_a==0))?'null':($rawdata["TotalRevenue"][$i] / (($arpy_a + $rawdata["TotalReceivablesNet"][$i])/2)));
+		$vv = (($rawdata["TotalRevenue"][$i-$years]=='null'||$rawdata["TotalReceivablesNet"][$i-$years]=='null'||$rawdata["TotalReceivablesNet"][$i-$years]==0)?'null':($rawdata["TotalRevenue"][$i-$years] / ($rawdata["TotalReceivablesNet"][$i-$years])));
 		$query .= updateCAGR_concat($vv, $va, $years);
 		$va = (($rawdata["CostofRevenue"][$i]=='null'||($rawdata["InventoriesNet"][$i]=='null'&&is_null($inpy_a))||($rawdata["InventoriesNet"][$i]+$inpy_a==0))?'null':($rawdata["CostofRevenue"][$i] / (($inpy_a + $rawdata["InventoriesNet"][$i])/2)));
 		$vv = (($rawdata["CostofRevenue"][$i-$years]=='null'||$rawdata["InventoriesNet"][$i-$years]=='null'||$rawdata["InventoriesNet"][$i-$years]==0)?'null':($rawdata["CostofRevenue"][$i-$years] / ($rawdata["InventoriesNet"][$i-$years])));
@@ -310,8 +310,8 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
 		$vv = (($rawdata["CostofRevenue"][$i-$years]=='null'||$rawdata["CostofRevenue"][$i-$years]==0||$rawdata["InventoriesNet"][$i-$years]=='null'||$rawdata["InventoriesNet"][$i-$years]==0)?'null':(365 / ($rawdata["CostofRevenue"][$i-$years] / ($rawdata["InventoriesNet"][$i-$years]))));
 		$query .= updateCAGR_concat($vv, $va, $years);
 	} else {
-		$va = (($rawdata["TotalRevenue"][$i]=='null'||($rawdata["AccountsReceivableTradeNet"][$i]=='null'&&is_null($arpy_a))||($rawdata["AccountsReceivableTradeNet"][$i]+$arpy_a==0))?'null':($rawdata["TotalRevenue"][$i] / (($arpy_a + $rawdata["AccountsReceivableTradeNet"][$i])/2)));
-		$vv = (($rawdata["TotalRevenue"][$i-$years]=='null'||($rawdata["AccountsReceivableTradeNet"][$i-$years]=='null'&&is_null($arpy_v))||($rawdata["AccountsReceivableTradeNet"][$i-$years]+$arpy_v==0))?'null':($rawdata["TotalRevenue"][$i-$years] / (($arpy_v + $rawdata["AccountsReceivableTradeNet"][$i-$years])/2)));
+		$va = (($rawdata["TotalRevenue"][$i]=='null'||($rawdata["TotalReceivablesNet"][$i]=='null'&&is_null($arpy_a))||($rawdata["TotalReceivablesNet"][$i]+$arpy_a==0))?'null':($rawdata["TotalRevenue"][$i] / (($arpy_a + $rawdata["TotalReceivablesNet"][$i])/2)));
+		$vv = (($rawdata["TotalRevenue"][$i-$years]=='null'||($rawdata["TotalReceivablesNet"][$i-$years]=='null'&&is_null($arpy_v))||($rawdata["TotalReceivablesNet"][$i-$years]+$arpy_v==0))?'null':($rawdata["TotalRevenue"][$i-$years] / (($arpy_v + $rawdata["TotalReceivablesNet"][$i-$years])/2)));
 		$query .= updateCAGR_concat($vv, $va, $years);
 		$va = (($rawdata["CostofRevenue"][$i]=='null'||($rawdata["InventoriesNet"][$i]=='null'&&is_null($inpy_a))||($rawdata["InventoriesNet"][$i]+$inpy_a==0))?'null':($rawdata["CostofRevenue"][$i] / (($inpy_a + $rawdata["InventoriesNet"][$i])/2)));
 		$vv = (($rawdata["CostofRevenue"][$i-$years]=='null'||($rawdata["InventoriesNet"][$i-$years]=='null'&&is_null($inpy_v))||($rawdata["InventoriesNet"][$i-$years]+$inpy_v==0))?'null':($rawdata["CostofRevenue"][$i-$years] / (($inpy_v + $rawdata["InventoriesNet"][$i-$years])/2)));

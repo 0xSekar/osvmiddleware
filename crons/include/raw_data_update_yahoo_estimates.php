@@ -45,7 +45,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->currQtr->growth->raw) || !is_numeric($rawdata->currQtr->growth->raw)?NULL:($rawdata->currQtr->growth->raw * 100));
 	$params[] = (!isset($rawdata->currQtr->industryTrend->growth->raw) || !is_numeric($rawdata->currQtr->industryTrend->growth->raw)?NULL:($rawdata->currQtr->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->currQtr->sectorTrend->growth->raw) || !is_numeric($rawdata->currQtr->sectorTrend->growth->raw)?NULL:($rawdata->currQtr->sectorTrend->growth->raw * 100));
-	$params[] = NULL;
+	$params[] = (!isset($rawdata->currQtr->sp500Trend->growth->raw) || !is_numeric($rawdata->currQtr->sp500Trend->growth->raw)?NULL:($rawdata->currQtr->sp500Trend->growth->raw * 100));
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -82,7 +82,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->nextQtr->growth->raw) || !is_numeric($rawdata->nextQtr->growth->raw)?NULL:($rawdata->nextQtr->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextQtr->industryTrend->growth->raw) || !is_numeric($rawdata->nextQtr->industryTrend->growth->raw)?NULL:($rawdata->nextQtr->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextQtr->sectorTrend->growth->raw) || !is_numeric($rawdata->nextQtr->sectorTrend->growth->raw)?NULL:($rawdata->nextQtr->sectorTrend->growth->raw * 100));
-	$params[] = NULL;
+	$params[] = (!isset($rawdata->nextQtr->sp500Trend->growth->raw) || !is_numeric($rawdata->nextQtr->sp500Trend->growth->raw)?NULL:($rawdata->nextQtr->sp500Trend->growth->raw * 100));
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -119,7 +119,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->currYear->growth->raw) || !is_numeric($rawdata->currYear->growth->raw)?NULL:($rawdata->currYear->growth->raw * 100));
 	$params[] = (!isset($rawdata->currYear->industryTrend->growth->raw) || !is_numeric($rawdata->currYear->industryTrend->growth->raw)?NULL:($rawdata->currYear->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->currYear->sectorTrend->growth->raw) || !is_numeric($rawdata->currYear->sectorTrend->growth->raw)?NULL:($rawdata->currYear->sectorTrend->growth->raw * 100));
-	$params[] = NULL;
+	$params[] = (!isset($rawdata->currYear->sp500Trend->growth->raw) || !is_numeric($rawdata->currYear->sp500Trend->growth->raw)?NULL:($rawdata->currYear->sp500Trend->growth->raw * 100));
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -156,7 +156,7 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->nextYear->growth->raw) || !is_numeric($rawdata->nextYear->growth->raw)?NULL:($rawdata->nextYear->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextYear->industryTrend->growth->raw) || !is_numeric($rawdata->nextYear->industryTrend->growth->raw)?NULL:($rawdata->nextYear->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextYear->sectorTrend->growth->raw) || !is_numeric($rawdata->nextYear->sectorTrend->growth->raw)?NULL:($rawdata->nextYear->sectorTrend->growth->raw * 100));
-	$params[] = NULL;
+	$params[] = (!isset($rawdata->nextYear->sp500Trend->growth->raw) || !is_numeric($rawdata->nextYear->sp500Trend->growth->raw)?NULL:($rawdata->nextYear->sp500Trend->growth->raw * 100));
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -204,19 +204,19 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->minus5Year->growth->raw) || !is_numeric($rawdata->minus5Year->growth->raw)?NULL:($rawdata->minus5Year->growth->raw * 100));
 	$params[] = (!isset($rawdata->minus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->minus5Year->industryTrend->growth->raw)?NULL:($rawdata->minus5Year->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->minus5Year->sectorTrend->growth->raw) || !is_numeric($rawdata->minus5Year->sectorTrend->growth->raw)?NULL:($rawdata->minus5Year->sectorTrend->growth->raw * 100));
-	$params[] = NULL;
+	$params[] = (!isset($rawdata->minus5Year->sp500Trend->growth->raw) || !is_numeric($rawdata->minus5Year->sp500Trend->growth->raw)?NULL:($rawdata->minus5Year->sp500Trend->growth->raw * 100));
 	$params[] = (!isset($rawdata->plus5Year->growth->raw) || !is_numeric($rawdata->plus5Year->growth->raw)?NULL:($rawdata->plus5Year->growth->raw * 100));
 	$params[] = (!isset($rawdata->plus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->plus5Year->industryTrend->growth->raw)?NULL:($rawdata->plus5Year->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->plus5Year->sectorTrend->growth->raw) || !is_numeric($rawdata->plus5Year->sectorTrend->growth->raw)?NULL:($rawdata->plus5Year->sectorTrend->growth->raw * 100));
+	$params[] = (!isset($rawdata->plus5Year->sp500Trend->growth->raw) || !is_numeric($rawdata->plus5Year->sp500Trend->growth->raw)?NULL:($rawdata->plus5Year->sp500Trend->growth->raw * 100));
 	$params[] = NULL;
-	$params[] = NULL;
-	$params[] = NULL;
-	$params[] = NULL;
-	$params[] = NULL;
+	$params[] = (!isset($rawdata->industryPeRatio->raw) || !is_numeric($rawdata->industryPeRatio->raw)?NULL:$rawdata->industryPeRatio->raw);
+	$params[] = (!isset($rawdata->sectorPeRatio->raw) || !is_numeric($rawdata->sectorPeRatio->raw)?NULL:$rawdata->sectorPeRatio->raw);
+	$params[] = (!isset($rawdata->sp500PeRatio->raw) || !is_numeric($rawdata->sp500PeRatio->raw)?NULL:$rawdata->sp500PeRatio->raw);
 	$params[] = NULL;
 	$params[] = (!isset($rawdata->industryPegRatio->raw) || !is_numeric($rawdata->industryPegRatio->raw)?NULL:$rawdata->industryPegRatio->raw);
 	$params[] = (!isset($rawdata->sectorPegRatio->raw) || !is_numeric($rawdata->sectorPegRatio->raw)?NULL:$rawdata->sectorPegRatio->raw);
-	$params[] = NULL;
+	$params[] = (!isset($rawdata->sp500PegRatio->raw) || !is_numeric($rawdata->sp500PegRatio->raw)?NULL:$rawdata->sp500PegRatio->raw);
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);

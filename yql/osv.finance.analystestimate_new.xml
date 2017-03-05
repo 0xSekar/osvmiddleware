@@ -28,7 +28,7 @@
                 var rawresult = restquery.accept( "text/html" ).get().response.toString();
             	// Setup Second Query from finance.yahoo.com
 				var url2 = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/"+symbol+
-				"?formatted=true&crumb=&lang=en-US&region=US&modules=upgradeDowngradeHistory%2CrecommendationTrend%2CfinancialData%2CearningsHistory%2CearningsTrend%2CindustryTrend%2CsectorTrend&corsDomain=finance.yahoo.com";
+				"?formatted=true&crumb=&lang=en-US&region=US&modules=upgradeDowngradeHistory%2CrecommendationTrend%2CfinancialData%2CearningsHistory%2CearningsTrend%2CindustryTrend%2CindexTrend%2CsectorTrend&corsDomain=finance.yahoo.com";
                 var restquery2 = y.rest( url2 );
                 var r2 = restquery2.accept( "application/json" ).get().response;
 				r2 = y.xmlToJson(r2);
@@ -37,6 +37,7 @@
 				rf["industryTrend"] = r2.quoteSummary.result.industryTrend;
 				rf["earningsHistory"] = r2.quoteSummary.result.earningsHistory;
 				rf["sectorTrend"] = r2.quoteSummary.result.sectorTrend;
+				rf["indexTrend"] = r2.quoteSummary.result.indexTrend;
 				response.object = rf;
                 ]]>
             </execute>
