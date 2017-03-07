@@ -56,7 +56,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$response = $yql->execute("select * from osv.finance.analystestimate_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
 	if(isset($response->query) && isset($response->query->results)) {
 		//Check if the symbol exists
-		if(isset($response->query->results->result->earningsTrend)) {
+		if(isset($response->query->results->result->earningsTrend) && $response->query->results->result->earningsTrend->trend[0]->endDate !== "null") {
 			$rawdata = new stdClass();
 			$rawdata->earningsHistory = new stdClass();
 			$rawdata->currQtr = new stdClass();
