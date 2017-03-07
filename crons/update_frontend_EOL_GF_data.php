@@ -19,6 +19,10 @@ include_once('./include/update_quality_checks.php');
 include_once('./include/update_ratings.php');
 include_once('./include/update_ratings_ttm.php');
 include_once('./include/update_is_old_field.php');
+include_once('./update_frontend_yahoo_daily_include.php');
+include_once('./include/raw_data_update_yahoo_keystats.php');
+require_once("../include/yahoo/common.inc.php");
+include_once('./include/update_eod_valuation.php');
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -49,6 +53,7 @@ $areports = AREPORTS;
 $qreports = QREPORTS;
 $treports = $areports+$qreports;
 $update_array = array(".","'");
+$newtick = array();
 echo "Updating ticker lists....<br>\n";
 //Process the tickers and add any missing ticket to the tables (only basic ticker data)
 foreach ($result as $key => $symbol) {
@@ -95,6 +100,8 @@ foreach ($result as $symbol) {
 					   ));
 			$id = $db->lastInsertId();
 			$res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_barchart_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
+			update_yahoo_daily($symbol->ticker);
+			$newtick[] = $id;
 		} catch(PDOException $ex) {
 			echo "\nDatabase Error"; //user message
 			die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -156,6 +163,8 @@ foreach ($result2 as $symbol2) {
 				$id = $db->lastInsertId();					
 
 				$res = $db->query("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_barchart_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
+				update_yahoo_daily($symbol2->ticker);
+				$newtick[] = $id;
 			} catch(PDOException $ex) {
 				echo "\nDatabase Error"; //user message
 				die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -333,6 +342,12 @@ update_ratings_ttm();
 echo "done<br>\n";
 echo "Updating is_old tickers table field... ";
 update_is_old_field();
+echo "done<br>\n";
+
+echo "Updating EOD valuation for new tickers... ";
+foreach($newtick as $value) {
+	update_eod_valuation($value);
+}
 echo "done<br>\n";
 
 function nullValues(&$item, $key) {
