@@ -61,7 +61,7 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 
-	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id` ,`Beta` ,`52WeekChange` ,`52WeekChangeSPS500` ,`52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`50DayMovingAverage` ,`200DayMovingAverage` ,`AvgVolume3Month` ,`AvgVolume10Days` ,`SharesOutstanding` ,`Float` ,`PercentageHeldByInsiders` ,`PercentageHeldByInstitutions` ,`SharesShortDate` ,`SharesShortValue` ,`SharesShortPriorMonth` ,`ShortRatioDate` ,`ShortRatio` ,`ShortPercentageOfFloatDate` ,`ShortPercentageOfFloat` ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` ,`TrailingAnnualDividendRate` ,`TrailingAnnualDividendYield` ,`5YearAverageDividendYield` ,`PayoutRatio` ,`DividendDate` ,`ExDividendDate` ,`LastSplitFactorTerm` ,`LastSplitFactor` ,`LastSplitDate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `Beta` = ? ,`52WeekChange` = ? ,`52WeekChangeSPS500` = ? ,`50DayMovingAverage` = ? ,`200DayMovingAverage` = ? ,`SharesOutstanding` = ? ,`Float` = ? ,`PercentageHeldByInsiders` = ? ,`PercentageHeldByInstitutions` = ? ,`SharesShortDate` = ? ,`SharesShortValue` = ? ,`SharesShortPriorMonth` = ? ,`ShortRatioDate` = ? ,`ShortRatio` = ? ,`ShortPercentageOfFloatDate` = ? ,`ShortPercentageOfFloat` = ? ,`TrailingAnnualDividendRate` = ? ,`TrailingAnnualDividendYield` = ? ,`5YearAverageDividendYield` = ? ,`PayoutRatio` = ? ,`DividendDate` = ? ,`LastSplitFactorTerm` = ? ,`LastSplitFactor` = ? ,`LastSplitDate` = ?";
+	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id` ,`Beta` ,`52WeekChange` ,`52WeekChangeSPS500` ,`52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`50DayMovingAverage` ,`200DayMovingAverage` ,`AvgVolume3Month` ,`AvgVolume10Days` ,`SharesOutstanding` ,`Float` ,`PercentageHeldByInsiders` ,`PercentageHeldByInstitutions` ,`SharesShortDate` ,`SharesShortValue` ,`SharesShortPriorMonth` ,`ShortRatioDate` ,`ShortRatio` ,`ShortPercentageOfFloatDate` ,`ShortPercentageOfFloat` ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` ,`TrailingAnnualDividendRate` ,`TrailingAnnualDividendYield` ,`5YearAverageDividendYield` ,`PayoutRatio` ,`DividendDate` ,`ExDividendDate` ,`LastSplitFactorTerm` ,`LastSplitFactor` ,`LastSplitDate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `Beta` = ? ,`52WeekChange` = ? ,`52WeekChangeSPS500` = ? ,`50DayMovingAverage` = ? ,`200DayMovingAverage` = ? ,`SharesOutstanding` = ? ,`Float` = ? ,`PercentageHeldByInsiders` = ? ,`PercentageHeldByInstitutions` = ? ,`SharesShortDate` = ? ,`SharesShortValue` = ? ,`SharesShortPriorMonth` = ? ,`ShortRatioDate` = ? ,`ShortRatio` = ? ,`ShortPercentageOfFloatDate` = ? ,`ShortPercentageOfFloat` = ? ,`TrailingAnnualDividendRate` = ? ,`TrailingAnnualDividendYield` = ? ,`5YearAverageDividendYield` = ? ,`PayoutRatio` = ? ,`DividendDate` = ? ,`LastSplitFactorTerm` = ? ,`LastSplitFactor` = ? ,`LastSplitDate` = ?, `ForwardAnnualDividendRate` = ?,`ForwardAnnualDividendYield` =?";
 	$params = array();
 	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->Beta->raw) || !is_numeric($rawdata->Beta->raw)?NULL:$rawdata->Beta->raw);
@@ -122,6 +122,8 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
         $params[] = NULL;
         $params[] = str_replace('/', ':', $rawdata->lastSplitFactor);
         $params[] = (!isset($rawdata->lastSplitDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->lastSplitDate->fmt));
+	$params[] = (!isset($rawdata->dividendRate->raw) || !is_numeric($rawdata->dividendRate->raw)?NULL:$rawdata->dividendRate->raw);
+	$params[] = (!isset($rawdata->dividendYield->raw) || !is_numeric($rawdata->dividendYield->raw)?NULL:($rawdata->dividendYield->raw * 100));
 
 	try {
 		$res = $db->prepare($query);
@@ -136,7 +138,7 @@ function update_raw_data_barchart_keystats($ticker_id, $resOD) {
 	//Updating Keystats 2 from Barchart
 	$db = Database::GetInstance();
 
-	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id`, `52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`AvgVolume10Days`  ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` , `ExDividendDate`, `AvgVolume3Month`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `52WeekHighDate`= ? ,`52WeekHighValue` = ? ,`52WeekLowDate` = ? ,`52WeekLowValue` = ? ,`AvgVolume10Days` = ? ,`ForwardAnnualDividendRate` = ? ,`ForwardAnnualDividendYield` = ?, `ExDividendDate` = ?, `AvgVolume3Month` = ?";
+	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id`, `52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`AvgVolume10Days` , `ExDividendDate`, `AvgVolume3Month`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `52WeekHighDate`= ? ,`52WeekHighValue` = ? ,`52WeekLowDate` = ? ,`52WeekLowValue` = ? ,`AvgVolume10Days` = ? , `ExDividendDate` = ?, `AvgVolume3Month` = ?";
 	$params = array();
 	$params[] = $ticker_id;
 	$params[] = $resOD['results'][0]['fiftyTwoWkHighDate'];
@@ -144,8 +146,6 @@ function update_raw_data_barchart_keystats($ticker_id, $resOD) {
 	$params[] = $resOD['results'][0]['fiftyTwoWkLowDate'];
 	$params[] = $resOD['results'][0]['fiftyTwoWkLow'];
 	$params[] = $resOD['results'][0]['twentyDayAvgVol'];
-	$params[] = $resOD['results'][0]['dividendRateAnnual'];
-	$params[] = $resOD['results'][0]['dividendYieldAnnual'];
 	$params[] = $resOD['results'][0]['exDividendDate'];
 	$params[] = $resOD['results'][0]['averageQuarterlyVolume'];
 
@@ -154,8 +154,6 @@ function update_raw_data_barchart_keystats($ticker_id, $resOD) {
 	$params[] = $resOD['results'][0]['fiftyTwoWkLowDate'];
 	$params[] = $resOD['results'][0]['fiftyTwoWkLow'];
 	$params[] = $resOD['results'][0]['twentyDayAvgVol'];
-	$params[] = $resOD['results'][0]['dividendRateAnnual'];
-	$params[] = $resOD['results'][0]['dividendYieldAnnual'];
 	$params[] = $resOD['results'][0]['exDividendDate'];
 	$params[] = $resOD['results'][0]['averageQuarterlyVolume'];
 	try {
