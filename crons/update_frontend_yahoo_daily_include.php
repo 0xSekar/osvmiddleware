@@ -10,7 +10,7 @@ function update_yahoo_daily($pticker = NULL) {
 	}
 	$row = $res->fetch(PDO::FETCH_ASSOC);
 	if($row["value"] == 0) {
-		echo "Skip yahoo queries as they are currently dissabled.\n";
+		echo "Skip yahoo queries as they are currently dissabled.<br>\n";
 		$yquery = false;
 	}
 
@@ -54,7 +54,7 @@ function update_yahoo_daily($pticker = NULL) {
 		$addq = " AND ticker = '".$pticker."' ";
 	}
 
-	echo "Updating Tickers (yahoo)...\n";
+	echo "Updating Tickers (yahoo)...<br>\n";
 
 	//Select all tickers not updated for at least a day
 	try {
@@ -378,10 +378,10 @@ function update_yahoo_daily($pticker = NULL) {
 				die("Line: ".__LINE__." - ".$ex->getMessage());
 			}
 		}	
-		echo " Done\n";
+		echo " Done<br>\n";
 	}
 
-	echo "\nUpdating Tickers (barchart)...\n";
+	echo "\nUpdating Tickers (barchart)...<br>\n";
 
 	//Select all tickers not updated for at least a day
 	try {
@@ -738,7 +738,7 @@ function update_yahoo_daily($pticker = NULL) {
 				die("Line: ".__LINE__." - ".$ex->getMessage());
 			}
 		}
-		echo " Done\n";
+		echo " Done<br>\n";
 	}
 
 	if(is_null($pticker)) {
@@ -776,6 +776,6 @@ function update_yahoo_daily($pticker = NULL) {
 		echo "Updating Ratings TTM... ";
 		update_ratings_ttm();
 	}
-	echo "done\n";
+	echo "done<br>\n";
 }
 ?>
