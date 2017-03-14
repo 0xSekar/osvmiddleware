@@ -152,8 +152,6 @@ function update_frontend_EOL_GF_data($eticker = null) {
 	//For each symbol in the database, check if there is new reports
 	//based on the last report date in the resultset
 	echo "Updating data points... (run 1) <br>\n";
-	$report_tables = array("reports_balanceconsolidated","reports_balancefull","reports_cashflowconsolidated","reports_cashflowfull","reports_financialheader","reports_gf_data","reports_incomeconsolidated","reports_incomefull","reports_metadata_eol","reports_variable_ratios");
-	$ticker_tables = array("tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios");
 	foreach ($result as $symbol) {
 		if (is_null($symbol->ticker) || trim($symbol->ticker) == "") continue;
 		if(!is_null($eticker) && strcasecmp($eticker,$symbol->ticker)) {
