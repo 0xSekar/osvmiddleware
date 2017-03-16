@@ -1,25 +1,11 @@
 <?php
 function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 	$db = Database::GetInstance();
-	$tables = array("tickers_yahoo_keystats_1");
-
-	//Delete all reports before updating to be sure we do not miss any manual update
-	//as this is a batch process, it will not impact on the UE
-	foreach($tables as $table) {
-		try {
-			$query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-			$res = $db->query($query);
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-	}
 
 	//Update yahoo keystats tables
 	//tickers_yahoo_keystats_1
-	$query = "INSERT INTO `tickers_yahoo_keystats_1` (`ticker_id` ,`MarketCapIntraday` ,`EnterpriseValueDate` ,`EnterpriseValue` ,`TrailingPETTMIntraday` ,`ForwardPEDate` ,`ForwardPE` ,`PEGRatio5Years` ,`PriceSalesTTM` ,`PriceBookMRQ` ,`EnterpriseValueRevenueTTM` ,`EnterpriseValueEBITDATTM` ,`FiscalYearEnds` ,`MostRecentQuarter` ,`ProfitMarginTTM` ,`OperatingMarginTTM` ,`ReturnOnAssetsTTM` ,`ReturnOnEquityTTM` ,`RevenueTTM` ,`RevenuePerShateTTM` ,`QtrlyRevenueGrowthYOY` ,`GrossProfitTTM` ,`EBITDATTM` ,`NetIncomeAvlToCommonTTM` ,`DilutedEPSTTM` ,`QtrlyEarningsGrowthYOY` ,`TotalCashMRQ` ,`TotalCashPerShareMRQ` ,`TotalDebtMRQ` ,`TotalDebtEquityMRQ` ,`CurrentRatioMRQ` ,`BookValuePerShareMRQ` ,`OperatingCashFlowTTM` ,`LeveredFreeCashFlowTTM`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //34par
+	$query = "INSERT INTO `tickers_yahoo_keystats_1` (`ticker_id` ,`MarketCapIntraday` ,`EnterpriseValueDate` ,`EnterpriseValue` ,`TrailingPETTMIntraday` ,`ForwardPEDate` ,`ForwardPE` ,`PEGRatio5Years` ,`PriceSalesTTM` ,`PriceBookMRQ` ,`EnterpriseValueRevenueTTM` ,`EnterpriseValueEBITDATTM` ,`FiscalYearEnds` ,`MostRecentQuarter` ,`ProfitMarginTTM` ,`OperatingMarginTTM` ,`ReturnOnAssetsTTM` ,`ReturnOnEquityTTM` ,`RevenueTTM` ,`RevenuePerShateTTM` ,`QtrlyRevenueGrowthYOY` ,`GrossProfitTTM` ,`EBITDATTM` ,`NetIncomeAvlToCommonTTM` ,`DilutedEPSTTM` ,`QtrlyEarningsGrowthYOY` ,`TotalCashMRQ` ,`TotalCashPerShareMRQ` ,`TotalDebtMRQ` ,`TotalDebtEquityMRQ` ,`CurrentRatioMRQ` ,`BookValuePerShareMRQ` ,`OperatingCashFlowTTM` ,`LeveredFreeCashFlowTTM`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `MarketCapIntraday`=? ,`EnterpriseValueDate`=? ,`EnterpriseValue`=? ,`TrailingPETTMIntraday`=? ,`ForwardPEDate`=? ,`ForwardPE`=? ,`PEGRatio5Years` =?,`PriceSalesTTM`=? ,`PriceBookMRQ`=? ,`EnterpriseValueRevenueTTM`=? ,`EnterpriseValueEBITDATTM`=? ,`FiscalYearEnds`=? ,`MostRecentQuarter`=? ,`ProfitMarginTTM`=? ,`OperatingMarginTTM`=? ,`ReturnOnAssetsTTM`=? ,`ReturnOnEquityTTM`=? ,`RevenueTTM`=? ,`RevenuePerShateTTM`=? ,`QtrlyRevenueGrowthYOY`=? ,`GrossProfitTTM`=? ,`EBITDATTM`=? ,`NetIncomeAvlToCommonTTM`=? ,`DilutedEPSTTM`=? ,`QtrlyEarningsGrowthYOY`=? ,`TotalCashMRQ`=? ,`TotalCashPerShareMRQ`=? ,`TotalDebtMRQ`=? ,`TotalDebtEquityMRQ`=? ,`CurrentRatioMRQ`=? ,`BookValuePerShareMRQ`=? ,`OperatingCashFlowTTM`=? ,`LeveredFreeCashFlowTTM`=?";
 	$params = array();
-	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->marketCap->raw) || !is_numeric($rawdata->marketCap->raw)?NULL:$rawdata->marketCap->raw);
 	$params[] = NULL;
 	$params[] = (!isset($rawdata->enterpriseValue->raw) || !is_numeric($rawdata->enterpriseValue->raw)?NULL:$rawdata->enterpriseValue->raw);
@@ -53,6 +39,9 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->bookValue->raw) || !is_numeric($rawdata->bookValue->raw)?NULL:$rawdata->bookValue->raw);
 	$params[] = (!isset($rawdata->operatingCashflow->raw) || !is_numeric($rawdata->operatingCashflow->raw)?NULL:$rawdata->operatingCashflow->raw);
 	$params[] = (!isset($rawdata->freeCashflow->raw) || !is_numeric($rawdata->freeCashflow->raw)?NULL:$rawdata->freeCashflow->raw);
+        $params = array_merge($params,$params);
+        array_unshift($params,$ticker_id);
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);

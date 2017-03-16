@@ -30,7 +30,7 @@ $qreports = QREPORTS;
 $treports = $areports+$qreports;
 
 //Get full list of symbols from backend
-$query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id group by a.id";
+$query = "SELECT a.* from tickers a inner join reports_header b on a.id=b.ticker_id where a.is_old=false group by a.id order by a.ticker";
 try {
 	$res = $db->query($query);
 } catch(PDOException $ex) {
@@ -106,6 +106,7 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			$rawdata[$v][$areports+$i] = null;
 		}
 	}
+	$dates = new stdClass();
 	$dates->ticker_id = $row["id"];
 	array_walk_recursive($rawdata, 'nullValues');
 	update_raw_data_tickers($dates, $rawdata);

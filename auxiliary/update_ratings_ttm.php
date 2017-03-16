@@ -20,13 +20,6 @@ try {
 	echo "\nDatabase Error"; //user message
 	die("- Line: ".__LINE__." - ".$ex->getMessage());
 }
-$query = "delete from ttm_ratings";
-try {
-	$res = $db->exec($query);
-} catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("- Line: ".__LINE__." - ".$ex->getMessage());
-}
 $tickerCount = 0;
 //Variables to be used for linear transform and squeez
 $squ = 0.998;
@@ -442,9 +435,8 @@ foreach($values as $id => $value) {
 		$values[$id]["VG"] = 'F';
 
 	//Save data
-	$query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //20
+	$query = "INSERT INTO `ttm_ratings` (`ticker_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `Q1`=?, `Q2`=?, `Q3`=?, `QT`=?, `G1`=?, `G2`=?, `G3`=?, `G4`=?, `GT`=?, `V1`=?, `V2`=?, `V3`=?, `V4`=?, `VT`=?, `AS`=?, `AS_grade`=?, `Q_grade`=?, `V_grade`=?, `G_grade`=?";
 	$params = array();
-	$params[] = $id;
 	$params[] = $values[$id]["QPW1"];
 	$params[] = $values[$id]["QPW2"];
 	$params[] = $values[$id]["QPW3"];
@@ -464,6 +456,9 @@ foreach($values as $id => $value) {
 	$params[] = $values[$id]["QG"];
 	$params[] = $values[$id]["VG"];
 	$params[] = $values[$id]["GG"];
+        $params = array_merge($params,$params);
+        array_unshift($params,$id);
+
 	try {
 		$save = $db->prepare($query);
 		$save->execute($params);

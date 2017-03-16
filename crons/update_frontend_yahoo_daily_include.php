@@ -621,32 +621,8 @@ function update_yahoo_daily($pticker = NULL) {
 
 		//Update altman data
 		if($procAlt && is_null($pticker)) {
-			try {
-				$db->exec("DELETE from ttm_alt_checks where ticker_id = " . $row["id"]);
-			} catch(PDOException $ex) {
-				echo "\nDatabase Error"; //user message
-				die("Line: ".__LINE__." - ".$ex->getMessage());
-			}
-			try {
-				$db->exec("DELETE from mrq_alt_checks where ticker_id = " . $row["id"]);
-			} catch(PDOException $ex) {
-				echo "\nDatabase Error"; //user message
-				die("Line: ".__LINE__." - ".$ex->getMessage());
-			}
 			altmanTTM($row["id"]);
-			try {
-				$db->exec("DELETE b FROM reports_pio_checks b INNER JOIN reports_header f ON f.id = b.report_id WHERE f.ticker_id = " . $row["id"]);
-			} catch(PDOException $ex) {
-				echo "\nDatabase Error"; //user message
-				die("Line: ".__LINE__." - ".$ex->getMessage());
-			}
 			update_pio_checks($row["id"]);
-			try {
-				$db->exec("delete from tickers_alt_aux where ticker_id = " . $row["id"]);
-			} catch(PDOException $ex) {
-				echo "\nDatabase Error"; //user message
-				die("Line: ".__LINE__." - ".$ex->getMessage());
-			}
 			$query1 = "SELECT *,
 				(CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL OR X5 IS NULL)
 				 THEN NULL ELSE (1.2 * X1 + 1.4 * X2 + 3.3 * X3 + 0.6 * X4 + 0.999 * X5) END) AS AltmanZNormal,
@@ -677,9 +653,8 @@ function update_yahoo_daily($pticker = NULL) {
 				die("- Line: ".__LINE__." - ".$ex->getMessage());
 			}
 
-			$query = "INSERT INTO  `tickers_alt_aux` (`ticker_id` ,`mrq_MarketValueofEquity` ,`mrq_X4` ,`mrq_AltmanZNormal` ,`mrq_AltmanZRevised` ,`ttm_MarketValueofEquity`, `ttm_X4` ,`ttm_AltmanZNormal` ,`ttm_AltmanZRevised`) VALUES (?,?,?,?,?,?,?,?,?)";
+			$query = "INSERT INTO  `tickers_alt_aux` (`ticker_id` ,`mrq_MarketValueofEquity` ,`mrq_X4` ,`mrq_AltmanZNormal` ,`mrq_AltmanZRevised` ,`ttm_MarketValueofEquity`, `ttm_X4` ,`ttm_AltmanZNormal` ,`ttm_AltmanZRevised`) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `mrq_MarketValueofEquity`=? ,`mrq_X4`=? ,`mrq_AltmanZNormal`=? ,`mrq_AltmanZRevised`=? ,`ttm_MarketValueofEquity`=?, `ttm_X4`=? ,`ttm_AltmanZNormal`=? ,`ttm_AltmanZRevised`=?";
 			$params = array();
-			$params[] = $row["id"];
 
 			if(is_null($row1)) {
 				$params[] = null;
@@ -703,6 +678,9 @@ function update_yahoo_daily($pticker = NULL) {
 				$params[] = $row2["AltmanZNormal"];
 				$params[] = $row2["AltmanZRevised"];
 			}
+			$params = array_merge($params,$params);
+			array_unshift($params,$row["id"]);
+
 			try {
 				$resf = $db->prepare($query);
 				$resf->execute($params);
@@ -742,6 +720,31 @@ function update_yahoo_daily($pticker = NULL) {
 	}
 
 	if(is_null($pticker)) {
+		echo "Removing old Quality Checks (PIO)... ";
+		try {
+			$res = $db->query("delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+		} catch(PDOException $ex) {
+			echo "\nDatabase Error"; //user message
+			die("Line: ".__LINE__." - ".$ex->getMessage());
+		}
+		echo "done<br>\n";
+		echo "Removing old Quality Checks (ALTMAN)... ";
+		try {
+			$res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+		} catch(PDOException $ex) {
+			echo "\nDatabase Error"; //user message
+			die("Line: ".__LINE__." - ".$ex->getMessage());
+		}
+		echo "done<br>\n";
+		echo "Removing old Quality Checks (BENEISH)... ";
+		try {
+			$res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+		} catch(PDOException $ex) {
+			echo "\nDatabase Error"; //user message
+			die("Line: ".__LINE__." - ".$ex->getMessage());
+		}
+		echo "done<br>\n";
+
 		echo $count . " rows processed for yahoo\n";
 		echo $count2 . " rows processed for barchart\n";
 		echo "Dividend History (yahoo):\n";

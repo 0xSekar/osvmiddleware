@@ -5,19 +5,12 @@ include_once('../db/db.php');
 $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
-$query = "delete from reports_beneish_checks";
+
 try {
-	$db->exec($query);
+        $res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("- Line: ".__LINE__." - ".$ex->getMessage());
-}
-$query = "DELETE from ttm_beneish_checks";
-try {
-	$db->exec($query);
-} catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("- Line: ".__LINE__." - ".$ex->getMessage());
+        echo "\nDatabase Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 
 $query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
@@ -56,9 +49,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		beneishTTM($ppid,$prawdata,$querypre);
 	}
 
-	$query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	$query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
 	$params = array();
-	$params[] = $row["id"];
 	//DSRI
 	$vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : ($rawdata["TotalReceivablesNet"]/$rawdata["TotalRevenue"]);
 	$vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : ($prawdata["TotalReceivablesNet"]/$prawdata["TotalRevenue"]);
@@ -101,14 +93,15 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	//BM8       
 	$bm8 = -4.84+(0.92*($dsri == 'null'?0:$dsri))+(0.528*($gmi=='null'?0:$gmi))+(0.404*($aqi=='null'?0:$aqi))+(0.892*($sgi=='null'?0:$sgi))+(0.115*($depi=='null'?0:$depi))-(0.172*($sgai=='null'?0:$sgai))+(4.679*($tata=='null'?0:$tata))-(0.327*($lvgi=='null'?0:$lvgi));
 	$params[] = $bm8;
+	$params = array_merge($params,$params);
 	$query2 = $params;
-	array_shift($query2);
+	array_unshift($params,$row["id"]);
 
-        $first = false;
-        //Skip calculations for first report of each ticket
-        if($idChange) {
-                continue;
-        }
+	$first = false;
+	//Skip calculations for first report of each ticket
+	if($idChange) {
+		continue;
+	}
 
 	try {
 		$res1 = $db->prepare($query1);
@@ -132,7 +125,7 @@ function beneishTTM($ppid,$prawdata,$querypre) {
 	}
 	$rowqtr = $resqtr->fetch(PDO::FETCH_ASSOC);
 	if ($rowqtr["fiscal_year"] == $prawdata["fiscal_year"] && $rowqtr["fiscal_quarter"] == $prawdata["fiscal_quarter"]) {
-		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
 		$params = $querypre;
 		array_unshift($params, $ppid);
 		try {
@@ -151,9 +144,8 @@ function beneishTTM($ppid,$prawdata,$querypre) {
 			die("- Line: ".__LINE__." - ".$ex->getMessage());
 		}
 		$rawdata = $tres->fetch(PDO::FETCH_ASSOC);
-		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
 		$params = array();
-		$params[] = $ppid;
 		//DSRI
 		$vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : ($rawdata["TotalReceivablesNet"]/$rawdata["TotalRevenue"]);
 		$vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : ($prawdata["TotalReceivablesNet"]/$prawdata["TotalRevenue"]);
@@ -196,8 +188,10 @@ function beneishTTM($ppid,$prawdata,$querypre) {
 		//BM8
 		$bm8 = -4.84+(0.92*($dsri == 'null'?0:$dsri))+(0.528*($gmi=='null'?0:$gmi))+(0.404*($aqi=='null'?0:$aqi))+(0.892*($sgi=='null'?0:$sgi))+(0.115*($depi=='null'?0:$depi))-(0.172*($sgai=='null'?0:$sgai))+(4.679*($tata=='null'?0:$tata))-(0.327*($lvgi=='null'?0:$lvgi));
 		$params[] = $bm8;            
+                $params = array_merge($params,$params);
 		$query2 = $params;
-		array_shift($query2);
+                array_unshift($params,$ppid);
+
 		try {
 			$res = $db->prepare($query1);
 			$res->execute($params);

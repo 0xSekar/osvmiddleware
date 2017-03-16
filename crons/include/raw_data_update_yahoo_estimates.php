@@ -1,26 +1,11 @@
 <?php
 function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$db = Database::GetInstance();
-	$tables = array("tickers_yahoo_estimates_curr_qtr","tickers_yahoo_estimates_curr_year","tickers_yahoo_estimates_earn_hist", "tickers_yahoo_estimates_next_qtr", "tickers_yahoo_estimates_next_year", "tickers_yahoo_estimates_others");
-
-	//Delete all reports before updating to be sure we do not miss any manual update
-	//as this is a batch process, it will not impact on the UE
-	foreach($tables as $table) {
-		try {
-			$query = "DELETE FROM $table WHERE ticker_id = ".$ticker_id;
-			$res = $db->query($query);
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-
-	}
 
 	//Update yahoo estimates tables
 	//tickers_yahoo_estimates_curr_qtr
-	$query = "INSERT INTO `tickers_yahoo_estimates_curr_qtr` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//26par
+	$query = "INSERT INTO `tickers_yahoo_estimates_curr_qtr` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `report_date`=?, `EarningsAvg`=?, `EarningsNoof`=?, `EarningsLow`=?, `EarningsHigh`=?, `EarningsYAEPS`=?, `RevenueAvg`=?, `RevenueNoof`=?, `RevenueLow`=?, `RevenueHigh`=?, `RevenueYASales`=?, `RevenueSalesGrowth`=?, `EPSTrendCurrentEst`=?, `EPSTrend7daysEst`=?, `EPSTrend30daysEst`=?, `EPSTrend60daysEst`=?, `EPSTrend90daysEst`=?, `EPSRevUp7days`=?, `EPSRevUp30days`=?, `EPSRevDown30days`=?, `EPSRevDown90days`=?, `GrowthEstTicker`=?, `GrowthEstIndustry`=?, `GrowthEstSector`=?, `GrowthEstSP500`=?";
 	$params = array();
-	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->currQtr->endDate)?NULL:(date("Y-m-d", strtotime($rawdata->currQtr->endDate))));
 	$params[] = (!isset($rawdata->currQtr->earningsEstimate->avg->raw) || !is_numeric($rawdata->currQtr->earningsEstimate->avg->raw)?NULL:$rawdata->currQtr->earningsEstimate->avg->raw);
 	$params[] = (!isset($rawdata->currQtr->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->currQtr->earningsEstimate->numberOfAnalysts->raw)?NULL:$rawdata->currQtr->earningsEstimate->numberOfAnalysts->raw);
@@ -46,6 +31,9 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->currQtr->industryTrend->growth->raw) || !is_numeric($rawdata->currQtr->industryTrend->growth->raw)?NULL:($rawdata->currQtr->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->currQtr->sectorTrend->growth->raw) || !is_numeric($rawdata->currQtr->sectorTrend->growth->raw)?NULL:($rawdata->currQtr->sectorTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->currQtr->sp500Trend->growth->raw) || !is_numeric($rawdata->currQtr->sp500Trend->growth->raw)?NULL:($rawdata->currQtr->sp500Trend->growth->raw * 100));
+        $params = array_merge($params,$params);
+        array_unshift($params,$ticker_id);
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -55,9 +43,8 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	}
 
 	//tickers_yahoo_estimates_next_qtr
-	$query = "INSERT INTO `tickers_yahoo_estimates_next_qtr` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//26par
+	$query = "INSERT INTO `tickers_yahoo_estimates_next_qtr` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `report_date`=?, `EarningsAvg`=?, `EarningsNoof`=?, `EarningsLow`=?, `EarningsHigh`=?, `EarningsYAEPS`=?, `RevenueAvg`=?, `RevenueNoof`=?, `RevenueLow`=?, `RevenueHigh`=?, `RevenueYASales`=?, `RevenueSalesGrowth`=?, `EPSTrendCurrentEst`=?, `EPSTrend7daysEst`=?, `EPSTrend30daysEst`=?, `EPSTrend60daysEst`=?, `EPSTrend90daysEst`=?, `EPSRevUp7days`=?, `EPSRevUp30days`=?, `EPSRevDown30days`=?, `EPSRevDown90days`=?, `GrowthEstTicker`=?, `GrowthEstIndustry`=?, `GrowthEstSector`=?, `GrowthEstSP500`=?";
 	$params = array();
-	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->nextQtr->endDate)?NULL:(date("Y-m-d", strtotime($rawdata->nextQtr->endDate))));
 	$params[] = (!isset($rawdata->nextQtr->earningsEstimate->avg->raw) || !is_numeric($rawdata->nextQtr->earningsEstimate->avg->raw)?NULL:$rawdata->nextQtr->earningsEstimate->avg->raw);
 	$params[] = (!isset($rawdata->nextQtr->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->nextQtr->earningsEstimate->numberOfAnalysts->raw)?NULL:$rawdata->nextQtr->earningsEstimate->numberOfAnalysts->raw);
@@ -83,6 +70,9 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->nextQtr->industryTrend->growth->raw) || !is_numeric($rawdata->nextQtr->industryTrend->growth->raw)?NULL:($rawdata->nextQtr->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextQtr->sectorTrend->growth->raw) || !is_numeric($rawdata->nextQtr->sectorTrend->growth->raw)?NULL:($rawdata->nextQtr->sectorTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextQtr->sp500Trend->growth->raw) || !is_numeric($rawdata->nextQtr->sp500Trend->growth->raw)?NULL:($rawdata->nextQtr->sp500Trend->growth->raw * 100));
+        $params = array_merge($params,$params);
+        array_unshift($params,$ticker_id);
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -92,9 +82,8 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	}
 
 	//tickers_yahoo_estimates_curr_year
-	$query = "INSERT INTO `tickers_yahoo_estimates_curr_year` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//26par
+	$query = "INSERT INTO `tickers_yahoo_estimates_curr_year` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `report_date`=?, `EarningsAvg`=?, `EarningsNoof`=?, `EarningsLow`=?, `EarningsHigh`=?, `EarningsYAEPS`=?, `RevenueAvg`=?, `RevenueNoof`=?, `RevenueLow`=?, `RevenueHigh`=?, `RevenueYASales`=?, `RevenueSalesGrowth`=?, `EPSTrendCurrentEst`=?, `EPSTrend7daysEst`=?, `EPSTrend30daysEst`=?, `EPSTrend60daysEst`=?, `EPSTrend90daysEst`=?, `EPSRevUp7days`=?, `EPSRevUp30days`=?, `EPSRevDown30days`=?, `EPSRevDown90days`=?, `GrowthEstTicker`=?, `GrowthEstIndustry`=?, `GrowthEstSector`=?, `GrowthEstSP500`=?";
 	$params = array();
-	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->currYear->endDate)?NULL:(date("Y-m-d", strtotime($rawdata->currYear->endDate))));
 	$params[] = (!isset($rawdata->currYear->earningsEstimate->avg->raw) || !is_numeric($rawdata->currYear->earningsEstimate->avg->raw)?NULL:$rawdata->currYear->earningsEstimate->avg->raw);
 	$params[] = (!isset($rawdata->currYear->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->currYear->earningsEstimate->numberOfAnalysts->raw)?NULL:$rawdata->currYear->earningsEstimate->numberOfAnalysts->raw);
@@ -120,6 +109,9 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->currYear->industryTrend->growth->raw) || !is_numeric($rawdata->currYear->industryTrend->growth->raw)?NULL:($rawdata->currYear->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->currYear->sectorTrend->growth->raw) || !is_numeric($rawdata->currYear->sectorTrend->growth->raw)?NULL:($rawdata->currYear->sectorTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->currYear->sp500Trend->growth->raw) || !is_numeric($rawdata->currYear->sp500Trend->growth->raw)?NULL:($rawdata->currYear->sp500Trend->growth->raw * 100));
+        $params = array_merge($params,$params);
+        array_unshift($params,$ticker_id);
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -129,9 +121,8 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	}
 
 	//tickers_yahoo_estimates_next_year
-	$query = "INSERT INTO `tickers_yahoo_estimates_next_year` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//26par
+	$query = "INSERT INTO `tickers_yahoo_estimates_next_year` (`ticker_id`, `report_date`, `EarningsAvg`, `EarningsNoof`, `EarningsLow`, `EarningsHigh`, `EarningsYAEPS`, `RevenueAvg`, `RevenueNoof`, `RevenueLow`, `RevenueHigh`, `RevenueYASales`, `RevenueSalesGrowth`, `EPSTrendCurrentEst`, `EPSTrend7daysEst`, `EPSTrend30daysEst`, `EPSTrend60daysEst`, `EPSTrend90daysEst`, `EPSRevUp7days`, `EPSRevUp30days`, `EPSRevDown30days`, `EPSRevDown90days`, `GrowthEstTicker`, `GrowthEstIndustry`, `GrowthEstSector`, `GrowthEstSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `report_date`=?, `EarningsAvg`=?, `EarningsNoof`=?, `EarningsLow`=?, `EarningsHigh`=?, `EarningsYAEPS`=?, `RevenueAvg`=?, `RevenueNoof`=?, `RevenueLow`=?, `RevenueHigh`=?, `RevenueYASales`=?, `RevenueSalesGrowth`=?, `EPSTrendCurrentEst`=?, `EPSTrend7daysEst`=?, `EPSTrend30daysEst`=?, `EPSTrend60daysEst`=?, `EPSTrend90daysEst`=?, `EPSRevUp7days`=?, `EPSRevUp30days`=?, `EPSRevDown30days`=?, `EPSRevDown90days`=?, `GrowthEstTicker`=?, `GrowthEstIndustry`=?, `GrowthEstSector`=?, `GrowthEstSP500`=?";
 	$params = array();
-	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->nextYear->endDate)?NULL:(date("Y-m-d", strtotime($rawdata->nextYear->endDate))));
 	$params[] = (!isset($rawdata->nextYear->earningsEstimate->avg->raw) || !is_numeric($rawdata->nextYear->earningsEstimate->avg->raw)?NULL:$rawdata->nextYear->earningsEstimate->avg->raw);
 	$params[] = (!isset($rawdata->nextYear->earningsEstimate->numberOfAnalysts->raw) || !is_numeric($rawdata->nextYear->earningsEstimate->numberOfAnalysts->raw)?NULL:$rawdata->nextYear->earningsEstimate->numberOfAnalysts->raw);
@@ -157,6 +148,9 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->nextYear->industryTrend->growth->raw) || !is_numeric($rawdata->nextYear->industryTrend->growth->raw)?NULL:($rawdata->nextYear->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextYear->sectorTrend->growth->raw) || !is_numeric($rawdata->nextYear->sectorTrend->growth->raw)?NULL:($rawdata->nextYear->sectorTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->nextYear->sp500Trend->growth->raw) || !is_numeric($rawdata->nextYear->sp500Trend->growth->raw)?NULL:($rawdata->nextYear->sp500Trend->growth->raw * 100));
+        $params = array_merge($params,$params);
+        array_unshift($params,$ticker_id);
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -166,9 +160,8 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	}
 
 	//tickers_yahoo_estimates_earn_hist
-	$query = "INSERT INTO `tickers_yahoo_estimates_earn_hist` (`ticker_id` ,`date1` ,`date2` ,`date3` ,`date4` ,`EarnHistEPSEst1` ,`EarnHistEPSEst2` ,`EarnHistEPSEst3` ,`EarnHistEPSEst4` ,`EarnHistEPSActual1` ,`EarnHistEPSActual2` ,`EarnHistEPSActual3` ,`EarnHistEPSActual4` ,`EarnHistDifference1` ,`EarnHistDifference2` ,`EarnHistDifference3` ,`EarnHistDifference4` ,`EarnHistSurprise1` ,`EarnHistSurprise2` ,`EarnHistSurprise3` ,`EarnHistSurprise4`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//21par
+	$query = "INSERT INTO `tickers_yahoo_estimates_earn_hist` (`ticker_id` ,`date1` ,`date2` ,`date3` ,`date4` ,`EarnHistEPSEst1` ,`EarnHistEPSEst2` ,`EarnHistEPSEst3` ,`EarnHistEPSEst4` ,`EarnHistEPSActual1` ,`EarnHistEPSActual2` ,`EarnHistEPSActual3` ,`EarnHistEPSActual4` ,`EarnHistDifference1` ,`EarnHistDifference2` ,`EarnHistDifference3` ,`EarnHistDifference4` ,`EarnHistSurprise1` ,`EarnHistSurprise2` ,`EarnHistSurprise3` ,`EarnHistSurprise4`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `date1`=? ,`date2`=? ,`date3`=? ,`date4`=? ,`EarnHistEPSEst1`=? ,`EarnHistEPSEst2`=? ,`EarnHistEPSEst3`=? ,`EarnHistEPSEst4`=? ,`EarnHistEPSActual1`=? ,`EarnHistEPSActual2`=? ,`EarnHistEPSActual3`=? ,`EarnHistEPSActual4`=? ,`EarnHistDifference1`=? ,`EarnHistDifference2`=? ,`EarnHistDifference3`=? ,`EarnHistDifference4`=? ,`EarnHistSurprise1`=? ,`EarnHistSurprise2`=? ,`EarnHistSurprise3`=? ,`EarnHistSurprise4`=?";
 	$params = array();
-	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->earningsHistory->minus4q->quarter->fmt)?NULL:($rawdata->earningsHistory->minus4q->quarter->fmt ));
 	$params[] = (!isset($rawdata->earningsHistory->minus3q->quarter->fmt)?NULL:($rawdata->earningsHistory->minus3q->quarter->fmt ));
 	$params[] = (!isset($rawdata->earningsHistory->minus2q->quarter->fmt)?NULL:($rawdata->earningsHistory->minus2q->quarter->fmt ));
@@ -189,6 +182,9 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->earningsHistory->minus3q->surprisePercent->raw) || !is_numeric($rawdata->earningsHistory->minus3q->surprisePercent->raw)?NULL:($rawdata->earningsHistory->minus3q->surprisePercent->raw * 100));
 	$params[] = (!isset($rawdata->earningsHistory->minus2q->surprisePercent->raw) || !is_numeric($rawdata->earningsHistory->minus2q->surprisePercent->raw)?NULL:($rawdata->earningsHistory->minus2q->surprisePercent->raw * 100));
 	$params[] = (!isset($rawdata->earningsHistory->minus1q->surprisePercent->raw) || !is_numeric($rawdata->earningsHistory->minus1q->surprisePercent->raw)?NULL:($rawdata->earningsHistory->minus1q->surprisePercent->raw * 100));
+        $params = array_merge($params,$params);
+        array_unshift($params,$ticker_id);
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);
@@ -198,9 +194,8 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	}
 
 	//tickers_yahoo_estimates_others
-	$query = "INSERT INTO `tickers_yahoo_estimates_others` (`ticker_id` ,`GrowthEstPast5YearTicker` ,`GrowthEstPast5YearIndustry` ,`GrowthEstPast5YearSector` ,`GrowthEstPast5YearSP500` ,`GrowthEstNext5YearTicker` ,`GrowthEstNext5YearIndustry` ,`GrowthEstNext5YearSector` ,`GrowthEstNext5YearSP500` ,`GrowthEstPriceEarnTicker` ,`GrowthEstPriceEarnIndustry` ,`GrowthEstPriceEarnSector` ,`GrowthEstPriceEarnSP500` ,`GrowthEstPEGRatioTicker` ,`GrowthEstPEGRatioIndustry` ,`GrowthEstPEGRatioSector` ,`GrowthEstPEGRatioSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//17par
+	$query = "INSERT INTO `tickers_yahoo_estimates_others` (`ticker_id` ,`GrowthEstPast5YearTicker` ,`GrowthEstPast5YearIndustry` ,`GrowthEstPast5YearSector` ,`GrowthEstPast5YearSP500` ,`GrowthEstNext5YearTicker` ,`GrowthEstNext5YearIndustry` ,`GrowthEstNext5YearSector` ,`GrowthEstNext5YearSP500` ,`GrowthEstPriceEarnTicker` ,`GrowthEstPriceEarnIndustry` ,`GrowthEstPriceEarnSector` ,`GrowthEstPriceEarnSP500` ,`GrowthEstPEGRatioTicker` ,`GrowthEstPEGRatioIndustry` ,`GrowthEstPEGRatioSector` ,`GrowthEstPEGRatioSP500`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `GrowthEstPast5YearTicker`=? ,`GrowthEstPast5YearIndustry`=? ,`GrowthEstPast5YearSector`=? ,`GrowthEstPast5YearSP500`=? ,`GrowthEstNext5YearTicker`=? ,`GrowthEstNext5YearIndustry`=? ,`GrowthEstNext5YearSector`=? ,`GrowthEstNext5YearSP500`=? ,`GrowthEstPriceEarnTicker`=? ,`GrowthEstPriceEarnIndustry`=? ,`GrowthEstPriceEarnSector`=? ,`GrowthEstPriceEarnSP500`=? ,`GrowthEstPEGRatioTicker`=? ,`GrowthEstPEGRatioIndustry`=? ,`GrowthEstPEGRatioSector`=? ,`GrowthEstPEGRatioSP500`=?";
 	$params = array();
-	$params[] = $ticker_id;
 	$params[] = (!isset($rawdata->minus5Year->growth->raw) || !is_numeric($rawdata->minus5Year->growth->raw)?NULL:($rawdata->minus5Year->growth->raw * 100));
 	$params[] = (!isset($rawdata->minus5Year->industryTrend->growth->raw) || !is_numeric($rawdata->minus5Year->industryTrend->growth->raw)?NULL:($rawdata->minus5Year->industryTrend->growth->raw * 100));
 	$params[] = (!isset($rawdata->minus5Year->sectorTrend->growth->raw) || !is_numeric($rawdata->minus5Year->sectorTrend->growth->raw)?NULL:($rawdata->minus5Year->sectorTrend->growth->raw * 100));
@@ -217,6 +212,9 @@ function update_raw_data_yahoo_estimates($ticker_id, $rawdata) {
 	$params[] = (!isset($rawdata->industryPegRatio->raw) || !is_numeric($rawdata->industryPegRatio->raw)?NULL:$rawdata->industryPegRatio->raw);
 	$params[] = (!isset($rawdata->sectorPegRatio->raw) || !is_numeric($rawdata->sectorPegRatio->raw)?NULL:$rawdata->sectorPegRatio->raw);
 	$params[] = (!isset($rawdata->sp500PegRatio->raw) || !is_numeric($rawdata->sp500PegRatio->raw)?NULL:$rawdata->sp500PegRatio->raw);
+        $params = array_merge($params,$params);
+        array_unshift($params,$ticker_id);
+
 	try {
 		$res = $db->prepare($query);
 		$res->execute($params);

@@ -2,7 +2,7 @@
 function update_ratings() {
 	$db = Database::GetInstance();
 	try {
-		$res = $db->query("delete from reports_ratings");
+		$res = $db->query("delete a from reports_ratings a left join reports_header b on a.report_id = b.id where b.id IS null");
 	} catch(PDOException $ex) {
 		echo "\nDatabase Error"; //user message
 		die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -472,9 +472,8 @@ function update_ratings() {
 
 
 			//Save data
-			$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//20par
+			$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `Q1`=?, `Q2`=?, `Q3`=?, `QT`=?, `G1`=?, `G2`=?, `G3`=?, `G4`=?, `GT`=?, `V1`=?, `V2`=?, `V3`=?, `V4`=?, `VT`=?, `AS`=?, `AS_grade`=?, `Q_grade`=?, `V_grade`=?, `G_grade`=?";
 			$params = array();
-			$params[] = $id;
 			$params[] = $values[$id]["QPW1"];
 			$params[] = $values[$id]["QPW2"];
 			$params[] = $values[$id]["QPW3"];
@@ -494,6 +493,9 @@ function update_ratings() {
 			$params[] = $values[$id]["QG"];
 			$params[] = $values[$id]["VG"];
 			$params[] = $values[$id]["GG"];
+                        $params = array_merge($params,$params);
+                        array_unshift($params,$id);
+
 			try {
 				$save = $db->prepare($query);
 				$save->execute($params);

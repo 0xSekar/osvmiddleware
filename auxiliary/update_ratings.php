@@ -5,7 +5,7 @@ include_once('../db/db.php');
 $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
-$query = "delete from reports_ratings";
+$query = "delete a from reports_ratings a left join reports_header b on a.report_id = b.id where b.id IS null";
 try {
 	$res = $db->exec($query);
 } catch(PDOException $ex) {
@@ -477,9 +477,8 @@ while($rowy = $resy->fetch(PDO::FETCH_ASSOC)) {
 			$values[$id]["VG"] = 'F';
 
 		//Save data
-		$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
+		$query = "INSERT INTO `reports_ratings` (`report_id`, `Q1`, `Q2`, `Q3`, `QT`, `G1`, `G2`, `G3`, `G4`, `GT`, `V1`, `V2`, `V3`, `V4`, `VT`, `AS`, `AS_grade`, `Q_grade`, `V_grade`, `G_grade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `Q1`=?, `Q2`=?, `Q3`=?, `QT`=?, `G1`=?, `G2`=?, `G3`=?, `G4`=?, `GT`=?, `V1`=?, `V2`=?, `V3`=?, `V4`=?, `VT`=?, `AS`=?, `AS_grade`=?, `Q_grade`=?, `V_grade`=?, `G_grade`=?"; 
 		$params = array();
-		$params[] = $id;
 		$params[] = $values[$id]["QPW1"];
 		$params[] = $values[$id]["QPW2"];
 		$params[] = $values[$id]["QPW3"];
@@ -499,6 +498,9 @@ while($rowy = $resy->fetch(PDO::FETCH_ASSOC)) {
 		$params[] = $values[$id]["QG"];
 		$params[] = $values[$id]["VG"];
 		$params[] = $values[$id]["GG"];
+                $params = array_merge($params,$params);
+                array_unshift($params,$id);
+
 		try {
 			$save = $db->prepare($query);
 			$save->execute($params);

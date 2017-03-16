@@ -5,14 +5,7 @@ include_once('../db/db.php');
 $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
-$query = "delete from reports_pio_checks";
-try {
-	$res = $db->exec($query);
-} catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("- Line: ".__LINE__." - ".$ex->getMessage());
-}
-$query = "DELETE from ttm_pio_checks";
+$query = "delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null";
 try {
 	$res = $db->exec($query);
 } catch(PDOException $ex) {
@@ -54,9 +47,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	}
 	$rawdata = $res2 ->fetch(PDO::FETCH_ASSOC);
 
-	$query1 = "INSERT INTO `reports_pio_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	$query1 = "INSERT INTO `reports_pio_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `pio1`=?, `pio2`=?, `pio3`=?, `pio4`=?, `pio5`=?, `pio6`=?, `pio7`=?, `pio8`=?, `pio9`=?, `pioTotal`=?";
 	$params = array();
-	$params[] = $row["id"];
 	//Pio 1
 	$value = (!is_null($rawdata["IncomebeforeExtraordinaryItems"]) && $rawdata["IncomebeforeExtraordinaryItems"] >= 0 ? 1 : 0);
 	$total += $value;
@@ -147,9 +139,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		$params[] = ($value);
 	}
 	$params[] = ($total);
-
-	$query2 = $params;
-	array_shift($query2);
+        $params = array_merge($params,$params);
+        $query2 = $params;
+        array_unshift($params,$row["id"]);
 
 	try {
 		$res1 = $db->prepare($query1);
@@ -178,7 +170,7 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
 	}
 	$rowqtr = $resqtr->fetch(PDO::FETCH_ASSOC);
 	if ($rowqtr["fiscal_year"] == $prawdata["fiscal_year"] && $rowqtr["fiscal_quarter"] == $prawdata["fiscal_quarter"]) {
-		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `pio1`=?, `pio2`=?, `pio3`=?, `pio4`=?, `pio5`=?, `pio6`=?, `pio7`=?, `pio8`=?, `pio9`=?, `pioTotal`=?";
 		$params = $querypre;
 		array_unshift($params, $ppid);
 		try {
@@ -213,8 +205,7 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
                         $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
                 }
 
-		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		$params[] = $ppid;
+		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `pio1`=?, `pio2`=?, `pio3`=?, `pio4`=?, `pio5`=?, `pio6`=?, `pio7`=?, `pio8`=?, `pio9`=?, `pioTotal`=?";
 		//Pio 1
 		$value = (!is_null($trawdata["IncomebeforeExtraordinaryItems"]) && $trawdata["IncomebeforeExtraordinaryItems"] >= 0 ? 1 : 0);
 		$total += $value;
@@ -271,8 +262,10 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
 		$params[] = ($value);
 		$params[] = ($total);
 
-		$query = $params;
-		array_shift($query);
+                $params = array_merge($params,$params);
+                $query = $params;
+                array_unshift($params,$ppid);
+
 		try {
 			$res = $db->prepare($query1);
 			$res->execute($params);

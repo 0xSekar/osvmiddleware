@@ -3,30 +3,12 @@ function update_pio_checks($ti = null) {
 	$db = Database::GetInstance();
 	if (is_null($ti)) {
 		try {
-			$res = $db->query("delete from reports_pio_checks");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
-			$res = $db->query("DELETE from ttm_pio_checks");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
 			$res = $db->query("SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year");
 		} catch(PDOException $ex) {
 			echo "\nDatabase Error"; //user message
 			die("Line: ".__LINE__." - ".$ex->getMessage());
 		}
 	} else {
-		try {
-			$res = $db->query("DELETE from ttm_pio_checks where ticker_id = $ti");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
 		try {
 			$res = $db->query("SELECT * FROM reports_header where report_type='ANN' and ticker_id = $ti order by ticker_id, fiscal_year");
 		} catch(PDOException $ex) {
@@ -63,9 +45,8 @@ function update_pio_checks($ti = null) {
 			die("Line: ".__LINE__." - ".$ex->getMessage());
 		}                
 		$rawdata = $res2->fetch(PDO::FETCH_ASSOC);
-		$query1 = "INSERT INTO `reports_pio_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //11
+		$query1 = "INSERT INTO `reports_pio_checks` (`report_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `pio1`=?, `pio2`=?, `pio3`=?, `pio4`=?, `pio5`=?, `pio6`=?, `pio7`=?, `pio8`=?, `pio9`=?, `pioTotal`=?"; 
 		$params = array();
-		$params[] = $row["id"];
 		//Pio 1
 		$value = (!is_null($rawdata["IncomebeforeExtraordinaryItems"]) && $rawdata["IncomebeforeExtraordinaryItems"] >= 0 ? 1 : 0);
 		$total += $value;
@@ -156,8 +137,10 @@ function update_pio_checks($ti = null) {
 			$params[] = ($value);
 		}
 		$params[] = ($total);
+	        $params = array_merge($params,$params);
 		$query2 = $params;
-		array_shift($query2);
+        	array_unshift($params,$row["id"]);
+
 		try {
 			$res1 = $db->prepare($query1);
 			$res1->execute($params);
@@ -182,42 +165,12 @@ function update_altman_checks($ti = null) {
 	$db = Database::GetInstance();
 	if (is_null($ti)) {
 		try {
-			$res = $db->query("delete from reports_alt_checks");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
-			$res = $db->query("DELETE from ttm_alt_checks");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
-			$res = $db->query("DELETE from mrq_alt_checks");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
 			$res = $db->query("SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year");
 		} catch(PDOException $ex) {
 			echo "\nDatabase Error"; //user message
 			die("Line: ".__LINE__." - ".$ex->getMessage());
 		}
 	} else {
-		try {
-			$res = $db->query("DELETE from ttm_alt_checks where ticker_id = $ti");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
-			$res = $db->query("DELETE from mrq_alt_checks where ticker_id = $ti");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
 		try {
 			$res = $db->query("SELECT * FROM reports_header where report_type='ANN' and ticker_id = $ti order by ticker_id, fiscal_year");
 		} catch(PDOException $ex) {
@@ -265,9 +218,8 @@ function update_altman_checks($ti = null) {
 			$rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
 		}
 
-		$query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarketValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//15
+		$query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarketValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `MarketValueofEquity`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X4`=?, `X5`=?, `AltmanZNormal`=?, `AltmanZRevised`=?";
 		$params = array();
-		$params[] = ($rawdata["id"] =='null' ? null:$rawdata["id"]);
 		$params[] = ($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"]);
 		$params[] = ($rawdata["TotalAssets"] =='null' ? null:$rawdata["TotalAssets"]);
 		$params[] = ($rawdata["TotalLiabilities"] =='null' ? null:$rawdata["TotalLiabilities"]);
@@ -288,6 +240,10 @@ function update_altman_checks($ti = null) {
 		$params[] = $x5;
 		$params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null' && $x5 !== 'null') ? (1.2*$x1+1.4*$x2+3.3*$x3+0.6*$x4+0.999*$x5) : null);
 		$params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null') ? (6.56*$x1+3.26*$x2+6.72*$x3+1.05*$x4) : null);
+		$paramid = ($rawdata["id"] =='null' ? null:$rawdata["id"]);
+                $params = array_merge($params,$params);
+                array_unshift($params,$paramid);
+
 		try {
 			$res1 = $db->prepare($query1);
 			$res1->execute($params);
@@ -311,30 +267,12 @@ function update_beneish_checks($ti = null) {
 	$db = Database::GetInstance();
 	if (is_null($ti)) {
 		try {
-			$res = $db->query("delete from reports_beneish_checks");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
-			$res = $db->query("DELETE from ttm_beneish_checks");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
-		try {
 			$res = $db->query("SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year");
 		} catch(PDOException $ex) {
 			echo "\nDatabase Error"; //user message
 			die("Line: ".__LINE__." - ".$ex->getMessage());
 		}                                                                                                                   
 	} else {
-		try {
-			$res = $db->query("DELETE from ttm_beneish_checks where ticker_id = $ti");
-		} catch(PDOException $ex) {
-			echo "\nDatabase Error"; //user message
-			die("Line: ".__LINE__." - ".$ex->getMessage());
-		}
 		try {
 			$res = $db->query("SELECT * FROM reports_header where report_type='ANN' and ticker_id = $ti order by ticker_id, fiscal_year");
 		} catch(PDOException $ex) {
@@ -374,9 +312,8 @@ function update_beneish_checks($ti = null) {
 			beneishTTM($ppid,$prawdata,$querypre);
 		}
 
-		$query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //11
+		$query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICAT EKEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
 		$params = array();
-		$params[] = $row["id"];
 		//DSRI
 		$vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : ($rawdata["TotalReceivablesNet"]/$rawdata["TotalRevenue"]);
 		$vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : ($prawdata["TotalReceivablesNet"]/$prawdata["TotalRevenue"]);
@@ -419,8 +356,9 @@ function update_beneish_checks($ti = null) {
 		//BM8
 		$bm8 = -4.84+(0.92*($dsri == 'null'?0:$dsri))+(0.528*($gmi=='null'?0:$gmi))+(0.404*($aqi=='null'?0:$aqi))+(0.892*($sgi=='null'?0:$sgi))+(0.115*($depi=='null'?0:$depi))-(0.172*($sgai=='null'?0:$sgai))+(4.679*($tata=='null'?0:$tata))-(0.327*($lvgi=='null'?0:$lvgi));
 		$params[] = $bm8;
-		$query2 = $params;
-		array_shift($query2);
+                $params = array_merge($params,$params);
+                $query2 = $params;
+                array_unshift($params,$row["id"]);
 
 		$first = false;
 		//Skip calculations for first report of each ticket
@@ -452,7 +390,7 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
 	}
 	$rowqtr = $resqtr->fetch(PDO::FETCH_ASSOC);
 	if ($rowqtr["fiscal_year"] == $prawdata["fiscal_year"] && $rowqtr["fiscal_quarter"] == $prawdata["fiscal_quarter"]) {
-		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `pio1`=?, `pio2`=?, `pio3`=?, `pio4`=?, `pio5`=?, `pio6`=?, `pio7`=?, `pio8`=?, `pio9`=?, `pioTotal`=?";
 		$params = $querypre;
 		array_unshift($params, $ppid);
 		try {
@@ -484,9 +422,8 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
 			$pricerow  = $rquote->fetch(PDO::FETCH_ASSOC);
 			$trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
 		}
-		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		$query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `pio1`=?, `pio2`=?, `pio3`=?, `pio4`=?, `pio5`=?, `pio6`=?, `pio7`=?, `pio8`=?, `pio9`=?, `pioTotal`=?";
 		$params = array();
-		$params[] = $ppid;
 		//Pio 1
 		$value = (!is_null($trawdata["IncomebeforeExtraordinaryItems"]) && $trawdata["IncomebeforeExtraordinaryItems"] >= 0 ? 1 : 0);
 		$total += $value;
@@ -542,8 +479,10 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
 		$total += $value;
 		$params[] = ($value);
 		$params[] = ($total);
-		$query = $params;
-		array_shift($query);
+                $params = array_merge($params,$params);
+                $query2 = $params;
+                array_unshift($params,$ppid);
+
 		try {
 			$res1 = $db->prepare($query1);
 			$res1->execute($params);
@@ -577,9 +516,8 @@ function altmanTTM($ppid) {
 		$pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
 		$trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
 	}
-	$query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//12
+	$query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `SharesOutstandingDiluted`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X5`=?";
 	$params = array();
-	$params[] = $ppid;
 	$params[] = ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"]);
 	$params[] = ($trawdata["TotalAssets"] =='null' ? null:$trawdata["TotalAssets"]);
 	$params[] = ($trawdata["TotalLiabilities"] =='null' ? null:$trawdata["TotalLiabilities"]);
@@ -595,6 +533,9 @@ function altmanTTM($ppid) {
 	$params[] = $x2;
 	$params[] = $x3;
 	$params[] = $x5;
+        $params = array_merge($params,$params);
+        array_unshift($params,$ppid);
+
 	try {
 		$res1 = $db->prepare($query1);
 		$res1->execute($params);
@@ -613,9 +554,8 @@ function altmanTTM($ppid) {
 	}
 	$trawdata = $tres->fetch(PDO::FETCH_ASSOC);
 	array_walk_recursive($trawdata, 'nullValues');
-	$query1 = "INSERT INTO `mrq_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//11
+	$query1 = "INSERT INTO `mrq_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X5`=?";
 	$params = array();
-	$params[] = $ppid;
 	$params[] = ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"]);
 	$params[] = ($trawdata["TotalAssets"] =='null' ? null:$trawdata["TotalAssets"]);
 	$params[] = ($trawdata["TotalLiabilities"] =='null' ? null:$trawdata["TotalLiabilities"]);
@@ -630,6 +570,9 @@ function altmanTTM($ppid) {
 	$params[] = $x2;
 	$params[] = $x3;
 	$params[] = $x5;
+        $params = array_merge($params,$params);
+        array_unshift($params,$ppid);
+
 	try {
 		$res1 = $db->prepare($query1);
 		$res1->execute($params);
@@ -650,7 +593,7 @@ function beneishTTM($ppid,$prawdata,$querypre) {
 	}
 	$rowqtr = $resqtr->fetch(PDO::FETCH_ASSOC);
 	if ($rowqtr["fiscal_year"] == $prawdata["fiscal_year"] && $rowqtr["fiscal_quarter"] == $prawdata["fiscal_quarter"]) {
-		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
 		$params = $querypre;
 		array_unshift($params, $ppid);
 		try {
@@ -669,9 +612,8 @@ function beneishTTM($ppid,$prawdata,$querypre) {
 			die("Line: ".__LINE__." - ".$ex->getMessage());
 		}
 		$rawdata = $tres->fetch(PDO::FETCH_ASSOC);
-		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//11
+		$query1 = "INSERT INTO `ttm_beneish_checks` (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
 		$params = array();
-		$params[] = $ppid;
 		//DSRI
 		$vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : ($rawdata["TotalReceivablesNet"]/$rawdata["TotalRevenue"]);
 		$vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : ($prawdata["TotalReceivablesNet"]/$prawdata["TotalRevenue"]);
@@ -714,8 +656,10 @@ function beneishTTM($ppid,$prawdata,$querypre) {
 		//BM8
 		$bm8 = -4.84+(0.92*($dsri == 'null'?0:$dsri))+(0.528*($gmi=='null'?0:$gmi))+(0.404*($aqi=='null'?0:$aqi))+(0.892*($sgi=='null'?0:$sgi))+(0.115*($depi=='null'?0:$depi))-(0.172*($sgai=='null'?0:$sgai))+(4.679*($tata=='null'?0:$tata))-(0.327*($lvgi=='null'?0:$lvgi));
 		$params[] = $bm8;
+	        $params = array_merge($params,$params);
 		$query2 = $params;
-		array_shift($query2);
+        	array_unshift($params,$ppid);
+
 		try {
 			$res1 = $db->prepare($query1);
 			$res1->execute($params);

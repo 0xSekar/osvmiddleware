@@ -5,7 +5,7 @@ $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
 
-$query = "DELETE FROM reports_financialscustom";
+$query = "delete a from reports_financialscustom a left join reports_header b on a.report_id = b.id where b.id IS null";
 try {
 	$res = $db->exec($query);
 } catch(PDOException $ex) {
@@ -23,9 +23,8 @@ try {
 		$res2 = $db->query($query);
 
 		$rawdata = $res2->fetch(PDO::FETCH_ASSOC);
-		$query = "INSERT INTO `reports_financialscustom` (`report_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";//19
+		$query = "INSERT INTO `reports_financialscustom` (`report_id`, `COGSPercent`, `GrossMarginPercent`, `SGAPercent`, `RDPercent`, `DepreciationAmortizationPercent`, `EBITDAPercent`, `OperatingMarginPercent`, `EBITPercent`, `TaxRatePercent`, `IncomeAfterTaxes`, `NetMarginPercent`, `DividendsPerShare`, `ShortTermDebtAndCurrentPortion`, `TotalLongTermDebtAndNotesPayable`, `NetChangeLongTermDebt`, `CapEx`, `FreeCashFlow`, `OwnerEarningsFCF`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `COGSPercent`=?, `GrossMarginPercent`=?, `SGAPercent`=?, `RDPercent`=?, `DepreciationAmortizationPercent`=?, `EBITDAPercent`=?, `OperatingMarginPercent`=?, `EBITPercent`=?, `TaxRatePercent`=?, `IncomeAfterTaxes`=?, `NetMarginPercent`=?, `DividendsPerShare`=?, `ShortTermDebtAndCurrentPortion`=?, `TotalLongTermDebtAndNotesPayable`=?, `NetChangeLongTermDebt`=?, `CapEx`=?, `FreeCashFlow`=?, `OwnerEarningsFCF`=?";
 		$params = array();
-		$params[] = $row['id'];
 		$params[] = ((is_null($rawdata["CostofRevenue"]) || is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"]==0)?null:($rawdata["CostofRevenue"]/$rawdata["TotalRevenue"]));
 		$params[] = ((is_null($rawdata["GrossProfit"]) || is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"]==0)?null:($rawdata["GrossProfit"]/$rawdata["TotalRevenue"]));
 		$params[] = ((is_null($rawdata["SellingGeneralAdministrativeExpenses"]) ||  is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"]==0)?null:($rawdata["SellingGeneralAdministrativeExpenses"]/$rawdata["TotalRevenue"]));
@@ -44,6 +43,8 @@ try {
 		$params[] = ((is_null($rawdata["CapitalExpenditures"]))?null:(-$rawdata["CapitalExpenditures"]));
 		$params[] = ((is_null($rawdata["CashfromOperatingActivities"]) && is_null($rawdata["CapitalExpenditures"]))?null:($rawdata["CashfromOperatingActivities"]+$rawdata["CapitalExpenditures"]));
 		$params[] = ((is_null($rawdata["CFNetIncome"]) && is_null($rawdata["CFDepreciationAmortization"]) && is_null($rawdata["EmployeeCompensation"]) && is_null($rawdata["AdjustmentforSpecialCharges"]) && is_null($rawdata["DeferredIncomeTaxes"]) && is_null($rawdata["CapitalExpenditures"]) && is_null($rawdata["ChangeinCurrentAssets"]) && is_null($rawdata["ChangeinCurrentLiabilities"]))?null:($rawdata["CFNetIncome"]+$rawdata["CFDepreciationAmortization"]+$rawdata["EmployeeCompensation"]+$rawdata["AdjustmentforSpecialCharges"]+$rawdata["DeferredIncomeTaxes"]+$rawdata["CapitalExpenditures"]+($rawdata["ChangeinCurrentAssets"]+$rawdata["ChangeinCurrentLiabilities"])));
+                $params = array_merge($params,$params);
+                array_unshift($params,$row['id']);
 
 		$res2 = $db->prepare($query);
 		$res2->execute($params);

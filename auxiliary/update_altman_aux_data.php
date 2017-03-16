@@ -18,7 +18,7 @@ ob_implicit_flush(true);             // output stuff directly
 $count2 = 0;
 echo "Updating Tickers...\n";
 try {
-	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id");
+	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE ORDER BY ticker");
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
 	die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -26,14 +26,6 @@ try {
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$count2++;
 	echo "Updating ".$row["ticker"]." Quote...";
-
-	$query = "delete from tickers_alt_aux where ticker_id = " . $row["id"];
-        try {
-                $db->exec($query);
-        } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
-                die("- Line: ".__LINE__." - ".$ex->getMessage());
-        }
 
 	$query1 = "SELECT *,
 		(CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL OR X5 IS NULL)
@@ -65,9 +57,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		die("- Line: ".__LINE__." - ".$ex->getMessage());
 	}
 
-	$query = "INSERT INTO  `tickers_alt_aux` (`ticker_id` ,`mrq_MarketValueofEquity` ,`mrq_X4` ,`mrq_AltmanZNormal` ,`mrq_AltmanZRevised` ,`ttm_MarketValueofEquity`, `ttm_X4` ,`ttm_AltmanZNormal` ,`ttm_AltmanZRevised`) VALUES (?,?,?,?,?,?,?,?,?)";
+	$query = "INSERT INTO  `tickers_alt_aux` (`ticker_id` ,`mrq_MarketValueofEquity` ,`mrq_X4` ,`mrq_AltmanZNormal` ,`mrq_AltmanZRevised` ,`ttm_MarketValueofEquity`, `ttm_X4` ,`ttm_AltmanZNormal` ,`ttm_AltmanZRevised`) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `mrq_MarketValueofEquity`=? ,`mrq_X4`=? ,`mrq_AltmanZNormal`=? ,`mrq_AltmanZRevised`=? ,`ttm_MarketValueofEquity`=?, `ttm_X4`=? ,`ttm_AltmanZNormal`=? ,`ttm_AltmanZRevised`=?";
 	$params = array();
-	$params[] = $row["id"];
 
 	if(is_null($row1)) {
 		$params[] = null;
@@ -91,6 +82,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		$params[] = $row2["AltmanZNormal"];
 		$params[] = $row2["AltmanZRevised"];
 	}
+	$params = array_merge($params,$params);
+	array_unshift($params,$row["id"]);
+
 	try {
 		$resf = $db->prepare($query);
 		$resf->execute($params);

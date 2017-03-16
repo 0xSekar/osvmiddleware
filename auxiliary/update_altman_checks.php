@@ -5,27 +5,11 @@ include_once('../db/db.php');
 $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
-
-$query = "delete from reports_alt_checks";
 try {
-	$db->exec($query);
+	$res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
-	die("- Line: ".__LINE__." - ".$ex->getMessage());
-}
-$query = "DELETE from ttm_alt_checks";
-try {
-	$db->exec($query);
-} catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("- Line: ".__LINE__." - ".$ex->getMessage());
-}
-$query = "DELETE from mrq_alt_checks";
-try {
-	$db->exec($query);
-} catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("- Line: ".__LINE__." - ".$ex->getMessage());
+	die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 
 $query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
@@ -72,9 +56,8 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		$rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
 	}
 
-	$query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarketValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	$query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarketValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `MarketValueofEquity`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X4`=?, `X5`=?, `AltmanZNormal`=?, `AltmanZRevised`=?";
 	$params = array();
-	$params[] = $rawdata["id"];
 	$params[] = ($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"]);
 	$params[] = $rawdata["TotalAssets"];
 	$params[] = $rawdata["TotalLiabilities"];
@@ -94,6 +77,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 	$params[] = $x5;
 	$params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null' && $x5 !== 'null') ? (1.2*$x1+1.4*$x2+3.3*$x3+0.6*$x4+0.999*$x5) : 'null');
 	$params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null') ? (6.56*$x1+3.26*$x2+6.72*$x3+1.05*$x4) : 'null');
+	$params = array_merge($params,$params);
+	array_unshift($params,$rawdata["id"]);
+
 	try {
 		$res1 = $db->prepare($query1);
 		$res1->execute($params);
@@ -122,21 +108,20 @@ function altmanTTM($ppid) {
 	$trawdata = $tres->fetch(PDO::FETCH_ASSOC);
 	array_walk_recursive($trawdata, 'nullValues');
 	$qquote = "SELECT * FROM tickers_yahoo_quotes_2 WHERE ticker_id = '$ppid'";
-        try {
-                $rquote = $db->query($qquote);
-        } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
-                die("Line: ".__LINE__." - ".$ex->getMessage());
-        }
+	try {
+		$rquote = $db->query($qquote);
+	} catch(PDOException $ex) {
+		echo "\nDatabase Error"; //user message
+		die("Line: ".__LINE__." - ".$ex->getMessage());
+	}
 	$row_count = $rquote->rowCount();
-        if($row_count > 0) {
-                $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
-                $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
-        }
+	if($row_count > 0) {
+		$pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
+		$trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+	}
 
-	$query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";   
+	$query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `SharesOutstandingDiluted`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X5`=?";   
 	$params = array();
-	$params[] = $ppid;
 
 	$params[] = (($trawdata["TotalCurrentAssets"] == 'null' && $trawdata["TotalCurrentLiabilities"] == 'null') ? null: ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])) ;
 	$params[] = $trawdata["TotalAssets"] == 'null' ? null: $trawdata["TotalAssets"];
@@ -153,6 +138,8 @@ function altmanTTM($ppid) {
 	$params[] = $x2;
 	$params[] = $x3;
 	$params[] = $x5;
+	$params = array_merge($params,$params);
+	array_unshift($params,$ppid);
 
 	try {
 		$res2 = $db->prepare($query1);
@@ -173,9 +160,8 @@ function altmanTTM($ppid) {
 	}
 	$trawdata = $tres->fetch(PDO::FETCH_ASSOC);
 	array_walk_recursive($trawdata, 'nullValues');
-	$query1 = "INSERT INTO `mrq_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	$query1 = "INSERT INTO `mrq_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X5`=?";
 	$params = array();
-	$params[] = $ppid;
 	$params[] = (($trawdata["TotalCurrentAssets"] == 'null' && $trawdata["TotalCurrentLiabilities"] == 'null') ? null: ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])) ;
 	$params[] = $trawdata["TotalAssets"] == 'null' ? null: $trawdata["TotalAssets"];
 	$params[] = $trawdata["TotalLiabilities"] == 'null' ? null: $trawdata["TotalLiabilities"];
@@ -190,6 +176,9 @@ function altmanTTM($ppid) {
 	$params[] = $x2;
 	$params[] = $x3;
 	$params[] = $x5;
+	$params = array_merge($params,$params);
+	array_unshift($params,$ppid);
+
 	try {
 		$res3 = $db->prepare($query1);
 		$res3->execute($params);
