@@ -6,7 +6,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 	$qreports = QREPORTS;
 	$treports = $areports+$qreports;
 
-	$report_tables = array("reports_balanceconsolidated","reports_balanceconsolidated_3cagr","reports_balanceconsolidated_5cagr","reports_balanceconsolidated_7cagr","reports_balanceconsolidated_10cagr","reports_balancefull","reports_balancefull_3cagr","reports_balancefull_5cagr","reports_balancefull_7cagr","reports_balancefull_10cagr","reports_cashflowconsolidated","reports_cashflowconsolidated_3cagr","reports_cashflowconsolidated_5cagr","reports_cashflowconsolidated_7cagr","reports_cashflowconsolidated_10cagr","reports_cashflowfull","reports_cashflowfull_3cagr","reports_cashflowfull_5cagr","reports_cashflowfull_7cagr","reports_cashflowfull_10cagr","reports_financialheader","reports_gf_data","reports_gf_data_3cagr","reports_gf_data_5cagr","reports_gf_data_7cagr","reports_gf_data_10cagr","reports_incomeconsolidated","reports_incomeconsolidated_3cagr","reports_incomeconsolidated_5cagr","reports_incomeconsolidated_7cagr","reports_incomeconsolidated_10cagr","reports_incomefull","reports_incomefull_3cagr","reports_incomefull_5cagr","reports_incomefull_7cagr","reports_incomefull_10cagr","reports_metadata_eol","reports_variable_ratios","reports_variable_ratios_3cagr","reports_variable_ratios_5cagr","reports_variable_ratios_7cagr","reports_variable_ratios_10cagr","reports_financialscustom","reports_financialscustom_3cagr","reports_financialscustom_5cagr","reports_financialscustom_7cagr","reports_financialscustom_10cagr","reports_key_ratios","reports_key_ratios_3cagr","reports_key_ratios_5cagr","reports_key_ratios_7cagr","reports_key_ratios_10cagr");
+	$report_tables = array("reports_balanceconsolidated","reports_balanceconsolidated_3cagr","reports_balanceconsolidated_5cagr","reports_balanceconsolidated_7cagr","reports_balanceconsolidated_10cagr","reports_balancefull","reports_balancefull_3cagr","reports_balancefull_5cagr","reports_balancefull_7cagr","reports_balancefull_10cagr","reports_cashflowconsolidated","reports_cashflowconsolidated_3cagr","reports_cashflowconsolidated_5cagr","reports_cashflowconsolidated_7cagr","reports_cashflowconsolidated_10cagr","reports_cashflowfull","reports_cashflowfull_3cagr","reports_cashflowfull_5cagr","reports_cashflowfull_7cagr","reports_cashflowfull_10cagr","reports_financialheader","reports_gf_data","reports_gf_data_3cagr","reports_gf_data_5cagr","reports_gf_data_7cagr","reports_gf_data_10cagr","reports_incomeconsolidated","reports_incomeconsolidated_3cagr","reports_incomeconsolidated_5cagr","reports_incomeconsolidated_7cagr","reports_incomeconsolidated_10cagr","reports_incomefull","reports_incomefull_3cagr","reports_incomefull_5cagr","reports_incomefull_7cagr","reports_incomefull_10cagr","reports_metadata_eol","reports_variable_ratios","reports_variable_ratios_3cagr","reports_variable_ratios_5cagr","reports_variable_ratios_7cagr","reports_variable_ratios_10cagr","reports_financialscustom","reports_financialscustom_3cagr","reports_financialscustom_5cagr","reports_financialscustom_7cagr","reports_financialscustom_10cagr","reports_key_ratios","reports_key_ratios_3cagr","reports_key_ratios_5cagr","reports_key_ratios_7cagr","reports_key_ratios_10cagr","reports_valuation","reports_valuation_3cagr","reports_valuation_5cagr","reports_valuation_7cagr","reports_valuation_10cagr");
 
 	//Update tickers_* tables (tables that hold only 1 data point per symbol)
 	$query = "INSERT INTO `tickers_activity_daily_ratios` (`ticker_id`, `AccountsPayableTurnoverDaysFY`, `TradeCycleDaysFY`, `TradeCycleDaysTTM`, `AccountsPayableTurnoverDaysTTM`, `InventoryTurnoverDaysFY`, `InventoryTurnoverDaysTTM`, `NetOperatingProfitafterTaxFQ`, `NetOperatingProfitafterTaxFY`, `NetOperatingProfitafterTaxTTM`, `ReceivablesCollectionPeriodDaysFY`, `ReceivablesCollectionPeriodDaysTTM`, `TaxRatePctFQ`, `TaxRatePctFY`, `TaxRatePctTTM`, `Volume`, `AverageVolume`, `Beta1Year`, `Beta3Year`, `Beta5Year`, `Date52WeekHigh`, `Date52WeekLow`, `DatePreviousClose`, `DatePriceClose`, `PreviousVolume`, `Price52WeekHigh`, `Price52WeekLow`, `PriceClose`, `PricePctChange13Week`, `PricePctChange1Day`, `PricePctChange1Week`, `PricePctChange26Week`, `PricePctChange4Week`, `PricePctChange52Week`, `PricePctChangeYTD`, `PricePreviousClose`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `AccountsPayableTurnoverDaysFY`=?, `TradeCycleDaysFY`=?, `TradeCycleDaysTTM`=?, `AccountsPayableTurnoverDaysTTM`=?, `InventoryTurnoverDaysFY`=?, `InventoryTurnoverDaysTTM`=?, `NetOperatingProfitafterTaxFQ`=?, `NetOperatingProfitafterTaxFY`=?, `NetOperatingProfitafterTaxTTM`=?, `ReceivablesCollectionPeriodDaysFY`=?, `ReceivablesCollectionPeriodDaysTTM`=?, `TaxRatePctFQ`=?, `TaxRatePctFY`=?, `TaxRatePctTTM`=?, `Volume`=?, `AverageVolume`=?, `Beta1Year`=?, `Beta3Year`=?, `Beta5Year`=?, `Date52WeekHigh`=?, `Date52WeekLow`=?, `DatePreviousClose`=?, `DatePriceClose`=?, `PreviousVolume`=?, `Price52WeekHigh`=?, `Price52WeekLow`=?, `PriceClose`=?, `PricePctChange13Week`=?, `PricePctChange1Day`=?, `PricePctChange1Week`=?, `PricePctChange26Week`=?, `PricePctChange4Week`=?, `PricePctChange52Week`=?, `PricePctChangeYTD`=?, `PricePreviousClose`=?";
@@ -954,7 +954,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 				}
 
 
-				//Populate Key Ratios only for annual reports
+				//Populate Key Ratios and valuation only for annual reports
 				if($i <= $areports) {
 					$CapEx = (($rawdata["CapitalExpenditures"][$i]=='null')?null:(-$rawdata["CapitalExpenditures"][$i]));
 					$FreeCashFlow = (($rawdata["CashfromOperatingActivities"][$i]=='null' && $rawdata["CapitalExpenditures"][$i]=='null')?null:($rawdata["CashfromOperatingActivities"][$i]+$rawdata["CapitalExpenditures"][$i]));
@@ -1051,6 +1051,43 @@ function update_raw_data_tickers($dates, $rawdata) {
 							updateCAGR_KR("reports_key_ratios_10cagr", 10, $i, $report_id, $rawdata, $dates->ticker_id);
 						}
 					}
+
+	                                //reports_valuation
+        	                        $query = "INSERT INTO `reports_valuation` (`report_id`, `nnwc`, `p_nnwc`, `mos_nnwc`, `ncav`, `p_ncav`, `mos_ncav`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                	                $params = array();
+					$nnwc = $rawdata["CashCashEquivalentsandShorttermInvestments"][$i] + $rawdata["TotalReceivablesNet"][$i] * 0.75 + $rawdata["TotalInventories"][$i] * 0.5 * 1000000 - $rawdata["TotalLiabilities"][$i];
+					$ncav = $rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalLiabilities"][$i];
+					$p_nnwc = (($rawdata["SharesOutstandingDiluted"][$i]=='null'||is_null($price)||$nnwc==0)? null:(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price/$nnwc));
+					$p_nvac = (($rawdata["SharesOutstandingDiluted"][$i]=='null'||is_null($price)||$ncav==0)? null:(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price/$ncav));
+                        	        $params[] = $report_id;
+                                	$params[] = $nnwc;
+                                	$params[] = $p_nnwc;
+        	                        $params[] = ((is_null($p_nnwc) || (1-$p_nnwc)*100 < 0 || $nnwc < 0) ? 0:((1-$p_nnwc)*100));
+                	                $params[] = $ncav;
+                	                $params[] = $p_nvac;
+        	                        $params[] = ((is_null($p_nvac) || (1-$p_nvac)*100 < 0 || $ncav < 0) ? 0:((1-$p_nvac)*100));
+        	                        try {
+                	                        $res = $db->prepare($query);
+                        	                $res->execute($params);
+                                	} catch(PDOException $ex) {
+                                        	echo "\nDatabase Error"; //user message
+	                                        die("Line: ".__LINE__." - ".$ex->getMessage());
+        	                        }
+
+					//reports_valuation CAGR
+					if ($i > 3) {
+						updateCAGR_V("reports_valuation_3cagr", 3, $i, $report_id, $rawdata, $dates->ticker_id);
+						if ($i > 5) {
+							updateCAGR_V("reports_valuation_5cagr", 5, $i, $report_id, $rawdata, $dates->ticker_id);
+						}
+						if ($i > 7) {
+							updateCAGR_V("reports_valuation_7cagr", 7, $i, $report_id, $rawdata, $dates->ticker_id);
+						}
+						if ($i > 10) {
+							updateCAGR_V("reports_valuation_10cagr", 10, $i, $report_id, $rawdata, $dates->ticker_id);
+						}
+					}
+
 				}
 			}
 		}

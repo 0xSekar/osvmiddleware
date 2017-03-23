@@ -29,7 +29,7 @@ $count = 0;
 $inserted = 0;
 $updated = 0;
 $dates = new stdClass();
-$report_tables = array("reports_balanceconsolidated_3cagr","reports_balanceconsolidated_5cagr","reports_balanceconsolidated_7cagr","reports_balanceconsolidated_10cagr","reports_balancefull_3cagr","reports_balancefull_5cagr","reports_balancefull_7cagr","reports_balancefull_10cagr","reports_cashflowconsolidated_3cagr","reports_cashflowconsolidated_5cagr","reports_cashflowconsolidated_7cagr","reports_cashflowconsolidated_10cagr","reports_cashflowfull_3cagr","reports_cashflowfull_5cagr","reports_cashflowfull_7cagr","reports_cashflowfull_10cagr","reports_gf_data_3cagr","reports_gf_data_5cagr","reports_gf_data_7cagr","reports_gf_data_10cagr","reports_incomeconsolidated_3cagr","reports_incomeconsolidated_5cagr","reports_incomeconsolidated_7cagr","reports_incomeconsolidated_10cagr","reports_incomefull_3cagr","reports_incomefull_5cagr","reports_incomefull_7cagr","reports_incomefull_10cagr","reports_variable_ratios_3cagr","reports_variable_ratios_5cagr","reports_variable_ratios_7cagr","reports_variable_ratios_10cagr","reports_financialscustom_3cagr","reports_financialscustom_5cagr","reports_financialscustom_7cagr","reports_financialscustom_10cagr","reports_key_ratios_3cagr","reports_key_ratios_5cagr","reports_key_ratios_7cagr","reports_key_ratios_10cagr");
+$report_tables = array("reports_balanceconsolidated_3cagr","reports_balanceconsolidated_5cagr","reports_balanceconsolidated_7cagr","reports_balanceconsolidated_10cagr","reports_balancefull_3cagr","reports_balancefull_5cagr","reports_balancefull_7cagr","reports_balancefull_10cagr","reports_cashflowconsolidated_3cagr","reports_cashflowconsolidated_5cagr","reports_cashflowconsolidated_7cagr","reports_cashflowconsolidated_10cagr","reports_cashflowfull_3cagr","reports_cashflowfull_5cagr","reports_cashflowfull_7cagr","reports_cashflowfull_10cagr","reports_gf_data_3cagr","reports_gf_data_5cagr","reports_gf_data_7cagr","reports_gf_data_10cagr","reports_incomeconsolidated_3cagr","reports_incomeconsolidated_5cagr","reports_incomeconsolidated_7cagr","reports_incomeconsolidated_10cagr","reports_incomefull_3cagr","reports_incomefull_5cagr","reports_incomefull_7cagr","reports_incomefull_10cagr","reports_variable_ratios_3cagr","reports_variable_ratios_5cagr","reports_variable_ratios_7cagr","reports_variable_ratios_10cagr","reports_financialscustom_3cagr","reports_financialscustom_5cagr","reports_financialscustom_7cagr","reports_financialscustom_10cagr","reports_key_ratios_3cagr","reports_key_ratios_5cagr","reports_key_ratios_7cagr","reports_key_ratios_10cagr","reports_valuation_3cagr","reports_valuation_5cagr","reports_valuation_7cagr","reports_valuation_10cagr");
 
 echo "Updating CAGR data points...<br>\n";
 while($row = $res->fetch(PDO::FETCH_ASSOC)) {    
@@ -202,6 +202,17 @@ while($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		if ($i > 10) {
 			updateCAGR_KR("reports_key_ratios_10cagr", 10, $i, $report_id, $rawdata, $dates->ticker_id);
 		}
+		//reports_valuation CAGR
+		updateCAGR_V("reports_valuation_3cagr", 3, $i, $report_id, $rawdata, $dates->ticker_id);
+                if ($i > 5) {
+                        updateCAGR_V("reports_valuation_5cagr", 5, $i, $report_id, $rawdata, $dates->ticker_id);
+                }
+                if ($i > 7) {
+                        updateCAGR_V("reports_valuation_7cagr", 7, $i, $report_id, $rawdata, $dates->ticker_id);
+                }
+                if ($i > 10) {
+                        updateCAGR_V("reports_valuation_10cagr", 10, $i, $report_id, $rawdata, $dates->ticker_id);
+                }
 	}
 }
 

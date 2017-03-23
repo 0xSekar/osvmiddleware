@@ -16,7 +16,7 @@ function update_eod_valuation($ti = null) {
 	$result = json_decode($good);
 
 	$params = array();
-	$query = "INSERT INTO tickers_eod_valuation (ticker_id, dcf_eps, dcf_fcf, dcf_oe, graham, ebit, p_dcf_eps, p_dcf_fcf, p_dcf_oe, p_graham, p_ebit, mos_dcf_eps, mos_dcf_fcf, mos_dcf_oe, mos_graham, mos_ebit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE dcf_eps=?, dcf_fcf=?, dcf_oe=?, graham=?, ebit=?, p_dcf_eps=?, p_dcf_fcf=?, p_dcf_oe=?, p_graham=?, p_ebit=?, mos_dcf_eps=?, mos_dcf_fcf=?, mos_dcf_oe=?, mos_graham=?, mos_ebit=?";
+	$query = "INSERT INTO tickers_eod_valuation (ticker_id, dcf_eps, dcf_fcf, dcf_oe, graham, ebit, p_dcf_eps, p_dcf_fcf, p_dcf_oe, p_graham, p_ebit, mos_dcf_eps, mos_dcf_fcf, mos_dcf_oe, mos_graham, mos_ebit, nnwc, ncav, p_nnwc, p_ncav, mos_nnwc, mos_ncav) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE dcf_eps=?, dcf_fcf=?, dcf_oe=?, graham=?, ebit=?, p_dcf_eps=?, p_dcf_fcf=?, p_dcf_oe=?, p_graham=?, p_ebit=?, mos_dcf_eps=?, mos_dcf_fcf=?, mos_dcf_oe=?, mos_graham=?, mos_ebit=?, nnwc=?, ncav=?, p_nnwc=?, p_ncav=?, mos_nnwc=?, mos_ncav=?";
 	$params[] = $ti;
 	$params[] = $result->dcf_eps;
 	$params[] = $result->dcf_fcf;
@@ -33,6 +33,12 @@ function update_eod_valuation($ti = null) {
 	$params[] = $result->mos_dcf_oe;
 	$params[] = $result->mos_graham;
 	$params[] = $result->mos_ebit;
+	$params[] = $result->nnwc;
+	$params[] = $result->ncav;
+	$params[] = $result->p_nnwc;
+	$params[] = $result->p_ncav;
+	$params[] = $result->mos_nnwc;
+	$params[] = $result->mos_ncav;
 	$params[] = $result->dcf_eps;
 	$params[] = $result->dcf_fcf;
 	$params[] = $result->dcf_oe;
@@ -48,6 +54,12 @@ function update_eod_valuation($ti = null) {
 	$params[] = $result->mos_dcf_oe;
 	$params[] = $result->mos_graham;
 	$params[] = $result->mos_ebit;
+	$params[] = $result->nnwc;
+	$params[] = $result->ncav;
+	$params[] = $result->p_nnwc;
+	$params[] = $result->p_ncav;
+	$params[] = $result->mos_nnwc;
+	$params[] = $result->mos_ncav;
 	
 	try {
 		$res1 = $db->prepare($query);

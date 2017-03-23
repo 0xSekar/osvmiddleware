@@ -8,9 +8,9 @@ class screener_filter {
 	//Auxiliary private variables
 	private $tableListG0 = ["tickers", "tickers_activity_daily_ratios", "tickers_growth_ratios", "tickers_leverage_ratios", "tickers_metadata_eol", "tickers_mini_ratios", "tickers_profitability_ratios", "tickers_valuation_ratios", "tickers_xignite_estimates", "tickers_yahoo_estimates_others", "tickers_yahoo_keystats_1", "tickers_yahoo_keystats_2", "tickers_yahoo_quotes_1", "tickers_yahoo_quotes_2", "tickers_eod_valuation"];
 	private $tableListG1 = ["reports_header", "reports_balanceconsolidated", "reports_balancefull", "reports_cashflowconsolidated", "reports_cashflowfull", "reports_financialheader", "reports_financialscustom", "reports_gf_data", "reports_incomeconsolidated", "reports_incomefull", "reports_metadata_eol", "reports_variable_ratios"];
-	private $tableListG1r = ["reports_alt_checks", "reports_beneish_checks", "reports_key_ratios", "reports_pio_checks", "reports_ratings"];
+	private $tableListG1r = ["reports_alt_checks", "reports_beneish_checks", "reports_key_ratios", "reports_pio_checks", "reports_ratings", "reports_valuation"];
 	private $tableListG3 = ["ttm_balanceconsolidated", "ttm_balancefull", "ttm_cashflowconsolidated", "ttm_cashflowfull", "ttm_financialscustom", "ttm_incomeconsolidated", "ttm_incomefull", "ttm_gf_data", "ttm_key_ratios", "ttm_beneish_checks", "ttm_pio_checks", "ttm_ratings"];
-	private $tableListG4 = ["reports_balanceconsolidated", "reports_balancefull", "reports_cashflowconsolidated", "reports_cashflowfull", "reports_financialscustom", "reports_gf_data", "reports_incomeconsolidated", "reports_incomefull", "reports_key_ratios", "reports_variable_ratios"];
+	private $tableListG4 = ["reports_balanceconsolidated", "reports_balancefull", "reports_cashflowconsolidated", "reports_cashflowfull", "reports_financialscustom", "reports_gf_data", "reports_incomeconsolidated", "reports_incomefull", "reports_key_ratios", "reports_variable_ratios", "reports_valuation"];
 	private $tableListG8 = ["ttm_alt_checks"];
 	private $tableListG10 = ["tickers_yahoo_estimates_curr_qtr"];
 	private $tableListG11 = ["tickers_yahoo_estimates_curr_year"];
@@ -431,7 +431,14 @@ class screener_filter {
 						$params[] = 17;
 						break;
 					case "tickers_eod_valuation":
+					case "reports_valuation":
 						$params[] = 20;
+						break;
+					case "reports_valuation_3cagr":
+					case "reports_valuation_5cagr":
+					case "reports_valuation_7cagr":
+					case "reports_valuation_10cagr":
+						$params[] = 21;
 						break;
 					case "ttm_financialscustom":
 					case "pttm_financialscustom":

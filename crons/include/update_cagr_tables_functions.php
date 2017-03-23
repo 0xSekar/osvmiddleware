@@ -352,4 +352,74 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
 		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 }
+
+function updateCAGR_V($table, $years, $i, $report_id, $rawdata, $ticker_id) {
+        $db = Database::GetInstance();
+        $rdate_a = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i]));
+        $qquote_a = "Select * from tickers_yahoo_historical_data where ticker_id = '".$ticker_id."' and report_date <= '".$rdate_a."' order by report_date desc limit 1";
+        $price_a = null;
+        try {
+                $rquote_a = $db->query($qquote_a);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $row_count_a = $rquote_a->rowCount();
+        if($row_count_a > 0) {
+                $price_a = $rquote_a->fetch(PDO::FETCH_ASSOC);
+                $price_a = $price_a["adj_close"];
+        }
+        $rdate_v = date("Y-m-d",strtotime($rawdata["PeriodEndDate"][$i-$years]));
+        $qquote_v = "Select * from tickers_yahoo_historical_data where ticker_id = '".$ticker_id."' and report_date <= '".$rdate_v."' order by report_date desc limit 1";
+        $price_v = null;
+        try {
+                $rquote_v = $db->query($qquote_v);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $row_count_v = $rquote_v->rowCount();
+        if($row_count_v > 0) {
+                $price_v = $rquote_v->fetch(PDO::FETCH_ASSOC);
+                $price_v = $price_v["adj_close"];
+        }
+
+        $nnwc_a = $rawdata["CashCashEquivalentsandShorttermInvestments"][$i] + $rawdata["TotalReceivablesNet"][$i] * 0.75 + $rawdata["TotalInventories"][$i] * 0.5 * 1000000 - $rawdata["TotalLiabilities"][$i];
+        $ncav_a = $rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalLiabilities"][$i];
+        $p_nnwc_a = (($rawdata["SharesOutstandingDiluted"][$i]=='null'||is_null($price_a)||$nnwc_a==0)? null:(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price_a/$nnwc_a));
+        $p_ncav_a = (($rawdata["SharesOutstandingDiluted"][$i]=='null'||is_null($price_a)||$ncav_a==0)? null:(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price_a/$ncav_a));
+        $nnwc_v = $rawdata["CashCashEquivalentsandShorttermInvestments"][$i-$years] + $rawdata["TotalReceivablesNet"][$i-$years] * 0.75 + $rawdata["TotalInventories"][$i-$years] * 0.5 * 1000000 - $rawdata["TotalLiabilities"][$i-$years];
+        $ncav_v = $rawdata["TotalCurrentAssets"][$i-$years] - $rawdata["TotalLiabilities"][$i-$years];
+        $p_nnwc_v = (($rawdata["SharesOutstandingDiluted"][$i-$years]=='null'||is_null($price_v)||$nnwc_v==0)? null:(toFloat($rawdata["SharesOutstandingDiluted"][$i-$years])*1000000*$price_v/$nnwc_v));
+        $p_ncav_v = (($rawdata["SharesOutstandingDiluted"][$i-$years]=='null'||is_null($price_v)||$ncav_v==0)? null:(toFloat($rawdata["SharesOutstandingDiluted"][$i-$years])*1000000*$price_v/$ncav_v));
+
+
+        $query = "INSERT INTO $table (`report_id`, `nnwc`, `p_nnwc`, `mos_nnwc`, `ncav`, `p_ncav`, `mos_ncav`) VALUES (";
+        $query .= "'".$report_id."'";
+        $va = $nnwc_a;
+        $vv = $nnwc_v;
+        $query .= updateCAGR_concat($vv, $va, $years);
+        $va = $p_nnwc_a;
+        $vv = $p_nnwc_v;
+        $query .= updateCAGR_concat($vv, $va, $years);
+        $va = ((is_null($p_nnwc_a) || (1-$p_nnwc_a)*100 < 0 || $nnwc_a < 0) ? 0:((1-$p_nnwc_a)*100));
+        $vv = ((is_null($p_nnwc_v) || (1-$p_nnwc_v)*100 < 0 || $nnwc_v < 0) ? 0:((1-$p_nnwc_v)*100));
+        $query .= updateCAGR_concat($vv, $va, $years);
+        $va = $ncav_a;
+        $vv = $ncav_v;
+        $query .= updateCAGR_concat($vv, $va, $years);
+        $va = $p_ncav_a;
+        $vv = $p_ncav_v;
+        $query .= updateCAGR_concat($vv, $va, $years);
+        $va = ((is_null($p_ncav_a) || (1-$p_ncav_a)*100 < 0 || $ncav_a < 0) ? 0:((1-$p_ncav_a)*100));
+        $vv = ((is_null($p_ncav_v) || (1-$p_ncav_v)*100 < 0 || $ncav_v < 0) ? 0:((1-$p_ncav_v)*100));
+        $query .= updateCAGR_concat($vv, $va, $years);
+        $query .= ")";
+        try {
+                $db->exec($query);
+        } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+}
 ?>

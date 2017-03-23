@@ -312,7 +312,7 @@ function update_beneish_checks($ti = null) {
 			beneishTTM($ppid,$prawdata,$querypre);
 		}
 
-		$query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICAT EKEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
+		$query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
 		$params = array();
 		//DSRI
 		$vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : ($rawdata["TotalReceivablesNet"]/$rawdata["TotalRevenue"]);
