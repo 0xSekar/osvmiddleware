@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS `reports_valuation_10cagr` (
 ALTER TABLE  `tickers_eod_valuation` ADD  `nnwc` DECIMAL( 30, 15 ) NULL COMMENT 'NNWC Net Net Working Capital|NNWC can be considered as the absolute floor value or liquidation fire sale. NNWC = Cash & Equivalents + (Accounts Receivables x 0.75) + (Inventory x 0.5) - Total Liabilities|osvnumber:2:true|NNWC' AFTER  `ebit` ,
 ADD  `ncav` DECIMAL( 30, 15 ) NULL COMMENT  'NCAV Net Current Asset Value|Companies where their market cap is less than NCAV are considered extremely cheap. NCAV = Current Assets - Total Liabilities|osvnumber:2:true|NCAV' AFTER `nnwc` ;
 
-ALTER TABLE  `tickers_eod_valuation` ADD  `p_nnwc` DECIMAL NULL COMMENT 'Price to NNWC|Price to NNWC based on the latest quarterly data. Ratio < 1 means that the market cap is less than the NNWC value.|osvnumber:2:true|P/NNWC' AFTER  `p_ebit` ,
-ADD  `p_ncav` DECIMAL NULL COMMENT 'Price to NCAV|Price to NNWC based on the latest quarterly data. Ratio < 1 means that the market cap is less than the NCAV value.|osvnumber:2:true|P/NCAV' AFTER  `p_nnwc` ;
+ALTER TABLE  `tickers_eod_valuation` ADD  `p_nnwc` DECIMAL( 30, 15 ) NULL COMMENT 'Price to NNWC|Price to NNWC based on the latest quarterly data. Ratio < 1 means that the market cap is less than the NNWC value.|osvnumber:2:true|P/NNWC' AFTER  `p_ebit` ,
+ADD  `p_ncav` DECIMAL( 30, 15 ) NULL COMMENT 'Price to NCAV|Price to NNWC based on the latest quarterly data. Ratio < 1 means that the market cap is less than the NCAV value.|osvnumber:2:true|P/NCAV' AFTER  `p_nnwc` ;
 
 ALTER TABLE  `tickers_eod_valuation` ADD  `mos_nnwc` DECIMAL( 30, 15 ) NULL COMMENT 'NNWC Margin of Safety|Margin of Safety % based on NNWC value|osvpercent:2:false|MOS NNWC',
 ADD  `mos_ncav` DECIMAL( 30, 15 ) NULL COMMENT  'NCAV Margin of Safety|Margin of Safety % based on NCAV value|osvpercent:2:false|MOS NCAV';
