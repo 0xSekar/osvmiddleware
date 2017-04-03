@@ -16,3 +16,9 @@ CREATE TABLE IF NOT EXISTS `tooltips` (
   KEY `table` (`table_name`,`field_name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
 
+ALTER TABLE  `screener_filter_fields` ADD  `tooltip_id` INT NOT NULL AFTER  `field_id` ,
+ADD INDEX (  `tooltip_id` ) ;
+
+ALTER TABLE  `screener_filter_fields2` ADD  `tooltip_id` INT NOT NULL AFTER  `field_id` ,
+ADD INDEX (  `tooltip_id` ) ;
+
