@@ -9,12 +9,12 @@ CREATE TABLE IF NOT EXISTS `tooltips` (
   `max` int(11) DEFAULT NULL,
   `table_group` int(11) NOT NULL DEFAULT '0',
   `field_group` int(11) DEFAULT NULL,
-  `comment` blob,
+  `comment` text,
   PRIMARY KEY (`tooltip_id`),
   KEY `field_group` (`field_group`),
   KEY `table_group` (`table_group`),
   KEY `table` (`table_name`,`field_name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
 
 ALTER TABLE  `screener_filter_fields` ADD  `tooltip_id` INT NOT NULL AFTER  `field_id` ,
 ADD INDEX (  `tooltip_id` ) ;
