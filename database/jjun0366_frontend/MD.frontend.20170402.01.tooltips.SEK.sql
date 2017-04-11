@@ -6,6 +6,7 @@ ALTER TABLE `screener_filter_fields2`
   DROP `field_group`,
   DROP `format`,
   DROP `min`,
+  DROP `field_type`,
   DROP `max`;
 
 ALTER TABLE `screener_filter_fields`
@@ -16,5 +17,6 @@ ALTER TABLE `screener_filter_fields`
   DROP `field_group`,
   DROP `format`,
   DROP `min`,
+  DROP `field_type`,
   DROP `max`;
 

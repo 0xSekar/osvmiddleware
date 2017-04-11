@@ -33,15 +33,7 @@ class screener_filter {
 		for ($i = 0; $i<14; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
-				$query = "INSERT INTO screener_filter_fields_temp (field_id, field_type, field_order, report_type, tooltip_id) VALUES (?, ?, ?, ?, ?)";
-				$type = $value["format"];
-				if(substr($type, 0, 7) == "osvdate") {
-					$params[] = "D";
-				} else if ($type == "" || substr($type, 0, 7) == "osvtext" || substr($type, 0, 7) == "osvstri") {
-					$params[] = "S";
-				} else {
-					$params[] = "N";
-				}
+				$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, tooltip_id) VALUES (?, ?, ?, ?)";
 				switch($i) {
 					case 3:
 					case 8:
@@ -112,7 +104,7 @@ class screener_filter {
 			}
 		}
 		//FINAL RUN
-		$query = "INSERT INTO screener_filter_fields_temp (field_id, field_type, field_order, report_type, tooltip_id) VALUES (?, ?, ?, ?, ?)";
+		$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, tooltip_id) VALUES (?, ?, ?, ?)";
 		$q = $this->db->prepare($query);
 		$query1 = "INSERT INTO screener_filter_criteria_temp (field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?)";
 		$q1 = $this->db->prepare($query1);
@@ -133,6 +125,24 @@ class screener_filter {
 		$q = $this->db->query("INSERT INTO screener_filter_criteria SELECT * FROM screener_filter_criteria_temp");
 		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_fields_temp");
 		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_criteria_temp");
+
+		$u1 = "SELECT * FROM fields_metadata";
+                $r1 = $this->db->query($u1);
+		$u2 = "UPDATE fields_metadata SET field_type = ? WHERE tooltip_id = ?";
+		$r2 = $this->db->prepare($u2);
+                while($row = $r1->fetch(PDO::FETCH_ASSOC)) {
+			$p1 = array();
+                        $type = $row["format"];
+                        if(substr($type, 0, 7) == "osvdate") {
+                                $p1[] = "D";
+                        } else if ($type == "" || substr($type, 0, 7) == "osvtext" || substr($type, 0, 7) == "osvstri") {
+                                $p1[] = "S";
+                        } else {
+                                $p1[] = "N";
+                        }
+			$p1[] = $row["tooltip_id"];
+			$r2->execute($p1);
+		}
 	}
 
 	private function getTooltip($id = null, $table = null, $field = null, $group = array(), $addPrefix = true, $addSufix = true) {

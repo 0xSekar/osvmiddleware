@@ -306,8 +306,7 @@ class screener_filter {
 		for ($i = 0; $i<14; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
-				$query = "INSERT INTO fields_metadata (table_name, field_name, title, short_title, format, min, max, table_group, field_group, tooltip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "tooltip" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
+				$query = "INSERT INTO fields_metadata (table_name, field_name, title, short_title, format, min, max, table_group, field_group, tooltip, field_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				$params[] = $value["table"];
 				$params[] = $key;
 				$params[] = $value["title"];
@@ -570,6 +569,14 @@ $this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "toolti
 						$params[] = 19;
 				}
 				$params[] = $value["tooltip"];
+                                $type = $value["format"];
+                                if(substr($type, 0, 7) == "osvdate") {
+                                        $params[] = "D";
+                                } else if ($type == "" || substr($type, 0, 7) == "osvtext" || substr($type, 0, 7) == "osvstri") {
+                                        $params[] = "S";
+                                } else {
+                                        $params[] = "N";
+                                }
 
 				$counter++;
 

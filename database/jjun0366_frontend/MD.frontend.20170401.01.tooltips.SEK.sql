@@ -22,3 +22,6 @@ ADD INDEX (  `tooltip_id` ) ;
 ALTER TABLE  `screener_filter_fields2` ADD  `tooltip_id` INT NOT NULL AFTER  `field_id` ,
 ADD INDEX (  `tooltip_id` ) ;
 
+ALTER TABLE  `fields_metadata` ADD  `field_type` CHAR( 1 ) NULL ,
+ADD  `good_increase` TINYINT NULL;
+
