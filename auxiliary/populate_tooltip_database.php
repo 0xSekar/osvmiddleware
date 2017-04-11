@@ -25,8 +25,8 @@ class screener_filter {
 		$this->db = Database::getInstance();
 
 		//Populate field list
-		$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "comment" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
-		$this->fieldCol[-1]["ticker"] = array("table" => "tickers", "title" => "Symbol", "comment" => "Symbol", "format" => "osvtext", "stitle" => "Symbol", "min" => null, "max" => null);
+		$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "tooltip" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
+		$this->fieldCol[-1]["ticker"] = array("table" => "tickers", "title" => "Symbol", "tooltip" => "Symbol", "format" => "osvtext", "stitle" => "Symbol", "min" => null, "max" => null);
 		foreach ($this->tableListG0 as $table) {
 			$q = $this->db->query("SHOW FULL COLUMNS FROM $table");
 			$table_fields = $q->fetchAll(PDO::FETCH_ASSOC);
@@ -50,7 +50,7 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[0][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[0][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG1 as $table) {
@@ -76,8 +76,8 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
-				$this->fieldCol[2][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[2][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG1r as $table) {
@@ -103,7 +103,7 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[1][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG3 as $table) {
@@ -129,7 +129,7 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[3][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[3][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG4 as $table) {
@@ -155,10 +155,10 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[4][$fieldName["Field"]] = array("table" => $table."_3cagr", "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
-				$this->fieldCol[5][$fieldName["Field"]] = array("table" => $table."_5cagr", "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
-				$this->fieldCol[6][$fieldName["Field"]] = array("table" => $table."_7cagr", "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
-				$this->fieldCol[7][$fieldName["Field"]] = array("table" => $table."_10cagr", "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[4][$fieldName["Field"]] = array("table" => $table."_3cagr", "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[5][$fieldName["Field"]] = array("table" => $table."_5cagr", "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[6][$fieldName["Field"]] = array("table" => $table."_7cagr", "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[7][$fieldName["Field"]] = array("table" => $table."_10cagr", "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG8 as $table) {
@@ -184,15 +184,15 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[8][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
-				$this->fieldCol[9][$fieldName["Field"]] = array("table" => "mrq_alt_checks", "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[8][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[9][$fieldName["Field"]] = array("table" => "mrq_alt_checks", "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
-			$this->fieldCol[8]["MarketValueofEquity"] = array("table" => "ttm_alt_checks", "title" => "Market Value of Equity", "comment" => "The stock market value of the equity only.<br><br>The equity market value serves as a proxy for the company asset values.", "format" => "osvnumber:2", "stitle" => "MktValue", "min" => 0, "max" => null);
-			$this->fieldCol[9]["MarketValueofEquity"] = array("table" => "mrq_alt_checks", "title" => "Market Value of Equity", "comment" => "The stock market value of the equity only.<br><br>The equity market value serves as a proxy for the company asset values.", "format" => "osvnumber:2", "stitle" => "MktValue", "min" => 0, "max" => null);
-			$this->fieldCol[8]["AltmanZNormal"] = array("table" => "ttm_alt_checks", "title" => "Altman Z Score Original (Manufacturer)", "comment" => "Original Altman Z score used for manufacturing companies.<br><br>When Z is below 1.8, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZOrig", "min" => null, "max" => null);
-			$this->fieldCol[9]["AltmanZNormal"] = array("table" => "mrq_alt_checks", "title" => "Altman Z Score Original (Manufacturer)", "comment" => "Original Altman Z score used for manufacturing companies.<br><br>When Z is below 1.8, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZOrig", "min" => null, "max" => null);
-			$this->fieldCol[8]["AltmanZRevised"] = array("table" => "ttm_alt_checks", "title" => "Altman Z Score Revised (Non-Manufacturer)", "comment" => "Revised Altman Z score used for non-manufacturing companies.<br><br>When Z is below 1.1, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZRev", "min" => null, "max" => null);
-			$this->fieldCol[9]["AltmanZRevised"] = array("table" => "mrq_alt_checks", "title" => "Altman Z Score Revised (Non-Manufacturer)", "comment" => "Revised Altman Z score used for non-manufacturing companies.<br><br>When Z is below 1.1, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZRev", "min" => null, "max" => null);
+			$this->fieldCol[8]["MarketValueofEquity"] = array("table" => "ttm_alt_checks", "title" => "Market Value of Equity", "tooltip" => "The stock market value of the equity only.<br><br>The equity market value serves as a proxy for the company asset values.", "format" => "osvnumber:2", "stitle" => "MktValue", "min" => 0, "max" => null);
+			$this->fieldCol[9]["MarketValueofEquity"] = array("table" => "mrq_alt_checks", "title" => "Market Value of Equity", "tooltip" => "The stock market value of the equity only.<br><br>The equity market value serves as a proxy for the company asset values.", "format" => "osvnumber:2", "stitle" => "MktValue", "min" => 0, "max" => null);
+			$this->fieldCol[8]["AltmanZNormal"] = array("table" => "ttm_alt_checks", "title" => "Altman Z Score Original (Manufacturer)", "tooltip" => "Original Altman Z score used for manufacturing companies.<br><br>When Z is below 1.8, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZOrig", "min" => null, "max" => null);
+			$this->fieldCol[9]["AltmanZNormal"] = array("table" => "mrq_alt_checks", "title" => "Altman Z Score Original (Manufacturer)", "tooltip" => "Original Altman Z score used for manufacturing companies.<br><br>When Z is below 1.8, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZOrig", "min" => null, "max" => null);
+			$this->fieldCol[8]["AltmanZRevised"] = array("table" => "ttm_alt_checks", "title" => "Altman Z Score Revised (Non-Manufacturer)", "tooltip" => "Revised Altman Z score used for non-manufacturing companies.<br><br>When Z is below 1.1, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZRev", "min" => null, "max" => null);
+			$this->fieldCol[9]["AltmanZRevised"] = array("table" => "mrq_alt_checks", "title" => "Altman Z Score Revised (Non-Manufacturer)", "tooltip" => "Revised Altman Z score used for non-manufacturing companies.<br><br>When Z is below 1.1, the company is highly likely to be bankrupt. If a company is generating lower than 1.8, serious studies must be performed to ensure the company can survive.", "format" => "osvnumber:2", "stitle" => "AltZRev", "min" => null, "max" => null);
 		}
 		foreach ($this->tableListG10 as $table) {
 			$q = $this->db->query("SHOW FULL COLUMNS FROM $table");
@@ -217,7 +217,7 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[10][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[10][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG11 as $table) {
@@ -243,7 +243,7 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[11][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[11][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG12 as $table) {
@@ -269,7 +269,7 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[12][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[12][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 		foreach ($this->tableListG13 as $table) {
@@ -295,19 +295,19 @@ class screener_filter {
 				if(!isset($tmp[5]) || $tmp[5] == "") {
 					$tmp[5] = null;
 				}
-				$this->fieldCol[13][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "comment" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
+				$this->fieldCol[13][$fieldName["Field"]] = array("table" => $table, "title" => $tmp[0], "tooltip" => $tmp[1], "format" => $tmp[2], "stitle" => $tmp[3], "min" => $tmp[4], "max" => $tmp[5]);
 			}
 		}
 	}
 
 	public function populatetooltip() {
-		$q = $this->db->query("TRUNCATE TABLE tooltips");
+		$q = $this->db->query("TRUNCATE TABLE fields_metadata");
 		$counter = 0;
 		for ($i = 0; $i<14; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
-				$query = "INSERT INTO tooltips (table_name, field_name, title, short_title, format, min, max, table_group, field_group, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "comment" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
+				$query = "INSERT INTO fields_metadata (table_name, field_name, title, short_title, format, min, max, table_group, field_group, tooltip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "tooltip" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
 				$params[] = $value["table"];
 				$params[] = $key;
 				$params[] = $value["title"];
@@ -569,7 +569,7 @@ $this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "commen
 					default:
 						$params[] = 19;
 				}
-				$params[] = $value["comment"];
+				$params[] = $value["tooltip"];
 
 				$counter++;
 

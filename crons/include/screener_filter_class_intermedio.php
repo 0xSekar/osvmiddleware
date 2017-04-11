@@ -13,12 +13,12 @@ class screener_filter {
 		$this->db = Database::getInstance();
 
 		//Populate field list
-		$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "comment" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
-		$this->fieldCol[-1]["ticker"] = array("table" => "tickers", "title" => "Symbol", "comment" => "Symbol", "format" => "osvtext", "stitle" => "Symbol", "min" => null, "max" => null);
+		$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "tooltip" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
+		$this->fieldCol[-1]["ticker"] = array("table" => "tickers", "title" => "Symbol", "tooltip" => "Symbol", "format" => "osvtext", "stitle" => "Symbol", "min" => null, "max" => null);
 		$flist = $this->getTooltip(null, null, null, array(0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 		foreach($flist as $field_group => $data1) {
 			foreach($data1 as $field_name => $data) {
-				$this->fieldCol[$field_group][$data["field_name"]] = array("table" => $data["table_name"], "title" => $data["title"], "comment" => $data["comment"], "format" => $data["format"], "stitle" => $data["short_title"], "min" => $data["min"], "max" => $data["max"], "sel_group" => $data["field_group"], "tooltip_id" => $data["tooltip_id"]);
+				$this->fieldCol[$field_group][$data["field_name"]] = array("table" => $data["table_name"], "title" => $data["title"], "tooltip" => $data["tooltip"], "format" => $data["format"], "stitle" => $data["short_title"], "min" => $data["min"], "max" => $data["max"], "sel_group" => $data["field_group"], "tooltip_id" => $data["tooltip_id"]);
 			}
 		}
 	}
@@ -40,7 +40,7 @@ class screener_filter {
 				$parid[] = $value["table"];
 				$parid[] = $key;
 				$params[] = $value["title"];
-				$params[] = $value["comment"];
+				$params[] = $value["tooltip"];
 				$type = $value["format"];
 				if(substr($type, 0, 7) == "osvdate") {
 					$params[] = "D";
@@ -410,7 +410,7 @@ class screener_filter {
 		}
 		$params = array();
 		$index = 0;
-		$query = "SELECT * FROM tooltips ";
+		$query = "SELECT * FROM fields_metadata ";
 		if(!empty($id) && is_numeric($id)) {
 			$query .= "WHERE tooltip_id = ?";
 			$params[] = $id;
@@ -442,27 +442,27 @@ class screener_filter {
 			if($addPrefix) {
 				switch($line["table_group"]) {
 					case 1:
-						$line["comment"] = "Latest Annual. " . $line["comment"];
+						$line["tooltip"] = "Latest Annual. " . $line["tooltip"];
 						break;
 					case 2:
 					case 9:
-						$line["comment"] = "Most Recent Quarter. " . $line["comment"];
+						$line["tooltip"] = "Most Recent Quarter. " . $line["tooltip"];
 						break;
 					case 3:
 					case 8:
-						$line["comment"] = "Trailing Twelve Months. " . $line["comment"];
+						$line["tooltip"] = "Trailing Twelve Months. " . $line["tooltip"];
 						break;
 					case 4:
-						$line["comment"] = "3 Year Compounded Annual Growth Rate. " . $line["comment"];
+						$line["tooltip"] = "3 Year Compounded Annual Growth Rate. " . $line["tooltip"];
 						break;
 					case 5:
-						$line["comment"] = "5 Year Compounded Annual Growth Rate. " . $line["comment"];
+						$line["tooltip"] = "5 Year Compounded Annual Growth Rate. " . $line["tooltip"];
 						break;
 					case 6:
-						$line["comment"] = "7 Year Compounded Annual Growth Rate. " . $line["comment"];
+						$line["tooltip"] = "7 Year Compounded Annual Growth Rate. " . $line["tooltip"];
 						break;
 					case 7:
-						$line["comment"] = "10 Year Compounded Annual Growth Rate. " . $line["comment"];
+						$line["tooltip"] = "10 Year Compounded Annual Growth Rate. " . $line["tooltip"];
 						break;
 				}
 			}

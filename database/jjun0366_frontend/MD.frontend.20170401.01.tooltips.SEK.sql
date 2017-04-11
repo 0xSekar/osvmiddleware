@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `tooltips` (
+CREATE TABLE IF NOT EXISTS `fields_metadata` (
   `tooltip_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `table_name` varchar(50) DEFAULT NULL,
   `field_name` varchar(100) DEFAULT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `tooltips` (
   `max` int(11) DEFAULT NULL,
   `table_group` int(11) NOT NULL DEFAULT '0',
   `field_group` int(11) DEFAULT NULL,
-  `comment` text,
+  `tooltip` text,
   PRIMARY KEY (`tooltip_id`),
   KEY `field_group` (`field_group`),
   KEY `table_group` (`table_group`),
