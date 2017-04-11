@@ -18,7 +18,7 @@ class screener_filter {
 		$flist = $this->getTooltip(null, null, null, array(0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 		foreach($flist as $field_group => $data1) {
 			foreach($data1 as $field_name => $data) {
-				$this->fieldCol[$field_group][$data["field_name"]] = array("table" => $data["table_name"], "title" => $data["title"], "tooltip" => $data["tooltip"], "format" => $data["format"], "stitle" => $data["short_title"], "min" => $data["min"], "max" => $data["max"], "sel_group" => $data["field_group"], "tooltip_id" => $data["tooltip_id"]);
+				$this->fieldCol[$field_group][$data["field_name"]] = array("table" => $data["table_name"], "title" => $data["title"], "tooltip" => $data["tooltip"], "format" => $data["format"], "stitle" => $data["short_title"], "min" => $data["min"], "max" => $data["max"], "sel_group" => $data["field_group"], "metadata_id" => $data["metadata_id"]);
 			}
 		}
 	}
@@ -33,7 +33,7 @@ class screener_filter {
 		for ($i = 0; $i<14; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
-				$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, tooltip_id) VALUES (?, ?, ?, ?)";
+				$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, metadata_id) VALUES (?, ?, ?, ?)";
 				switch($i) {
 					case 3:
 					case 8:
@@ -64,12 +64,12 @@ class screener_filter {
 				} else {
 					$params[] = NULL;
 				}
-				$params[] = $value["tooltip_id"];
+				$params[] = $value["metadata_id"];
 
 				//Get id if available
-				$queryid = "SELECT field_id FROM screener_filter_fields WHERE tooltip_id = ?";
+				$queryid = "SELECT field_id FROM screener_filter_fields WHERE metadata_id = ?";
 				$q = $this->db->prepare($queryid);
-				$q->execute(array($value["tooltip_id"]));
+				$q->execute(array($value["metadata_id"]));
 				$rid = $q->fetchColumn();
 				$counter++;
 				if(empty($rid)) {
@@ -104,7 +104,7 @@ class screener_filter {
 			}
 		}
 		//FINAL RUN
-		$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, tooltip_id) VALUES (?, ?, ?, ?)";
+		$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, metadata_id) VALUES (?, ?, ?, ?)";
 		$q = $this->db->prepare($query);
 		$query1 = "INSERT INTO screener_filter_criteria_temp (field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?)";
 		$q1 = $this->db->prepare($query1);
@@ -128,7 +128,7 @@ class screener_filter {
 
 		$u1 = "SELECT * FROM fields_metadata";
                 $r1 = $this->db->query($u1);
-		$u2 = "UPDATE fields_metadata SET field_type = ? WHERE tooltip_id = ?";
+		$u2 = "UPDATE fields_metadata SET field_type = ? WHERE metadata_id = ?";
 		$r2 = $this->db->prepare($u2);
                 while($row = $r1->fetch(PDO::FETCH_ASSOC)) {
 			$p1 = array();
@@ -140,7 +140,7 @@ class screener_filter {
                         } else {
                                 $p1[] = "N";
                         }
-			$p1[] = $row["tooltip_id"];
+			$p1[] = $row["metadata_id"];
 			$r2->execute($p1);
 		}
 	}
@@ -153,7 +153,7 @@ class screener_filter {
 		$index = 0;
 		$query = "SELECT * FROM fields_metadata ";
 		if(!empty($id) && is_numeric($id)) {
-			$query .= "WHERE tooltip_id = ?";
+			$query .= "WHERE metadata_id = ?";
 			$params[] = $id;
 		} else {
 			$cond = "WHERE ";
@@ -244,7 +244,7 @@ class screener_filter {
 			if($index) {
 				$result[$line["table_group"]][$line["field_name"]] = $line;
 			} else {
-				$result[$line["tooltip_id"]] = $line;
+				$result[$line["metadata_id"]] = $line;
 			}
 		}
 		return $result;
