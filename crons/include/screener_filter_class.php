@@ -28,35 +28,11 @@ class screener_filter {
 		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_criteria_temp");
 		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_fields_temp LIKE screener_filter_fields");
 		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_criteria_temp LIKE screener_filter_criteria");
-		$counter = 0;
 		$pfinalrun = array();
 		for ($i = 0; $i<14; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
-				$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, metadata_id) VALUES (?, ?, ?, ?)";
-				switch($i) {
-					case 3:
-					case 8:
-						$params[] = $counter+10000;
-						break;
-					case 9:
-						$params[] = $counter+20000;
-						break;
-					case 1:
-						$params[] = $counter+40000;
-						break;
-					case 2:
-						$params[] = $counter+30000;
-						break;
-					case 4:
-					case 5:
-					case 6:
-					case 7:
-						$params[] = $counter+50000;
-						break;
-					default:
-						$params[] = $counter;
-				}
+				$query = "INSERT INTO screener_filter_fields_temp (field_id, report_type, metadata_id) VALUES (?, ?, ?)";
 				if($i == 1) {
 					$params[] = "ANN";
 				} else if($i == 2) {
@@ -71,7 +47,6 @@ class screener_filter {
 				$q = $this->db->prepare($queryid);
 				$q->execute(array($value["metadata_id"]));
 				$rid = $q->fetchColumn();
-				$counter++;
 				if(empty($rid)) {
 					array_unshift($params, NULL);
 					$pfinalrun[] = $params;
@@ -104,7 +79,7 @@ class screener_filter {
 			}
 		}
 		//FINAL RUN
-		$query = "INSERT INTO screener_filter_fields_temp (field_id, field_order, report_type, metadata_id) VALUES (?, ?, ?, ?)";
+		$query = "INSERT INTO screener_filter_fields_temp (field_id, report_type, metadata_id) VALUES (?, ?, ?)";
 		$q = $this->db->prepare($query);
 		$query1 = "INSERT INTO screener_filter_criteria_temp (field_id, crit_text, crit_cond, crit_order) VALUES (?, ?, ?, ?)";
 		$q1 = $this->db->prepare($query1);
@@ -126,9 +101,10 @@ class screener_filter {
 		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_fields_temp");
 		$q = $this->db->query("DROP TEMPORARY TABLE IF EXISTS screener_filter_criteria_temp");
 
-		$u1 = "SELECT * FROM fields_metadata";
+		$counter = 0;
+		$u1 = "SELECT * FROM fields_metadata order by title";
                 $r1 = $this->db->query($u1);
-		$u2 = "UPDATE fields_metadata SET field_type = ? WHERE metadata_id = ?";
+		$u2 = "UPDATE fields_metadata SET field_type = ?, field_order = ? WHERE metadata_id = ?";
 		$r2 = $this->db->prepare($u2);
                 while($row = $r1->fetch(PDO::FETCH_ASSOC)) {
 			$p1 = array();
@@ -139,6 +115,36 @@ class screener_filter {
                                 $p1[] = "S";
                         } else {
                                 $p1[] = "N";
+                        }
+			$counter++;
+                        switch($row["table_group"]) {
+                                case 3:
+                                case 8:
+                                        $p1[] = $counter+10000;
+                                        break;
+                                case 9:
+                                        $p1[] = $counter+20000;
+                                        break;
+                                case 1:
+                                        $p1[] = $counter+40000;
+                                        break;
+                                case 2:
+                                        $p1[] = $counter+30000;
+                                        break;
+                                case 4:
+                                        $p1[] = $counter+50000;
+                                        break;
+                                case 5:
+                                        $p1[] = $counter+60000;
+                                        break;
+                                case 6:
+                                        $p1[] = $counter+70000;
+                                        break;
+                                case 7:
+                                        $p1[] = $counter+80000;
+                                        break;
+                                default:
+                                        $p1[] = $counter;
                         }
 			$p1[] = $row["metadata_id"];
 			$r2->execute($p1);
