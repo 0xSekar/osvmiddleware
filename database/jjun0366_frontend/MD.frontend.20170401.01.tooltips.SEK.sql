@@ -26,3 +26,6 @@ ALTER TABLE  `fields_metadata` ADD  `field_type` CHAR( 1 ) NULL ,
 ADD  `good_increase` TINYINT NULL;
 
 ALTER TABLE  `fields_metadata` ADD  `field_order` INT NOT NULL DEFAULT  '0';
+
+ALTER TABLE  `fields_metadata` CHANGE  `tooltip`  `tooltip` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+
