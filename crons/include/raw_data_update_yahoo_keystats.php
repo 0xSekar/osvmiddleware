@@ -53,7 +53,7 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 	$query = "INSERT INTO `tickers_yahoo_keystats_2` (`ticker_id` ,`Beta` ,`52WeekChange` ,`52WeekChangeSPS500` ,`52WeekHighDate` ,`52WeekHighValue` ,`52WeekLowDate` ,`52WeekLowValue` ,`50DayMovingAverage` ,`200DayMovingAverage` ,`AvgVolume3Month` ,`AvgVolume10Days` ,`SharesOutstanding` ,`Float` ,`PercentageHeldByInsiders` ,`PercentageHeldByInstitutions` ,`SharesShortDate` ,`SharesShortValue` ,`SharesShortPriorMonth` ,`ShortRatioDate` ,`ShortRatio` ,`ShortPercentageOfFloatDate` ,`ShortPercentageOfFloat` ,`ForwardAnnualDividendRate` ,`ForwardAnnualDividendYield` ,`TrailingAnnualDividendRate` ,`TrailingAnnualDividendYield` ,`5YearAverageDividendYield` ,`PayoutRatio` ,`DividendDate` ,`ExDividendDate` ,`LastSplitFactorTerm` ,`LastSplitFactor` ,`LastSplitDate`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `Beta` = ? ,`52WeekChange` = ? ,`52WeekChangeSPS500` = ? ,`50DayMovingAverage` = ? ,`200DayMovingAverage` = ? ,`SharesOutstanding` = ? ,`Float` = ? ,`PercentageHeldByInsiders` = ? ,`PercentageHeldByInstitutions` = ? ,`SharesShortDate` = ? ,`SharesShortValue` = ? ,`SharesShortPriorMonth` = ? ,`ShortRatioDate` = ? ,`ShortRatio` = ? ,`ShortPercentageOfFloatDate` = ? ,`ShortPercentageOfFloat` = ? ,`TrailingAnnualDividendRate` = ? ,`TrailingAnnualDividendYield` = ? ,`5YearAverageDividendYield` = ? ,`PayoutRatio` = ? ,`DividendDate` = ? ,`LastSplitFactorTerm` = ? ,`LastSplitFactor` = ? ,`LastSplitDate` = ?, `ForwardAnnualDividendRate` = ?,`ForwardAnnualDividendYield` =?";
 	$params = array();
 	$params[] = $ticker_id;
-	$params[] = (!isset($rawdata->Beta->raw) || !is_numeric($rawdata->Beta->raw)?NULL:$rawdata->Beta->raw);
+	$params[] = (!isset($rawdata->beta->raw) || !is_numeric($rawdata->beta->raw)?NULL:$rawdata->beta->raw);
 	$params[] = (!isset($rawdata->_2WeekChange->raw) || !is_numeric($rawdata->_2WeekChange->raw)?NULL:($rawdata->_2WeekChange->raw * 100));
 	$params[] = (!isset($rawdata->SandP52WeekChange->raw) || !is_numeric($rawdata->SandP52WeekChange->raw)?NULL:($rawdata->SandP52WeekChange->raw * 100));
 	$params[] = NULL;
@@ -87,7 +87,7 @@ function update_raw_data_yahoo_keystats($ticker_id, $rawdata) {
 	$params[] = str_replace('/', ':', $rawdata->lastSplitFactor);
 	$params[] = (!isset($rawdata->lastSplitDate->fmt))?NULL:date("Y-m-d", strtotime($rawdata->lastSplitDate->fmt));
 
-        $params[] = (!isset($rawdata->Beta->raw) || !is_numeric($rawdata->Beta->raw)?NULL:$rawdata->Beta->raw);
+        $params[] = (!isset($rawdata->beta->raw) || !is_numeric($rawdata->beta->raw)?NULL:$rawdata->beta->raw);
         $params[] = (!isset($rawdata->_2WeekChange->raw) || !is_numeric($rawdata->_2WeekChange->raw)?NULL:($rawdata->_2WeekChange->raw * 100));
         $params[] = (!isset($rawdata->SandP52WeekChange->raw) || !is_numeric($rawdata->SandP52WeekChange->raw)?NULL:($rawdata->SandP52WeekChange->raw * 100));
         $params[] = (!isset($rawdata->fiftyDayAverage->raw) || !is_numeric($rawdata->fiftyDayAverage->raw)?NULL:$rawdata->fiftyDayAverage->raw);
