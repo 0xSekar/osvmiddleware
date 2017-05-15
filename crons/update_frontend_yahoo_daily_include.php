@@ -407,7 +407,7 @@ function update_yahoo_daily($pticker = NULL) {
         $sresponse = new stdClass();
         $split_date = date("Ymd",strtotime($row["last_split_date"]));
         if($yquery) {
-            $sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+            $sresponse = $yql->execute("select * from osv.finance.splits_new where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
         }
         $sym = $row["ticker"]; //get symbol from yahoo rawdata
 
@@ -417,7 +417,7 @@ function update_yahoo_daily($pticker = NULL) {
         $resOD = file_get_contents($queryOD);
         $resJS = json_decode($resOD, true);
 
-        if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date)) {
+        if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->splits) && isset($sresponse->query->results->splits->SplitDate) && $sresponse->query->results->splits->SplitDate > $split_date)) {
             $resJS1 = array();
             $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
             $resOD1 = file_get_contents($queryOD1);
@@ -455,16 +455,16 @@ function update_yahoo_daily($pticker = NULL) {
             } else {
                 $herrors ++;
             }
-            if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->SplitDate) && $sresponse->query->results->SplitDate > $split_date) {
+            if (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->splits) && isset($sresponse->query->results->splits->SplitDate) && $sresponse->query->results->splits->SplitDate > $split_date) {
                 try {
                     $res1 = $db->prepare("UPDATE tickers_control SET last_split_date = ? WHERE ticker_id = ?");
-                    $res1->execute(array((date("Y-m-d",strtotime($sresponse->query->results->SplitDate))), $row["id"]));
+                    $res1->execute(array((date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate))), $row["id"]));
                 } catch(PDOException $ex) {
                     echo "\nDatabase Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
 
-                //UPDATE DIVIDEN HISTORY
+                //UPDATE DIVIDEND HISTORY
                 $divresponse = $yql->execute("select * from yahoo.finance.dividendhistory where startDate = '".date("Y-m-d", strtotime("-15 years"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
                 if(isset($response->query) && isset($response->query->results)) {
                     foreach($divresponse->query->results->quote as $element) {
@@ -487,11 +487,26 @@ function update_yahoo_daily($pticker = NULL) {
                     }
                 }
 
+                //UPDATE PORTFOLIOS
+                list($splitFactor_div, $splitFactor_mul) = explode(":", $sresponse->query->results->splits->SplitFactor);
+                try {
+                    $query_port = "UPDATE portfolio_stocks SET current_shares = current_shares * ? / ? WHERE ticker_id = ?";
+                    $res_port = $db->prepare($query_port);
+                    $res_port->execute(array($splitFactor_div,$splitFactor_mul,$row["id"]));
+                    $query_port = "UPDATE portfolio_transactions SET transac_price = transac_price * ? / ?, transac_shares = transac_shares * ? / ?, cost_per_share = cost_per_share * ? / ? WHERE ticker_id = ?";
+                    $res_port = $db->prepare($query_port);
+                    $res_port->execute(array($splitFactor_mul, $splitFactor_div, $splitFactor_div, $splitFactor_mul, $splitFactor_mul, $splitFactor_div, $row["id"]));
+                } catch(PDOException $ex) {
+                    echo "\nDatabase Error"; //user message
+                    die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
+
+                //INFORM BACKEND
                 if(is_null($pticker)) {
                     if($resJS['status']['code'] == 200 && !is_null($resJS['results'][0]['sharesOutstanding'])){
                         $sharesOut = $resJS['results'][0]['sharesOutstanding']/1000;
                         //report to webservice so backend updates his own data
-                        $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
+                        $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
                     } else {
                         if($yquery) {
                             //Need to get latest shares outstandings from yahoo quotes to compare on webservices
@@ -501,7 +516,7 @@ function update_yahoo_daily($pticker = NULL) {
                                 $sharesOut = $response->query->results->quote->SharesOutstanding / 1000000;
                             }
                             //report to webservice so backend updates his own data
-                            $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
+                            $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
                         }
                     }
                 }
