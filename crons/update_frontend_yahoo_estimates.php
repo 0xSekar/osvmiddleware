@@ -21,15 +21,15 @@ while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
 try {
-	$res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
+    $res = $db->query("SELECT value FROM system WHERE parameter = 'query_yahoo'");
 } catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("Line: ".__LINE__." - ".$ex->getMessage());
+    echo "\nDatabase Error"; //user message
+    die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 $row = $res->fetch(PDO::FETCH_ASSOC);
 if($row["value"] == 0) {
-	echo "Skip process as yahoo queries are currently dissabled.\n";
-	exit;
+    echo "Skip process as yahoo queries are currently dissabled.\n";
+    exit;
 }
 
 //Using customized Yahoo Social SDK (The default version does not work)
@@ -43,137 +43,137 @@ $eerrors = 0;
 echo "Updating Tickers...\n";
 //Analyst Estimates needs more frequent updates
 try {
-	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE");
+    $res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE");
 } catch(PDOException $ex) {
-	echo "\nDatabase Error"; //user message
-	die("Line: ".__LINE__." - ".$ex->getMessage());
+    echo "\nDatabase Error"; //user message
+    die("Line: ".__LINE__." - ".$ex->getMessage());
 }
 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-	$count2++;
-	echo "Updating ".$row["ticker"]." Estimates...";
-	//UPDATE ESTIMATES
-	//Try to get yahoo data for the ticker
-	$response = $yql->execute("select * from osv.finance.analystestimate_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
-	if(isset($response->query) && isset($response->query->results)) {
-		//Check if the symbol exists
-		if(isset($response->query->results->result->earningsTrend) && $response->query->results->result->earningsTrend->trend[0]->endDate !== "null") {
-			$rawdata = new stdClass();
-			$rawdata->earningsHistory = new stdClass();
-			$rawdata->currQtr = new stdClass();
-			$rawdata->nextQtr = new stdClass();
-			$rawdata->currYear = new stdClass();
-			$rawdata->nextYear = new stdClass();
-			$rawdata->plus5Year = new stdClass();
-			$rawdata->minus5Year = new stdClass();
-			$rawdata->industryPegRatio = null;
-			$rawdata->sectorPegRatio = null;
-			$rawdata->sp500PegRatio = null;
-			$rawdata->industryPeRatio = null;
-			$rawdata->sectorPeRatio = null;
-			$rawdata->sp500PeRatio = null;
-			//Get dates from fetched ticker
-			if(isset($response->query->results->result->earningsHistory)) {
-				foreach($response->query->results->result->earningsHistory->history as $value) {
-					if($value->period == "-4q") {
-						$rawdata->earningsHistory->minus4q = $value;
-					} elseif($value->period == "-3q") {
-						$rawdata->earningsHistory->minus3q = $value;
-					} elseif($value->period == "-2q") {
-						$rawdata->earningsHistory->minus2q = $value;
-					} elseif($value->period == "-1q") {
-						$rawdata->earningsHistory->minus1q = $value;
-					}
-				}
-			}
-			foreach($response->query->results->result->earningsTrend->trend as $value) {
-				if($value->period == "0q" && $value->endDate !== "null") {
-					$rawdata->currQtr = $value;
-				} elseif ($value->period == "+1q" && $value->endDate !== "null") {
-					$rawdata->nextQtr = $value;
-				} elseif ($value->period == "0y" && $value->endDate !== "null") {
-					$rawdata->currYear = $value;
-				} elseif ($value->period == "+1y" && $value->endDate !== "null") {
-					$rawdata->nextYear = $value;
-				} elseif ($value->period == "+5y" && $value->endDate !== "null") {
-					$rawdata->plus5Year = $value;
-				} elseif ($value->period == "-5y" && $value->endDate !== "null") {
-					$rawdata->minus5Year = $value;
-				}
-			}
-			if(isset($response->query->results->result->industryTrend)) {
-				$rawdata->industryPegRatio = $response->query->results->result->industryTrend->pegRatio;
-				$rawdata->industryPeRatio = $response->query->results->result->industryTrend->peRatio;
-				if(isset($response->query->results->result->industryTrend->estimates)) {
-					foreach($response->query->results->result->industryTrend->estimates as $value) {
-						if($value->period == "0q") {
-							$rawdata->currQtr->industryTrend = $value;
-						} elseif($value->period == "+1q") {
-							$rawdata->nextQtr->industryTrend = $value;
-						} elseif($value->period == "0y") {
-							$rawdata->currYear->industryTrend = $value;
-						} elseif($value->period == "+1y") {
-							$rawdata->nextYear->industryTrend = $value;
-						} elseif($value->period == "+5y") {
-							$rawdata->plus5Year->industryTrend = $value;
-						} elseif($value->period == "-5y") {
-							$rawdata->minus5Year->industryTrend = $value;
-						}
-					}
-				}
-			}
-			if(isset($response->query->results->result->sectorTrend)) {
-				$rawdata->sectorPegRatio = $response->query->results->result->sectorTrend->pegRatio;
-				$rawdata->sectorPeRatio = $response->query->results->result->sectorTrend->peRatio;
-				if(isset($response->query->results->result->sectorTrend->estimates)) {
-					foreach($response->query->results->result->sectorTrend->estimates as $value) {
-						if($value->period == "0q") {
-							$rawdata->currQtr->sectorTrend = $value;
-						} elseif($value->period == "+1q") {
-							$rawdata->nextQtr->sectorTrend = $value;
-						} elseif($value->period == "0y") {
-							$rawdata->currYear->sectorTrend = $value;
-						} elseif($value->period == "+1y") {
-							$rawdata->nextYear->sectorTrend = $value;
-						} elseif($value->period == "+5y") {
-							$rawdata->plus5Year->sectorTrend = $value;
-						} elseif($value->period == "-5y") {
-							$rawdata->minus5Year->sectorTrend = $value;
-						}
-					}
-				}
-			}
-			if(isset($response->query->results->result->indexTrend)) {
-				$rawdata->sp500PegRatio = $response->query->results->result->indexTrend->pegRatio;
-				$rawdata->sp500PeRatio = $response->query->results->result->indexTrend->peRatio;
-				if(isset($response->query->results->result->indexTrend->estimates)) {
-					foreach($response->query->results->result->indexTrend->estimates as $value) {
-						if($value->period == "0q") {
-							$rawdata->currQtr->sp500Trend = $value;
-						} elseif($value->period == "+1q") {
-							$rawdata->nextQtr->sp500Trend = $value;
-						} elseif($value->period == "0y") {
-							$rawdata->currYear->sp500Trend = $value;
-						} elseif($value->period == "+1y") {
-							$rawdata->nextYear->sp500Trend = $value;
-						} elseif($value->period == "+5y") {
-							$rawdata->plus5Year->sp500Trend = $value;
-						} elseif($value->period == "-5y") {
-							$rawdata->minus5Year->sp500Trend = $value;
-						}
-					}
-				}
-			}
-			update_raw_data_yahoo_estimates($row["id"], $rawdata);
-			$eupdated ++;
-		} else {
-			$enotfound ++;
-		}
-	} elseif(isset($response->error)) {
-		$eerrors ++;
-	} else {
-		$eerrors ++;
-	}
-	echo " Done\n";
+    $count2++;
+    echo "Updating ".$row["ticker"]." Estimates...";
+    //UPDATE ESTIMATES
+    //Try to get yahoo data for the ticker
+    $response = $yql->execute("select * from osv.finance.analystestimate_new where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
+    if(isset($response->query) && isset($response->query->results)) {
+        //Check if the symbol exists
+        if(isset($response->query->results->result) && isset($response->query->results->result->earningsTrend) && isset($response->query->results->result->earningsTrend->trend) && $response->query->results->result->earningsTrend->trend[0]->endDate !== "null") {
+            $rawdata = new stdClass();
+            $rawdata->earningsHistory = new stdClass();
+            $rawdata->currQtr = new stdClass();
+            $rawdata->nextQtr = new stdClass();
+            $rawdata->currYear = new stdClass();
+            $rawdata->nextYear = new stdClass();
+            $rawdata->plus5Year = new stdClass();
+            $rawdata->minus5Year = new stdClass();
+            $rawdata->industryPegRatio = null;
+            $rawdata->sectorPegRatio = null;
+            $rawdata->sp500PegRatio = null;
+            $rawdata->industryPeRatio = null;
+            $rawdata->sectorPeRatio = null;
+            $rawdata->sp500PeRatio = null;
+            //Get dates from fetched ticker
+            if(isset($response->query->results->result->earningsHistory)) {
+                foreach($response->query->results->result->earningsHistory->history as $value) {
+                    if($value->period == "-4q") {
+                        $rawdata->earningsHistory->minus4q = $value;
+                    } elseif($value->period == "-3q") {
+                        $rawdata->earningsHistory->minus3q = $value;
+                    } elseif($value->period == "-2q") {
+                        $rawdata->earningsHistory->minus2q = $value;
+                    } elseif($value->period == "-1q") {
+                        $rawdata->earningsHistory->minus1q = $value;
+                    }
+                }
+            }
+            foreach($response->query->results->result->earningsTrend->trend as $value) {
+                if($value->period == "0q" && $value->endDate !== "null") {
+                    $rawdata->currQtr = $value;
+                } elseif ($value->period == "+1q" && $value->endDate !== "null") {
+                    $rawdata->nextQtr = $value;
+                } elseif ($value->period == "0y" && $value->endDate !== "null") {
+                    $rawdata->currYear = $value;
+                } elseif ($value->period == "+1y" && $value->endDate !== "null") {
+                    $rawdata->nextYear = $value;
+                } elseif ($value->period == "+5y" && $value->endDate !== "null") {
+                    $rawdata->plus5Year = $value;
+                } elseif ($value->period == "-5y" && $value->endDate !== "null") {
+                    $rawdata->minus5Year = $value;
+                }
+            }
+            if(isset($response->query->results->result->industryTrend)) {
+                $rawdata->industryPegRatio = $response->query->results->result->industryTrend->pegRatio;
+                $rawdata->industryPeRatio = $response->query->results->result->industryTrend->peRatio;
+                if(isset($response->query->results->result->industryTrend->estimates)) {
+                    foreach($response->query->results->result->industryTrend->estimates as $value) {
+                        if($value->period == "0q") {
+                            $rawdata->currQtr->industryTrend = $value;
+                        } elseif($value->period == "+1q") {
+                            $rawdata->nextQtr->industryTrend = $value;
+                        } elseif($value->period == "0y") {
+                            $rawdata->currYear->industryTrend = $value;
+                        } elseif($value->period == "+1y") {
+                            $rawdata->nextYear->industryTrend = $value;
+                        } elseif($value->period == "+5y") {
+                            $rawdata->plus5Year->industryTrend = $value;
+                        } elseif($value->period == "-5y") {
+                            $rawdata->minus5Year->industryTrend = $value;
+                        }
+                    }
+                }
+            }
+            if(isset($response->query->results->result->sectorTrend)) {
+                $rawdata->sectorPegRatio = $response->query->results->result->sectorTrend->pegRatio;
+                $rawdata->sectorPeRatio = $response->query->results->result->sectorTrend->peRatio;
+                if(isset($response->query->results->result->sectorTrend->estimates)) {
+                    foreach($response->query->results->result->sectorTrend->estimates as $value) {
+                        if($value->period == "0q") {
+                            $rawdata->currQtr->sectorTrend = $value;
+                        } elseif($value->period == "+1q") {
+                            $rawdata->nextQtr->sectorTrend = $value;
+                        } elseif($value->period == "0y") {
+                            $rawdata->currYear->sectorTrend = $value;
+                        } elseif($value->period == "+1y") {
+                            $rawdata->nextYear->sectorTrend = $value;
+                        } elseif($value->period == "+5y") {
+                            $rawdata->plus5Year->sectorTrend = $value;
+                        } elseif($value->period == "-5y") {
+                            $rawdata->minus5Year->sectorTrend = $value;
+                        }
+                    }
+                }
+            }
+            if(isset($response->query->results->result->indexTrend)) {
+                $rawdata->sp500PegRatio = $response->query->results->result->indexTrend->pegRatio;
+                $rawdata->sp500PeRatio = $response->query->results->result->indexTrend->peRatio;
+                if(isset($response->query->results->result->indexTrend->estimates)) {
+                    foreach($response->query->results->result->indexTrend->estimates as $value) {
+                        if($value->period == "0q") {
+                            $rawdata->currQtr->sp500Trend = $value;
+                        } elseif($value->period == "+1q") {
+                            $rawdata->nextQtr->sp500Trend = $value;
+                        } elseif($value->period == "0y") {
+                            $rawdata->currYear->sp500Trend = $value;
+                        } elseif($value->period == "+1y") {
+                            $rawdata->nextYear->sp500Trend = $value;
+                        } elseif($value->period == "+5y") {
+                            $rawdata->plus5Year->sp500Trend = $value;
+                        } elseif($value->period == "-5y") {
+                            $rawdata->minus5Year->sp500Trend = $value;
+                        }
+                    }
+                }
+            }
+            update_raw_data_yahoo_estimates($row["id"], $rawdata);
+            $eupdated ++;
+        } else {
+            $enotfound ++;
+        }
+    } elseif(isset($response->error)) {
+        $eerrors ++;
+    } else {
+        $eerrors ++;
+    }
+    echo " Done\n";
 }
 
 echo $count2 . " rows processed\n";
@@ -184,22 +184,22 @@ echo "\t".$enotfound." tickers not found on yahoo\n";
 echo "\t".$eerrors." errors updating tickers\n";
 
 function toFloat($num) {
-	if (is_null($num)) {
-		return 'null';
-	}
+    if (is_null($num)) {
+        return 'null';
+    }
 
-	$dotPos = strrpos($num, '.');
-	$commaPos = strrpos($num, ',');
-	$sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
-		((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+    $dotPos = strrpos($num, '.');
+    $commaPos = strrpos($num, ',');
+    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
+        ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
 
-	if (!$sep) {
-		return floatval(preg_replace("/[^\-0-9]/", "", $num));
-	}
+    if (!$sep) {
+        return floatval(preg_replace("/[^\-0-9]/", "", $num));
+    }
 
-	return floatval(
-			preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
-			preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
-		       );
+    return floatval(
+            preg_replace("/[^\-0-9]/", "", substr($num, 0, $sep)) . '.' .
+            preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
+            );
 }
 ?>
