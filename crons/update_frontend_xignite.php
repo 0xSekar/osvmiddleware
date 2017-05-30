@@ -125,7 +125,7 @@ function xigniteString($data, $full) {
 		} else if ($estimate->DataType == "Date" && $estimate->DataFormat == "yyyyMM") {
 			$query .= "'" . substr($estimate->Value,0,4) ."-". substr($estimate->Value,4,2) . "-01'";
 		} else {
-			$query .= (strlen($estimate->Value)==0?"NULL":str_replace(',', '', $estimate->Value));
+			$query .= (strlen($estimate->Value)==0?"NULL":str_replace(',', '', $db->quote($estimate->Value)));
 		}
 	}
 	return $query;
