@@ -177,7 +177,11 @@ function updateCAGR_KR($table, $years, $i, $report_id, $rawdata, $ticker_id) {
 	$vv = $price_v;
 	$query .= updateCAGR_concat($vv, $va, $years);
 	$va = ((($rawdata["GrossProfit"][$i]=='null'&&$rawdata["OperatingExpenses"][$i]=='null' && is_null($CapEx_a)) || $rawdata["TaxRatePercent"][$i]=='null')?'null':(($rawdata["GrossProfit"][$i]-$rawdata["OperatingExpenses"][$i]-$CapEx_a)*(1-$rawdata["TaxRatePercent"][$i])));
-	$vv = ((($rawdata["GrossProfit"][$i-$years]=='null'&&$rawdata["OperatingExpenses"][$i-$years]=='null' && is_null($CapEx_v)) || $rawdata["TaxRatePercent"][$i-$years]=='null')?'null':(($rawdata["GrossProfit"][$i-$years]-$rawdata["OperatingExpenses"][$i-$years]-$CapEx_v)*(1-$rawdata["TaxRatePercent"][$i-$years])));
+        if(!isset($rawdata["GrossProfit"][$i-$years]) || !isset($rawdata["OperatingExpenses"][$i-$years]) || !isset($rawdata["TaxRatePercent"][$i-$years])) {
+            $vv = 'null';
+        } else {
+    	    $vv = ((($rawdata["GrossProfit"][$i-$years]=='null'&&$rawdata["OperatingExpenses"][$i-$years]=='null' && is_null($CapEx_v)) || $rawdata["TaxRatePercent"][$i-$years]=='null')?'null':(($rawdata["GrossProfit"][$i-$years]-$rawdata["OperatingExpenses"][$i-$years]-$CapEx_v)*(1-$rawdata["TaxRatePercent"][$i-$years])));
+        }
 	$query .= updateCAGR_concat($vv, $va, $years);
 	$va = (($rawdata["SharesOutstandingDiluted"][$i]=='null'||is_null($price_a))?'null':(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price_a));
 	$vv = (($rawdata["SharesOutstandingDiluted"][$i-$years]=='null'||is_null($price_v))?'null':(toFloat($rawdata["SharesOutstandingDiluted"][$i-$years])*1000000*$price_v));
