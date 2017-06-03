@@ -5,10 +5,10 @@
             Sergio Karsvnie
         </author>
         <description>
-            Yahoo Finance - Get Latest Split
+            Yahoo Finance - Dividend History
         </description>
         <sampleQuery>
-            SELECT * FROM osv.finance.splits WHERE symbol='T'
+            SELECT * FROM osv.finance.dividendhistory WHERE symbol='T' and startDate="2016-02-02" and endDate="2017-02-02"
         </sampleQuery>
     </meta>
     <bindings>
@@ -19,6 +19,8 @@
             </urls>
             <inputs>
                 <key id="symbol" type="xs:string" paramType="variable" required="true" />
+                <key id="startDate" type="xs:string" paramType="variable" required="true"/>
+                <key id="endDate" type="xs:string" paramType="variable" required="true"/>
             </inputs>
             <execute>
                 <![CDATA[
@@ -27,21 +29,18 @@
                     var restquery = y.rest( url );
                     var rawresult = restquery.accept( "text/html" ).get().response.toString();
                     // Setup Second Query from finance.yahoo.com
-                    var period1 = (y.date.getOffsetFromEpochInMillis("-15 year")/1000).toFixed(0);
-                    var period2 = (y.date.getOffsetFromEpochInMillis("now")/1000).toFixed(0);
+                    var period1 = (y.date.getOffsetFromEpochInMillis(startDate)/1000).toFixed(0);
+                    var period2 = ((y.date.getOffsetFromEpochInMillis(endDate)/1000)+36000).toFixed(0);
                     var url2 = "https://query2.finance.yahoo.com/v8/finance/chart/"+symbol+"?formatted=true&crumb=Q3iB.HnhxjZ&lang=en-US&region=US&period1="+period1+"&period2="+period2+"&interval=1d&events=div%7Csplit&corsDomain=finance.yahoo.com";
                     var restquery2 = y.rest( url2 );
                     var r2 = restquery2.accept( "application/json" ).get().response;
                     r2 = y.xmlToJson(r2);
-                    r2 = r2.chart.result.events.splits;
-                    var rf = {"splits":{}};
-                    var start = 0;
+                    r2 = r2.chart.result.events.dividends;
+                    var rf = {"quote":{}};
                     for (var attrname in r2) {
-                        if(parseInt(r2[attrname].date) > start) {
-                            start = parseInt(r2[attrname].date);
-                            rf.splits.SplitFactor=r2[attrname].splitRatio;
-                            rf.splits.SplitDate=new Date(parseInt(r2[attrname].date * 1000)).toISOString().slice(0,10);
-                        }
+                        rf.quote[attrname] = {};
+                        rf.quote[attrname].Dividends=r2[attrname].amount;
+                        rf.quote[attrname].Date=new Date(parseInt(r2[attrname].date * 1000)).toISOString().slice(0,10);
                     }
                     response.object = rf;
                 ]]>

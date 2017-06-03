@@ -69,7 +69,7 @@ function update_yahoo_daily($pticker = NULL) {
 
         if($yquery) {
             //UPDATE DIVIDEN HISTORY
-            $response = $yql->execute("select * from yahoo.finance.dividendhistory where startDate = '".date("Y-m-d", strtotime("-1 years"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
+            $response = $yql->execute("select * from osv.finance.dividendhistory where startDate = '".date("Y-m-d", strtotime("-1 years"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
             if(isset($response->query) && isset($response->query->results)) {
                 foreach($response->query->results->quote as $element) {
                     if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
@@ -405,12 +405,11 @@ function update_yahoo_daily($pticker = NULL) {
         }
 
         $sresponse = new stdClass();
-        $split_date = date("Ymd",strtotime($row["last_split_date"]));
+        $split_date = date("Y-m-d",strtotime($row["last_split_date"]));
         if($yquery) {
-            $sresponse = $yql->execute("select * from osv.finance.splits_new where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
+            $sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
         }
         $sym = $row["ticker"]; //get symbol from yahoo rawdata
-
         //Prequering Quotes in case we need for splits
         $resJS = array();
         $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume";
@@ -465,7 +464,7 @@ function update_yahoo_daily($pticker = NULL) {
                 }
 
                 //UPDATE DIVIDEND HISTORY
-                $divresponse = $yql->execute("select * from yahoo.finance.dividendhistory where startDate = '".date("Y-m-d", strtotime("-15 years"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://datatables.org/alltableswithkeys");	
+                $divresponse = $yql->execute("select * from osv.finance.dividendhistory where startDate = '".date("Y-m-d", strtotime("-15 years"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
                 if(isset($response->query) && isset($response->query->results)) {
                     foreach($divresponse->query->results->quote as $element) {
                         if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
@@ -488,7 +487,7 @@ function update_yahoo_daily($pticker = NULL) {
                 }
 
                 //UPDATE PORTFOLIOS
-                list($splitFactor_div, $splitFactor_mul) = explode(":", $sresponse->query->results->splits->SplitFactor);
+                list($splitFactor_div, $splitFactor_mul) = explode("/", $sresponse->query->results->splits->SplitFactor);
                 try {
                     $query_port = "UPDATE portfolio_stocks SET current_shares = current_shares * ? / ? WHERE ticker_id = ?";
                     $res_port = $db->prepare($query_port);
