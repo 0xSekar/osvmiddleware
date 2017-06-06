@@ -22,3 +22,7 @@ NULL , NULL ,  'RealizedGain',  'Realized P&L',  'Realized P&L',  'osvcurrency:1
 INSERT INTO  `fields_metadata` (`metadata_id` ,`table_name` ,`field_name` ,`title` ,`short_title` ,`format` ,`min` ,`max` ,`table_group` ,`field_group` ,`tooltip` ,`field_type` ,`good_increase` ,`field_order`) VALUES (
 NULL , NULL ,  'TotalGain',  'Total P&L',  'Total P&L',  'osvcurrency:1', NULL , NULL ,  '-10', NULL ,  'Total P&L',  'N', NULL ,  '90010'
 );
+
+INSERT INTO  `fields_metadata` (`metadata_id` ,`table_name` ,`field_name` ,`title` ,`short_title` ,`format` ,`min` ,`max` ,`table_group` ,`field_group` ,`tooltip` ,`field_type` ,`good_increase` ,`field_order`) VALUES (
+NULL , NULL ,  'OverallReturn',  'Overall Return',  'Overall Return',  'osvpercent:2:true', NULL , NULL ,  '-10', NULL ,  'Overall Return', 'N', NULL ,  '90011'
+);
