@@ -8,7 +8,7 @@ function updateCAGR($table, $fieldArray, $years, $period, $report_id, $rawdata, 
 	$query .= ") VALUES (";
 	$query .= "'".$report_id."'";
 	foreach ($fieldArray as $value) {
-		if ($rawdata[$value][$period]=='null' || $rawdata[$value][$period-$years]=='null' || $rawdata[$value][$period-$years]==0 || ($rawdata[$value][$period] < 0 && $rawdata[$value][$period-$years] > 0) || ($rawdata[$value][$period] > 0 && $rawdata[$value][$period-$years] < 0)) {
+		if (!isset($rawdata[$value]) || $rawdata[$value][$period]=='null' || $rawdata[$value][$period-$years]=='null' || $rawdata[$value][$period-$years]==0 || ($rawdata[$value][$period] < 0 && $rawdata[$value][$period-$years] > 0) || ($rawdata[$value][$period] > 0 && $rawdata[$value][$period-$years] < 0)) {
 			$query .= ",null";
 		} else {
 			if ($toFloat) {
@@ -388,6 +388,30 @@ function updateCAGR_V($table, $years, $i, $report_id, $rawdata, $ticker_id) {
                 $price_v = $price_v["adj_close"];
         }
 
+        if(!isset($rawdata["CashCashEquivalentsandShorttermInvestments"])) {
+            $rawdata["CashCashEquivalentsandShorttermInvestments"][$i] = 0;
+            $rawdata["CashCashEquivalentsandShorttermInvestments"][$i-$years] = 0;
+        }
+        if(!isset($rawdata["TotalReceivablesNet"])) {
+            $rawdata["TotalReceivablesNet"][$i] = 0;
+            $rawdata["TotalReceivablesNet"][$i-$years] = 0;
+        }
+        if(!isset($rawdata["TotalInventories"])) {
+            $rawdata["TotalInventories"][$i] = 0;
+            $rawdata["TotalInventories"][$i-$years] = 0;
+        }
+        if(!isset($rawdata["TotalLiabilities"])) {
+            $rawdata["TotalLiabilities"][$i] = 0;
+            $rawdata["TotalLiabilities"][$i-$years] = 0;
+        }
+        if(!isset($rawdata["TotalCurrentAssets"])) {
+            $rawdata["TotalCurrentAssets"][$i] = 0;
+            $rawdata["TotalCurrentAssets"][$i-$years] = 0;
+        }
+        if(!isset($rawdata["SharesOutstandingDiluted"])) {
+            $rawdata["SharesOutstandingDiluted"][$i] = 'null';
+            $rawdata["SharesOutstandingDiluted"][$i-$years] = 'null';
+        }
         $nnwc_a = $rawdata["CashCashEquivalentsandShorttermInvestments"][$i] + $rawdata["TotalReceivablesNet"][$i] * 0.75 + $rawdata["TotalInventories"][$i] * 0.5 * 1000000 - $rawdata["TotalLiabilities"][$i];
         $ncav_a = $rawdata["TotalCurrentAssets"][$i] - $rawdata["TotalLiabilities"][$i];
         $p_nnwc_a = (($rawdata["SharesOutstandingDiluted"][$i]=='null'||is_null($price_a)||$nnwc_a==0)? null:(toFloat($rawdata["SharesOutstandingDiluted"][$i])*1000000*$price_a/$nnwc_a));
