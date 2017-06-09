@@ -402,7 +402,7 @@ function update_dupont_checks($ti = null) {
     $idChange = true;
     $first = true;
     while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-        $query = "SELECT * FROM `reports_header` a, reports_incomeconsolidated b, reports_balanceconsolidated c, reports_incomefull d WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id= " . $row["id"];
+        $query = "SELECT * FROM `reports_header` a, reports_incomeconsolidated b, reports_balanceconsolidated c WHERE a.id=b.report_id AND a.id=c.report_id AND a.id= " . $row["id"];
         try {
             $res2 = $db->query($query);
         } catch(PDOException $ex) {
@@ -433,9 +433,8 @@ function update_dupont_checks($ti = null) {
         $params[] = $p3;
         $params[] = (is_null($p1) || is_null($p2) || is_null($p3) ? null : ($p1 * $p2 * $p3));
         $p1_b = ($rawdata["IncomeBeforeTaxes"] == 'null' || $rawdata["IncomeBeforeTaxes"] == 0 ? null : ($rawdata["NetIncome"] / $rawdata["IncomeBeforeTaxes"]));
-        $p2_dividend = ($rawdata["EBIT"] == 'null' || $rawdata["EBIT"] == 0 ? $rawdata["OperatingProfit"] : $rawdata["EBIT"]);
-        $p2_b = ($p2_dividend == 'null' || $p2_dividend == 0 ? null : ($rawdata["IncomeBeforeTaxes"] / $p2_dividend));
-        $p3_b = ($rawdata["TotalRevenue"] == 'null' || $rawdata["TotalRevenue"] == 0 ? null : ($p2_dividend / $rawdata["TotalRevenue"]));
+        $p2_b = ($rawdata["EBIT"] == 'null' || $rawdata["EBIT"] == 0 ? null : ($rawdata["IncomeBeforeTaxes"] / $rawdata["EBIT"]));
+        $p3_b = ($rawdata["TotalRevenue"] == 'null' || $rawdata["TotalRevenue"] == 0 ? null : ($rawdata["EBIT"] / $rawdata["TotalRevenue"]));
         $params[] = $p1_b;
         $params[] = $p2_b;
         $params[] = $p3_b;
@@ -754,7 +753,7 @@ function beneishTTM($ppid,$prawdata,$querypre) {
 
 function dupontTTM($ppid) {
     $db = Database::GetInstance();
-    $tquery = "SELECT * FROM ttm_incomeconsolidated a, ttm_balanceconsolidated b, ttm_incomefull c WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id= " . $ppid;
+    $tquery = "SELECT * FROM ttm_incomeconsolidated a, ttm_balanceconsolidated b WHERE a.ticker_id=b.ticker_id AND a.ticker_id= " . $ppid;
     try {
         $tres = $db->query($tquery);
     } catch(PDOException $ex) {
@@ -775,9 +774,8 @@ function dupontTTM($ppid) {
     $params[] = $p3;
     $params[] = (is_null($p1) || is_null($p2) || is_null($p3) ? null : ($p1 * $p2 * $p3));
     $p1_b = ($trawdata["IncomeBeforeTaxes"] == 'null' || $trawdata["IncomeBeforeTaxes"] == 0 ? null : ($trawdata["NetIncome"] / $trawdata["IncomeBeforeTaxes"]));
-    $p2_dividend = ($trawdata["EBIT"] == 'null' || $trawdata["EBIT"] == 0 ? $trawdata["OperatingProfit"] : $trawdata["EBIT"]);
-    $p2_b = ($p2_dividend == 'null' || $p2_dividend == 0 ? null : ($trawdata["IncomeBeforeTaxes"] / $p2_dividend));
-    $p3_b = ($trawdata["TotalRevenue"] == 'null' || $trawdata["TotalRevenue"] == 0 ? null : ($p2_dividend / $trawdata["TotalRevenue"]));
+    $p2_b = ($trawdata["EBIT"] == 'null' || $trawdata["EBIT"] == 0 ? null : ($trawdata["IncomeBeforeTaxes"] / $trawdata["EBIT"]));
+    $p3_b = ($trawdata["TotalRevenue"] == 'null' || $trawdata["TotalRevenue"] == 0 ? null : ($trawdata["EBIT"] / $trawdata["TotalRevenue"]));
     $params[] = $p1_b;
     $params[] = $p2_b;
     $params[] = $p3_b;
