@@ -9,3 +9,4 @@
 30 2 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /var/www/oldschoolvalue/middleware/crons/img_cleanup.sh 2>&1 | tail -n 200 | mail -s "Image Cache Cleanup Cron Output" cronreports.i9xgk@zapiermail.com
 30 3 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_portfolio_dividends.php 2>&1 | tail -n 200 | mail -s "Update Portfolio Dividends Cron Output" cronreports.i9xgk@zapiermail.com
 20 0,9,11,13,15,16 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_indexes.php 2>&1 | tail -n 200 | mail -s "Update Market Indexes" cronreports.i9xgk@zapiermail.com
+30 1 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/portfolio_cleanup.php 2>&1 | tail -n 200 | mail -s "Portfolio Cleanup" cronreports.i9xgk@zapiermail.com
