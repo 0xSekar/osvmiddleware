@@ -43,7 +43,7 @@ $eerrors = 0;
 echo "Updating Tickers...\n";
 //Analyst Estimates needs more frequent updates
 try {
-    $res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE");
+    $res = $db->query("SELECT t.*, tc.*, es.EE_PercentGrowthCurrentFiscalYearMeanOverMostRecentFiscalYearE, es.EE_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id LEFT JOIN tickers_xignite_estimates es ON t.id = es.ticker_id WHERE is_old = FALSE ORDER BY t.ticker");
 } catch(PDOException $ex) {
     echo "\nDatabase Error"; //user message
     die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -99,6 +99,13 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                 } elseif ($value->period == "-5y" && $value->endDate !== "null") {
                     $rawdata->minus5Year = $value;
                 }
+            }
+            //Replace yahoo by xignite values when possible
+            if(!is_null($row["EE_PercentGrowthCurrentFiscalYearMeanOverMostRecentFiscalYearE"])) {
+                $rawdata->currYear->growth->raw = $row["EE_PercentGrowthCurrentFiscalYearMeanOverMostRecentFiscalYearE"] / 100;
+            }
+            if(!is_null($row["EE_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean"])) {
+                $rawdata->nextYear->growth->raw = $row["EE_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean"] / 100;
             }
             if(isset($response->query->results->result->industryTrend)) {
                 $rawdata->industryPegRatio = $response->query->results->result->industryTrend->pegRatio;
