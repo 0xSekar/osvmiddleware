@@ -102,9 +102,11 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
             }
             //Replace yahoo by xignite values when possible
             if(!is_null($row["EE_PercentGrowthCurrentFiscalYearMeanOverMostRecentFiscalYearE"])) {
+                $rawdata->currYear->growth = new stdClass();
                 $rawdata->currYear->growth->raw = $row["EE_PercentGrowthCurrentFiscalYearMeanOverMostRecentFiscalYearE"] / 100;
             }
             if(!is_null($row["EE_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean"])) {
+                $rawdata->nextYear->growth = new stdClass();
                 $rawdata->nextYear->growth->raw = $row["EE_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean"] / 100;
             }
             if(isset($response->query->results->result->industryTrend)) {
