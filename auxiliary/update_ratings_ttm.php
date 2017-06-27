@@ -156,9 +156,20 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 //GET SORTED VALUE VARIABLES
 //EV/EBIT
 $position = 1;
-$query = "
+/*$query = "
 select ticker_id, EV_EBIT AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by EV_EBIT desc
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by EV_EBIT 
+";*/
+$query = "
+select 1 as rank, ticker_id, EV_EBIT AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT > 0 AND EV_EBIT IS NOT NULL AND EV_EBIT < 25
+UNION SELECT 2 as rank, ticker_id, -EV_EBIT AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT < 0 AND EV_EBIT IS NOT NULL
+UNION SELECT 3 as rank, ticker_id, EV_EBIT AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT >= 25 AND EV_EBIT IS NOT NULL
+UNION SELECT 4 as rank, ticker_id, EV_EBIT AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT IS NULL
+ORDER BY rank, value
 ";
 try {
 	$res = $db->query($query);
@@ -173,9 +184,20 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 }
 //P/FCF
 $position = 1;
-$query = "
+/*$query = "
 select ticker_id, P_FCF AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by P_FCF desc
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by P_FCF 
+";*/
+$query = "
+select 1 as rank, ticker_id, P_FCF AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF > 0 AND P_FCF IS NOT NULL AND P_FCF < 20
+UNION SELECT 2 as rank, ticker_id, -P_FCF AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF < 0 AND P_FCF IS NOT NULL
+UNION SELECT 3 as rank, ticker_id, P_FCF AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF >= 20 AND P_FCF IS NOT NULL
+UNION SELECT 4 as rank, ticker_id, P_FCF AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF IS NULL
+ORDER BY rank, value
 ";
 try {
 	$res = $db->query($query);
@@ -190,9 +212,20 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 }
 //-Pr2BookQ
 $position = 1;
-$query = "
+/*$query = "
 select ticker_id, -P_BV as value from
 ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by -P_BV desc
+";*/
+$query = "
+select 1 as rank, ticker_id, P_BV AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV > 0 AND P_BV IS NOT NULL AND P_BV <= 11
+UNION SELECT 2 as rank, ticker_id, P_BV AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV IS NULL
+UNION SELECT 3 as rank, ticker_id, -P_BV AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV < 0 AND P_BV IS NOT NULL
+UNION SELECT 4 as rank, ticker_id, P_BV AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV > 11 AND P_BV IS NOT NULL
+ORDER BY rank, value
 ";
 try {
 	$res = $db->query($query);
@@ -279,11 +312,14 @@ foreach($values as $id => $value) {
 	}
 	//EV/EBIT
 	if(is_null($value["V1"])) {
-		$values[$id]["VPP1"] = round(31*$value["VP1"]);
+		$values[$id]["VPP1"] = $tickerCount - 1;
 	} else {
-		if($value["V1"] < 0)
-			$values[$id]["VPP1"] = round(3*$value["VP1"]);
-		if($value["V1"] >= 0 && $value["V1"] < 11)
+		if($value["V1"] >= 70) {
+			$values[$id]["VPP1"] = $tickerCount;
+                } else {
+                        $values[$id]["VPP1"] = $value["VP1"];
+                }
+/*		if($value["V1"] >= 0 && $value["V1"] < 11)
 			$values[$id]["VPP1"] = round(0.01*$value["VP1"]);
 		if($value["V1"] >= 11 && $value["V1"] < 19)
 			$values[$id]["VPP1"] = round(1.5*$value["VP1"]);
@@ -294,15 +330,18 @@ foreach($values as $id => $value) {
 		if($value["V1"] >= 40 && $value["V1"] < 70)
 			$values[$id]["VPP1"] = round(9*$value["VP1"]);
 		if($value["V1"] >= 70)
-			$values[$id]["VPP1"] = $tickerCount;
+			$values[$id]["VPP1"] = $tickerCount;*/
 	}
 	//P/FCF
 	if(is_null($value["V2"])) {
-		$values[$id]["VPP2"] = round(31*$value["VP2"]);
+		$values[$id]["VPP2"] = $tickerCount - 1;
 	} else {
-		if($value["V2"] < 0)
-			$values[$id]["VPP2"] = round(3*$value["VP2"]);
-		if($value["V2"] >= 0 && $value["V2"] < 10)
+		if($value["V2"] >= 100) {
+			$values[$id]["VPP2"] = $tickerCount;
+                } else {
+                        $values[$id]["VPP2"] = $value["VP2"];
+                }
+/*		if($value["V2"] >= 0 && $value["V2"] < 10)
 			$values[$id]["VPP2"] = round(0.01*$value["VP2"]);
 		if($value["V2"] >= 10 && $value["V2"] < 15)
 			$values[$id]["VPP2"] = round(1.4*$value["VP2"]);
@@ -311,10 +350,10 @@ foreach($values as $id => $value) {
 		if($value["V2"] >= 20 && $value["V2"] < 100)
 			$values[$id]["VPP2"] = round(4*$value["VP2"]);
 		if($value["V2"] >= 100)
-			$values[$id]["VPP2"] = $tickerCount;
+			$values[$id]["VPP2"] = $tickerCount;*/
 	}
 	//-Pr2BookQ
-	if(is_null($value["V3"])) {
+/*	if(is_null($value["V3"])) {
 		$values[$id]["VPP3"] = round(3*$value["VP3"]);
 	} else {
 		if(-$value["V3"] < 0)
@@ -327,7 +366,12 @@ foreach($values as $id => $value) {
 			$values[$id]["VPP3"] = round(1.6*$value["VP3"]);
 		if(-$value["V3"] > 11)
 			$values[$id]["VPP3"] = $tickerCount;
-	}
+	}*/
+        if($value["V3"] > 11) {
+            $values[$id]["VPP3"] = $tickerCount;
+        } else {
+            $values[$id]["VPP3"] = $value["VP3"];
+        }
 
 	//Cut values that exceed the number of tickers
 	if($values[$id]["QPP1"] > $tickerCount) {
@@ -469,10 +513,13 @@ foreach($values as $id => $value) {
 	$values[$id]["id"] = $id;
 }
 //Export to csv
-/*$o = fopen('file.csv', 'w');
-  fputcsv($o,array_keys($values[1]));
+$o = fopen('file.csv', 'w');
+  fputcsv($o,array_keys($values[19]));
   foreach($values as $id=>$value) {
+  $query = "select ticker from tickers where id=".$id;
+  $res = $db->query($query);
+  $value["ticker"] = $res->fetchColumn();
   fputcsv($o,$value);
   }
-  fclose($o);*/
+  fclose($o);
 ?>
