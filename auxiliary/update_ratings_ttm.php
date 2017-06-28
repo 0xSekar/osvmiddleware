@@ -162,12 +162,10 @@ ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE o
 ";*/
 $query = "
 select 1 as rank, ticker_id, EV_EBIT AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT > 0 AND EV_EBIT IS NOT NULL AND EV_EBIT < 25
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT > 0 AND EV_EBIT IS NOT NULL
 UNION SELECT 2 as rank, ticker_id, -EV_EBIT AS value from
 ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT < 0 AND EV_EBIT IS NOT NULL
 UNION SELECT 3 as rank, ticker_id, EV_EBIT AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT >= 25 AND EV_EBIT IS NOT NULL
-UNION SELECT 4 as rank, ticker_id, EV_EBIT AS value from
 ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT IS NULL
 ORDER BY rank, value
 ";
@@ -190,12 +188,10 @@ ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE o
 ";*/
 $query = "
 select 1 as rank, ticker_id, P_FCF AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF > 0 AND P_FCF IS NOT NULL AND P_FCF < 20
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF > 0 AND P_FCF IS NOT NULL
 UNION SELECT 2 as rank, ticker_id, -P_FCF AS value from
 ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF < 0 AND P_FCF IS NOT NULL
 UNION SELECT 3 as rank, ticker_id, P_FCF AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF >= 20 AND P_FCF IS NOT NULL
-UNION SELECT 4 as rank, ticker_id, P_FCF AS value from
 ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF IS NULL
 ORDER BY rank, value
 ";
@@ -218,13 +214,11 @@ ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE o
 ";*/
 $query = "
 select 1 as rank, ticker_id, P_BV AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV > 0 AND P_BV IS NOT NULL AND P_BV <= 11
-UNION SELECT 2 as rank, ticker_id, P_BV AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV IS NULL
-UNION SELECT 3 as rank, ticker_id, -P_BV AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV > 0 AND P_BV IS NOT NULL
+UNION SELECT 2 as rank, ticker_id, -P_BV AS value from
 ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV < 0 AND P_BV IS NOT NULL
-UNION SELECT 4 as rank, ticker_id, P_BV AS value from
-ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV > 11 AND P_BV IS NOT NULL
+UNION SELECT 3 as rank, ticker_id, P_BV AS value from
+ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV IS NULL
 ORDER BY rank, value
 ";
 try {
@@ -312,14 +306,15 @@ foreach($values as $id => $value) {
 	}
 	//EV/EBIT
 	if(is_null($value["V1"])) {
-		$values[$id]["VPP1"] = $tickerCount - 1;
+		$values[$id]["VPP1"] = $tickerCount;
 	} else {
+/*
 		if($value["V1"] >= 70) {
-			$values[$id]["VPP1"] = $tickerCount;
-                } else {
+			$values[$id]["VPP1"] = $tickerCount-10;
+                } else {*/
                         $values[$id]["VPP1"] = $value["VP1"];
-                }
-/*		if($value["V1"] >= 0 && $value["V1"] < 11)
+/*                }
+		if($value["V1"] >= 0 && $value["V1"] < 11)
 			$values[$id]["VPP1"] = round(0.01*$value["VP1"]);
 		if($value["V1"] >= 11 && $value["V1"] < 19)
 			$values[$id]["VPP1"] = round(1.5*$value["VP1"]);
@@ -334,14 +329,14 @@ foreach($values as $id => $value) {
 	}
 	//P/FCF
 	if(is_null($value["V2"])) {
-		$values[$id]["VPP2"] = $tickerCount - 1;
+		$values[$id]["VPP2"] = $tickerCount;
 	} else {
-		if($value["V2"] >= 100) {
-			$values[$id]["VPP2"] = $tickerCount;
-                } else {
+/*		if($value["V2"] >= 100) {
+			$values[$id]["VPP2"] = $tickerCount-10;
+                } else {*/
                         $values[$id]["VPP2"] = $value["VP2"];
-                }
-/*		if($value["V2"] >= 0 && $value["V2"] < 10)
+/*                }
+		if($value["V2"] >= 0 && $value["V2"] < 10)
 			$values[$id]["VPP2"] = round(0.01*$value["VP2"]);
 		if($value["V2"] >= 10 && $value["V2"] < 15)
 			$values[$id]["VPP2"] = round(1.4*$value["VP2"]);
@@ -367,10 +362,14 @@ foreach($values as $id => $value) {
 		if(-$value["V3"] > 11)
 			$values[$id]["VPP3"] = $tickerCount;
 	}*/
-        if($value["V3"] > 11) {
+        if(is_null($value["V3"])) {
             $values[$id]["VPP3"] = $tickerCount;
         } else {
-            $values[$id]["VPP3"] = $value["VP3"];
+/*            if($value["V3"] > 11) {
+                $values[$id]["VPP3"] = $tickerCount-10;
+            } else {*/
+                $values[$id]["VPP3"] = $value["VP3"];
+//            }
         }
 
 	//Cut values that exceed the number of tickers
