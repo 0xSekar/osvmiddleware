@@ -5,9 +5,9 @@ include_once('../config.php');
 include_once('../db/db.php');
 
 // Tools & functions
+include_once('../crons/include/eol_xml_parser.php');
 include_once('../crons/include/guru.php'); 
 include_once('../crons/include/eol.php'); 
-include_once('../crons/include/eol_xml_parser.php');
 include_once('../crons/include/eolgf_updater.php');
 
 // Should never be cached - do not remove this

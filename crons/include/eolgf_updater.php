@@ -239,7 +239,6 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot){
     }else{
         $guruok = TRUE; //error if guru is missing
     }
-
     if($checkqtr && $checkann && $guruok) { 
         
         $arrayguru = parseguru($arrayguru, $fechaeol, $AnnLot, $QtrLotExt); //parse guru        
