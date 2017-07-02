@@ -36,8 +36,15 @@ function update_ratings_ttm() {
     //FCF / Sales
     $position = 1;
     $query = "
-        select ticker_id, FCF_S AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by FCF_S desc
+        select 1 as rank, ticker_id, -FCF_S AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S >= 0 AND FCF_S < 0.30 AND FCF_S IS NOT NULL
+        UNION SELECT 2 as rank, ticker_id, FCF_S AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S >= 0.30 AND FCF_S IS NOT NULL
+        UNION SELECT 3 as rank, ticker_id, -FCF_S AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S < 0 AND FCF_S IS NOT NULL
+        UNION SELECT 4 as rank, ticker_id, FCF_S AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S IS NULL
+        ORDER BY rank, value
         ";
     try {
         $res = $db->query($query);
@@ -58,8 +65,15 @@ function update_ratings_ttm() {
     //CROIC
     $position = 1;
     $query = "
-        select ticker_id, CROIC AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by CROIC desc
+        select 1 as rank, ticker_id, -CROIC AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC >= 0 AND CROIC < 0.40 AND CROIC IS NOT NULL
+        UNION SELECT 2 as rank, ticker_id, CROIC AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC >= 0.40 AND CROIC IS NOT NULL
+        UNION SELECT 3 as rank, ticker_id, -CROIC AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC < 0 AND CROIC IS NOT NULL
+        UNION SELECT 4 as rank, ticker_id, CROIC AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC IS NULL
+        ORDER BY rank, value
         ";
     try {
         $res = $db->query($query);
@@ -100,8 +114,15 @@ function update_ratings_ttm() {
     //SalesPercChange
     $position = 1;
     $query = "
-        select ticker_id, RevenuePctGrowthTTM AS value from
-        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by RevenuePctGrowthTTM desc
+        select 1 as rank, ticker_id, -RevenuePctGrowthTTM AS value from
+        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM >= 0 AND RevenuePctGrowthTTM < 0.60 AND RevenuePctGrowthTTM IS NOT NULL
+        UNION SELECT 2 as rank, ticker_id, RevenuePctGrowthTTM AS value from
+        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM >= 0.60 AND RevenuePctGrowthTTM IS NOT NULL
+        UNION SELECT 3 as rank, ticker_id, -RevenuePctGrowthTTM AS value from
+        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM < 0 AND RevenuePctGrowthTTM IS NOT NULL
+        UNION SELECT 4 as rank, ticker_id, RevenuePctGrowthTTM AS value from
+        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM IS NULL
+        ORDER BY rank, value
         ";
     try {
         $res = $db->query($query);
@@ -117,8 +138,15 @@ function update_ratings_ttm() {
     //Sales5YYCGrPerc
     $position = 1;
     $query = "
-        select ticker_id, Sales5YYCGrPerc AS value from
-        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by Sales5YYCGrPerc desc
+        select 1 as rank, ticker_id, -Sales5YYCGrPerc AS value from
+        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc >= 0 AND Sales5YYCGrPerc < 0.40 AND Sales5YYCGrPerc IS NOT NULL
+        UNION SELECT 2 as rank, ticker_id, Sales5YYCGrPerc AS value from
+        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc >= 0.40 AND Sales5YYCGrPerc IS NOT NULL
+        UNION SELECT 3 as rank, ticker_id, -Sales5YYCGrPerc AS value from
+        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc < 0 AND Sales5YYCGrPerc IS NOT NULL
+        UNION SELECT 4 as rank, ticker_id, Sales5YYCGrPerc AS value from
+        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc IS NULL
+        ORDER BY rank, value
         ";
     try {
         $res = $db->query($query);
@@ -134,8 +162,15 @@ function update_ratings_ttm() {
     //GrossProfitAstTotal
     $position = 1;
     $query = "
-        select ticker_id, GPA AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE order by GPA desc
+        select 1 as rank, ticker_id, -GPA AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA >= 0 AND GPA < 1 AND GPA IS NOT NULL
+        UNION SELECT 2 as rank, ticker_id, GPA AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA >= 1 AND GPA IS NOT NULL
+        UNION SELECT 3 as rank, ticker_id, -GPA AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA < 0 AND GPA IS NOT NULL
+        UNION SELECT 4 as rank, ticker_id, GPA AS value from
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA IS NULL
+        ORDER BY rank, value
         ";
     try {
         $res = $db->query($query);
@@ -220,72 +255,35 @@ function update_ratings_ttm() {
         //PENALIZE RATINGS
         //FCF / Sales
         if(is_null($value["Q1"])) {
-            $values[$id]["QPP1"] = round(21*$value["QP1"]);
+            $values[$id]["QPP1"] = $tickerCount;
         } else {
-            if($value["Q1"] < 0) 
-                $values[$id]["QPP1"] = round(5*$value["QP1"]);
-            if($value["Q1"] >= 0 && $value["Q1"] < 30) 
-                $values[$id]["QPP1"] = round(0.01*$value["QP1"]);
-            if($value["Q1"] >= 30 && $value["Q1"] < 60) 
-                $values[$id]["QPP1"] = round(1.5*$value["QP1"]);
-            if($value["Q1"] >= 60)
-                $values[$id]["QPP1"] = $tickerCount;
+            $values[$id]["QPP1"] = $value["QP1"];
         }
         //CROIC
         if(is_null($value["Q2"])) {
-            $values[$id]["QPP2"] = round(21*$value["QP2"]);
+            $values[$id]["QPP2"] = $tickerCount;
         } else {
-            if($value["Q2"] < 0) 
-                $values[$id]["QPP2"] = round(3*$value["QP2"]);
-            if($value["Q2"] >= 0 && $value["Q2"] < 23) 
-                $values[$id]["QPP2"] = $value["QP2"];
-            if($value["Q2"] >= 23 && $value["Q2"] < 40) 
-                $values[$id]["QPP2"] = round(0.01*$value["QP2"]);
-            if($value["Q2"] >= 40 && $value["Q2"] < 60) 
-                $values[$id]["QPP2"] = round(1.5*$value["QP2"]);
-            if($value["Q2"] >= 60)
-                $values[$id]["QPP2"] = $tickerCount;
+            $values[$id]["QPP2"] = $value["QP2"];
         }
         //PIO F Score
         $values[$id]["QPP3"] = $value["QP3"];
         //SalesPercChange
         if(is_null($value["G1"])) {
-            $values[$id]["GPP1"] = round(10*$value["GP1"]);
+            $values[$id]["GPP1"] = $tickerCount;
         } else {
-            if($value["G1"] < 0)
-                $values[$id]["GPP1"] = round(10*$value["GP1"]);
-            if($value["G1"] >= 0 && $value["G1"] < 60)
-                $values[$id]["GPP1"] = round(0.2*$value["GP1"]);
-            if($value["G1"] >= 60 && $value["G1"] <= 100)
-                $values[$id]["GPP1"] = round(1.3*$value["GP1"]);
-            if($value["G1"] > 100)
-                $values[$id]["GPP1"] = $tickerCount;
+            $values[$id]["GPP1"] = $value["GP1"];
         }
         //Sales5YYCGrPerc
         if(is_null($value["G2"])) {
-            $values[$id]["GPP2"] = round(11*$value["GP2"]);
+            $values[$id]["GPP2"] = $tickerCount;
         } else {
-            if($value["G2"] < 0)
-                $values[$id]["GPP2"] = round(3*$value["GP2"]);
-            if($value["G2"] >= 0 && $value["G2"] < 40)
-                $values[$id]["GPP2"] = round(0.2*$value["GP2"]);
-            if($value["G2"] >= 40 && $value["G2"] <= 70)
-                $values[$id]["GPP2"] = round(1.25*$value["GP2"]);
-            if($value["G2"] > 70)
-                $values[$id]["GPP2"] = $tickerCount;
+            $values[$id]["GPP2"] = $value["GP2"];
         }
         //GrossProfitAstTotal
         if(is_null($value["G3"])) {
-            $values[$id]["GPP3"] = round(3*$value["GP3"]);
+            $values[$id]["GPP3"] = $tickerCount;
         } else {
-            if($value["G3"] < 0)
-                $values[$id]["GPP3"] = $tickerCount;
-            if($value["G3"] >= 0 && $value["G3"] < 1)
-                $values[$id]["GPP3"] = $value["GP3"];
-            if($value["G3"] >= 1 && $value["G3"] <= 1.8)
-                $values[$id]["GPP3"] = round(0.01*$value["GP3"]);
-            if($value["G3"] > 1.8)
-                $values[$id]["GPP3"] = $tickerCount;
+            $values[$id]["GPP3"] = $value["GP3"];
         }
         //EV/EBIT
         if(is_null($value["V1"])) {
@@ -299,7 +297,7 @@ function update_ratings_ttm() {
         } else {
             $values[$id]["VPP2"] = $value["VP2"];
         }
-        //-Pr2BookQ
+        //Pr2BookQ
         if(is_null($value["V3"])) {
             $values[$id]["VPP3"] = $tickerCount;
         } else {
@@ -447,14 +445,15 @@ function update_ratings_ttm() {
     }
     //Export to csv
     /*
-       $o = fopen('file.csv', 'w');
-       fputcsv($o,array_keys($values[19]));
-       foreach($values as $id=>$value) {
-       $query = "select ticker from tickers where id=".$id;
-       $res = $db->query($query);
-       $value["ticker"] = $res->fetchColumn();
-       fputcsv($o,$value);
-       }
-    fclose($o);*/
+    $o = fopen('file.csv', 'w');
+    fputcsv($o,array_keys($values[19]));
+    foreach($values as $id=>$value) {
+        $query = "select ticker from tickers where id=".$id;
+        $res = $db->query($query);
+        $value["ticker"] = $res->fetchColumn();
+        fputcsv($o,$value);
+    }
+    fclose($o);
+    */
 }
 ?>
