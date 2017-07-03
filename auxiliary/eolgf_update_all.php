@@ -3,17 +3,17 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 include_once('../config.php');
 include_once('../db/db.php');
-include_once('../crons/include/raw_data_update_queries.php');
-include_once('../crons/include/update_key_ratios_ttm.php');
-include_once('../crons/include/update_quality_checks.php');
-include_once('../crons/include/update_ratings.php');
-include_once('../crons/include/update_ratings_ttm.php');
-include_once('../crons/include/update_is_old_field.php');
-include_once('../crons/update_frontend_yahoo_daily_include.php');
-include_once('../crons/include/raw_data_update_yahoo_keystats.php');
+include_once('./include/raw_data_update_queries.php');
+include_once('./include/update_key_ratios_ttm.php');
+include_once('./include/update_quality_checks.php');
+include_once('./include/update_ratings.php');
+include_once('./include/update_ratings_ttm.php');
+include_once('./include/update_is_old_field.php');
+include_once('./update_frontend_yahoo_daily_include.php');
+include_once('./include/raw_data_update_yahoo_keystats.php');
 require_once("../include/yahoo/common.inc.php");
-include_once('../crons/include/update_eod_valuation.php');
-include_once('../crons/update_frontend_EOL_GF_data_include.php');
+include_once('./include/update_eod_valuation.php');
+include_once('./update_frontend_EOL_GF_data_include.php');
 
 // Tools & functions
 include_once('../crons/include/guru.php'); 
@@ -43,7 +43,7 @@ $lot = count($list);
 
 foreach($list as $i => $ticker){
     echo "Downloading data for ". $ticker."... ";
-    //$chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
+    $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
     $count = statusCounter($ticker, $chek, $count);
 }
 
@@ -63,7 +63,7 @@ function listOfTickers(){
         
         $res->execute();
     } catch(PDOException $ex) {
-        echo " Database Error"; //user message
+        echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     $row = $res->fetchAll(PDO::FETCH_COLUMN);

@@ -44,7 +44,7 @@ $lot = count($list);
 foreach($list as $i => $ticker){
     echo "Downloading data for ". $ticker."... ";
     $chek = ckeckNDown($ticker, $AnnLot, $QtrLot);
-    $count = statusCounter($ticker, $chek, $count);   
+    $count = statusCounter($ticker, $chek, $count);
 }
 
 $tlot = $lot;
@@ -56,7 +56,7 @@ $tlot = $tlot + $lot;
 foreach($list as $i => $ticker){
     echo "Downloading data for ". $ticker."... ";
     $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE);
-    $count = statusCounter($ticker, $chek, $count);    
+    $count = statusCounter($ticker, $chek, $count);
 }
 
 resumeEcho($count);
