@@ -5,6 +5,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
     $arrayeol1 = array();
     $dbFY = 0;
     $dbFQ = 0;
+    $tAdded = FALSE;
     $today = date('Y/m/d H:i:s');
 
         // ******** Intern Id Fetch *********
@@ -12,7 +13,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
         $res = $db->prepare("SELECT id FROM tickers WHERE ticker = ?");
         $res->execute(array(strval($ticker)));
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
 
@@ -30,15 +31,14 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
             $col = count($arrayeol1['PrimaryExchange'])-1;
             $exchange = strval($arrayeol1['PrimaryExchange'][$col]);
         }else{
-            echo "\n Ticker's EOL data failed, marked as tested\n";
             try {
                 $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
                 $res->execute(array(strval($ticker)));
             } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
+                echo " Database Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }
-            return FALSE;
+            return '-3';
         }
             
         if(strpos($exchange, 'OTC') !== FALSE && $OTC == FALSE){ //cambiar =OTC por contiene OTC
@@ -46,17 +46,17 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                 $res = $db->prepare("UPDATE tickers_proedgard_updates SET otc = 'Y' WHERE ticker = ?");
                 $res->execute(array(strval($ticker)));
             } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
+                echo " Database Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }
-            echo " OTC ticker marked\n";
-            return FALSE;
+            return '2';
         }else{
             //Agrego
             if($OTC == FALSE){
             $intId = addTicker($ticker, $arrayeol1);
-            echo " Ticker added \n";
+            echo " Ticker added to DB ";
             $proc = TRUE;
+            $tAdded = TRUE;
             }
         }
 
@@ -73,15 +73,15 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                 $price = $resJS['results'][0]['lastPrice']; //si este es menor q 1 nada, si es mayor q uno agrego y pongo el nuevo int id para q siga procesando
                 if($price > 1){
                     $intId = addTicker($ticker, $arrayeol1);
-                    echo " Ticker added, price high than U\$s 1\n";
+                    echo " Ticker OTC added to DB, price high than U\$s 1 ";
                     $proc = TRUE;
                 }else{ 
-                    echo " Ticker marked as tested, price is under U\$s 1\n";
+                    echo " Ticker marked as tested, price is under U\$s 1 ";
                     try {
                         $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
                         $res->execute(array(strval($ticker)));
                     } catch(PDOException $ex) {
-                        echo "\nDatabase Error"; //user message
+                        echo " Database Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     } //proc == FALSE
                 } 
@@ -93,20 +93,20 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                         $res = $db->prepare("DELETE FROM tickers_proedgard_updates WHERE ticker = ?");
                         $res->execute(array(strval($ticker)));
                     } catch(PDOException $ex) {
-                        echo "\nDatabase Error"; //user message
+                        echo " Database Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
-                    echo " Ticker deleted - Barchart code 204\n";
+                    echo " Ticker deleted - Barchart code 204 ";
                 }else{
-                    echo " Barchart code is not 204 or 200\n";
-                    return FALSE;
+                    echo " Barchart code is not 204 or 200 ";
+                    return '-1';
                 }
             }
         }
 
         if($proc == FALSE){
-        echo " Id on tickers table doesnt exist \n ";
-        return FALSE;
+        echo " Id on tickers table doesnt exist ";
+        return '-1';
         }
     }else{
         $intId = $row[0]['id'];
@@ -128,14 +128,14 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                 $res = $db->prepare("SELECT fiscal_year, fiscal_quarter FROM reports_header WHERE ticker_id = ? ORDER BY fiscal_year ASC, fiscal_quarter ASC"); //order by fiscal y y dsp fq
                 $res->execute(array(strval($intId)));
             } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
+                echo " Database Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }
 
             $row = $res->fetchAll();
             $line = count($row)-1;
             if($line == -1){
-                echo " Id doesnt exist on reports_header \n ";//forzar descarga
+                echo " Id doesnt exist on reports_header ";//forzar descarga
                 $force = TRUE;
                 $dbFY = 2000;
                 $dbFQ = 1;
@@ -147,24 +147,24 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
 
         
         if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ) || $force == TRUE || $proc == TRUE){ 
-            $downOK = downNParse($ticker, $arrayeol, $AnnLot, $QtrLot);
+            $downOK = downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded);
 
             if($downOK & $force == FALSE){ 
                 try {
                     $res = $db->prepare("UPDATE tickers_proedgard_updates SET downloaded = 'Y', updated_date = '".$today."' WHERE (ticker = ? AND downloaded is null) ");
                     $res->execute(array(strval($ticker)));
                 } catch(PDOException $ex) {
-                    echo "\nDatabase Error"; //user message
+                    echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
                 try {
                     $res = $db->prepare("UPDATE tickers_split_parser SET updated_date = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
                     $res->execute(array(strval($ticker)));
                 } catch(PDOException $ex) {
-                    echo "\nDatabase Error"; //user message
+                    echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
-                return TRUE;
+                return '1';
             }else{
                 if ($downOK & $force == TRUE) {
                     if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ)) {
@@ -172,31 +172,30 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                             $res = $db->prepare("UPDATE tickers_proedgard_updates SET downloaded = 'Y', updated_date = '".$today."' WHERE (ticker = ? AND downloaded is null) ");
                             $res->execute(array(strval($ticker)));
                         } catch(PDOException $ex) {
-                            echo "\nDatabase Error"; //user message
+                            echo " Database Error"; //user message
                             die("Line: ".__LINE__." - ".$ex->getMessage());
                         }
                         try {
                             $res = $db->prepare("UPDATE tickers_split_parser SET updated_date = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
                             $res->execute(array(strval($ticker)));
                         } catch(PDOException $ex) {
-                            echo "\nDatabase Error"; //user message
+                            echo " Database Error"; //user message
                             die("Line: ".__LINE__." - ".$ex->getMessage());
                         }
-                        return TRUE;
+                        return '1';
                     } else {
                         try {
                             $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
                             $res->execute(array(strval($ticker)));
                         } catch(PDOException $ex) {
-                            echo "\nDatabase Error"; //user message
+                            echo " Database Error"; //user message
                             die("Line: ".__LINE__." - ".$ex->getMessage());
                         }
-                        echo " Forced updated\n";
-                        return TRUE;
+                        echo " Forced updated ";
+                        return '1';
                     }
                 }else{
-                    echo " Download Error !!!  EOL QTR FAILED\n";
-                    return FALSE;
+                    return '-2'; //Download error
                 }
             }            
         }else{
@@ -204,20 +203,18 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                     $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
                     $res->execute(array(strval($ticker)));
                 } catch(PDOException $ex) {
-                    echo "\nDatabase Error"; //user message
+                    echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
-            echo " Previously updated\n";
-            return FALSE;
+            return '0';
         }
 
     }else{        
-        echo " Download Error !!!  EOL QTR FAILED\n";
-        return FALSE;
+        return -'2'; //Download error
     }
 }
 
-function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot){
+function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
     $checkqtr = TRUE;
     $return = array();    
 
@@ -256,17 +253,11 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot){
         $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
 
-        //Export to csv
-        $o = fopen('file_Ticker'.$ticker.'.csv', 'w');
+        update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
 
-        foreach($arraymerged as $name=>$value) {
-        fputcsv($o,$value);
-        }
-        fclose($o);
         return TRUE;
     }else{
-        echo "\n \n \n ----  DOWNLOAD ERROR !!!!!!!! Tiker unprocessed -----\n ";
-        return FALSE;
+        return FALSE; //Download error
     }
 }
 
@@ -287,7 +278,7 @@ function addTicker($ticker, $EOLQtr){
             $rowe["exchange"] = "";
         }
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     try {
@@ -307,7 +298,7 @@ function addTicker($ticker, $EOLQtr){
         $id = $db->lastInsertId();
         $res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_barchart_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     return $id;
@@ -546,6 +537,61 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
         return $arrayComplete;
     }
     return $arraymerged;
+}
+
+function ratings(){ 
+
+    echo "Updating Ratings... ";
+    update_ratings();
+    echo "Done<br>\n";
+    echo "Updating Ratings TTM... ";
+    update_ratings_ttm();
+    echo "Done<br>\n";
+    echo "Updating is_old tickers table field... ";
+    update_is_old_field();
+    echo "Done<br>\n";    
+}
+
+function statusCounter($tick, $code, $count){
+    switch($code) {
+        case '2': // OTC detect 
+        echo "OTC ticker marked: ".$tick."<br>\n";
+        break;
+
+        case '1': // Updated correctly 
+        echo "Updating ticker: ".$tick."<br>\n";
+        $count[0]++;
+        break;
+
+        case '0': // Dont need update
+        echo "Ticker ".$tick." is updated<br>\n";
+        $count[1]++;
+        break;
+
+        case '-1': // Error
+        echo "Error for ticker ".$tick."<br>\n";
+        $count[2]++;
+        break;
+
+        case '-2': // ErrorS
+        echo "Error of data downloading for ticker ".$tick."<br>\n";
+        $count[2]++;
+        break; 
+
+        case '-3': // Error
+        echo "Error: EOL data failed (marked as tested) for ticker ".$tick."<br>\n";
+        $count[2]++;
+        break;
+    }         
+    return $count;
+}
+
+function resumeEcho($count){
+    echo "\n
+    ".$count[0]+$count[1]+$count[2]." total Tickers.<br>\n 
+    ".$count[0]." stocks Updated<br>\n
+    ".$count[1]." stocks Don't Need Update<br>\n
+    ".$count[2]." stocks With Errors <br>\n";
 }
 
 ?>

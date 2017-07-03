@@ -1,14 +1,30 @@
 <?php
-set_time_limit(0);                   // ignore php timeout
 // Database Connection
 include_once('../config.php');
 include_once('../db/db.php');
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+include_once('./include/raw_data_update_queries.php');
+include_once('./include/update_key_ratios_ttm.php');
+include_once('./include/update_quality_checks.php');
+include_once('./include/update_ratings.php');
+include_once('./include/update_ratings_ttm.php');
+include_once('./include/update_is_old_field.php');
+include_once('./update_frontend_yahoo_daily_include.php');
+include_once('./include/raw_data_update_yahoo_keystats.php');
+require_once("../include/yahoo/common.inc.php");
+include_once('./include/update_eod_valuation.php');
+include_once('./update_frontend_EOL_GF_data_include.php');
 
 // Tools & functions
 include_once('./include/guru.php'); 
 include_once('./include/eol.php'); 
 include_once('./include/eol_xml_parser.php');
 include_once('./include/eolgf_updater.php');
+
+set_time_limit(0);                   // ignore php timeout
+//ignore_user_abort(true);             // keep on going even if user pulls the plug*
+while(ob_get_level())ob_end_clean(); // remove output buffers
+ob_implicit_flush(true);             // output stuff directly
 
 // Should never be cached - do not remove this
 header("Content-type: text/xml; charset=utf-8");
@@ -20,34 +36,33 @@ $db = Database::GetInstance();
 $AnnLot = 15;
 $QtrLot = 20;
 
+$count = array(0,0,0);
+
 $list = listOfTickers();
 $lot = count($list);
 
 foreach($list as $i => $ticker){
-    if($i > 25){
-        continue;
-    }
-    echo " Attempting to update ticker: ". $ticker;
-    echo date('         H:i:s');
+    echo "Downloading data for ". $ticker."... ";
     $chek = ckeckNDown($ticker, $AnnLot, $QtrLot);
-    echo "\n";
-    if($chek){echo " Ticker Correctly Updated \n";}else{echo " Ticker Not Updated \n";};
-    echo "\n";
+    $count = statusCounter($ticker, $chek, $count);
 }
+
+$tlot = $lot;
 
 $list = listOfTickersOTC();
 $lot = count($list);
+$tlot = $tlot + $lot;
 
 foreach($list as $i => $ticker){
-    if($i > 25){
-        continue;
-    }
-    echo " Attempting to update ticker: ". $ticker;
-    echo date('         H:i:s');
+    echo "Downloading data for ". $ticker."... ";
     $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE);
-    echo "\n";    
-    if($chek){echo " Ticker Correctly Updated \n";}else{echo " Ticker Not Updated \n";};
-    echo "\n";
+    $count = statusCounter($ticker, $chek, $count);
+}
+
+resumeEcho($count);
+
+if($tlot>0){
+    ratings();
 }
 
 // --------------------------------- Functions --------------------------------- 

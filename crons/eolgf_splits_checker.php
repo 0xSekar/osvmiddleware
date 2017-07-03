@@ -1,14 +1,29 @@
 <?php
-set_time_limit(0);                   // ignore php timeout
-// Database Connection
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 include_once('../config.php');
 include_once('../db/db.php');
+include_once('./include/raw_data_update_queries.php');
+include_once('./include/update_key_ratios_ttm.php');
+include_once('./include/update_quality_checks.php');
+include_once('./include/update_ratings.php');
+include_once('./include/update_ratings_ttm.php');
+include_once('./include/update_is_old_field.php');
+include_once('./update_frontend_yahoo_daily_include.php');
+include_once('./include/raw_data_update_yahoo_keystats.php');
+require_once("../include/yahoo/common.inc.php");
+include_once('./include/update_eod_valuation.php');
+include_once('./update_frontend_EOL_GF_data_include.php');
 
 // Tools & functions
 include_once('./include/guru.php'); 
 include_once('./include/eol.php'); 
 include_once('./include/eol_xml_parser.php');
 include_once('./include/eolgf_updater.php');
+
+set_time_limit(0);                   // ignore php timeout
+//ignore_user_abort(true);             // keep on going even if user pulls the plug*
+while(ob_get_level())ob_end_clean(); // remove output buffers
+ob_implicit_flush(true);             // output stuff directly
 
 // Should never be cached - do not remove this
 header("Content-type: text/xml; charset=utf-8");
@@ -21,19 +36,16 @@ $today = date('Y/m/d');
 $AnnLot = 15;
 $QtrLot = 20;
 
+$count = array(0,0,0);
+
 $list = listOfTickers();
 $lot = count($list);
 
 foreach($list as $i => $ticker){
-    if($i > 25){
-        continue;
-    }
-    echo "Attempting to update ticker: ". $ticker;
-    echo date('         H:i:s');
+    echo "Downloading data for ". $ticker."... ";
     $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
-    echo "\n";
-    
-    if($chek){
+    $count = statusCounter($ticker, $chek, $count);    
+    if($chek==1){
         try {
             $res = $db->prepare("UPDATE tickers_split_parser SET updated_date = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
             $res->execute(array(strval($ticker)));
@@ -41,7 +53,6 @@ foreach($list as $i => $ticker){
             echo "\nDatabase Error"; //user message
             die("Line: ".__LINE__." - ".$ex->getMessage());
         }
-        echo "Ticker Correctly Updated \n";
     }else{
         try {
             $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND  tested_for_today is null) ");            
@@ -50,9 +61,13 @@ foreach($list as $i => $ticker){
             echo "\nDatabase Error"; //user message
             die("Line: ".__LINE__." - ".$ex->getMessage());
         }
-        echo "Ticker Not Updated \n";
     };
-    echo "\n";       
+}
+
+resumeEcho($count);
+
+if($lot>0){
+    ratings();
 }
 
 // --------------------------------- Functions --------------------------------- 
