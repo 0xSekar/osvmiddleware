@@ -539,19 +539,6 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
     return $arraymerged;
 }
 
-function ratings(){ 
-
-    echo "Updating Ratings... ";
-    update_ratings();
-    echo "Done<br>\n";
-    echo "Updating Ratings TTM... ";
-    update_ratings_ttm();
-    echo "Done<br>\n";
-    echo "Updating is_old tickers table field... ";
-    update_is_old_field();
-    echo "Done<br>\n";    
-}
-
 function statusCounter($tick, $code, $count){
     switch($code) {
         case '2': // OTC detect 
@@ -587,11 +574,23 @@ function statusCounter($tick, $code, $count){
 }
 
 function resumeEcho($count){
-    echo "\n
-    ".$count[0]+$count[1]+$count[2]." total Tickers.<br>\n 
+    echo "\n\n
+    ".$count[0]+$count[1]+$count[2]." total Tickers.<br>\n
     ".$count[0]." stocks Updated<br>\n
     ".$count[1]." stocks Don't Need Update<br>\n
-    ".$count[2]." stocks With Errors <br>\n";
+    ".$count[2]." stocks With Errors <br>\n\n";
+}
+
+function ratings(){ 
+    echo "Updating Ratings... ";
+    update_ratings();
+    echo "Done<br>\n";
+    echo "Updating Ratings TTM... ";
+    update_ratings_ttm();
+    echo "Done<br>\n";
+    echo "Updating is_old tickers table field... ";
+    update_is_old_field();
+    echo "Done<br>\n";    
 }
 
 ?>

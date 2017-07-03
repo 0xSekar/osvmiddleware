@@ -181,7 +181,7 @@ function duplicateFetchAndInform($arrayControl){ //Detect duplicates and report 
     for($c=0;$c<$max;$c++){
         for($d=$c+1;$d<$max;$d++){
             if($d!=$c && $arrayControl['fiscalYear'][$c]==$arrayControl['fiscalYear'][$d] && $arrayControl['FiscalQuarter'][$c]==$arrayControl['FiscalQuarter'][$d] && $arrayControl['fiscalYear'][$d]!=0){
-                echo "\n Informe - Duplicado ".$c." con ".$d;
+                echo " Informe - Duplicado ".$c." con ".$d;
             }
         }
     }

@@ -62,7 +62,7 @@ function listOfTickers(){
         $res = $db->prepare("SELECT ticker_id FROM tickers_control WHERE (DATEDIFF('".$today."',last_eol_date) > 100)");        
         $res->execute();
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     $ids = $res->fetchAll(PDO::FETCH_COLUMN);
@@ -71,7 +71,7 @@ function listOfTickers(){
             $res = $db->prepare("SELECT ticker FROM tickers WHERE id = '".$value."'");            
             $res->execute();
         } catch(PDOException $ex) {
-            echo "\nDatabase Error"; //user message
+            echo " Database Error"; //user message
             die("Line: ".__LINE__." - ".$ex->getMessage());
         }
         $res = $res->fetchAll(PDO::FETCH_COLUMN);
@@ -84,7 +84,7 @@ function listOfTickers(){
                 $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = '".$value."' ");            
                 $res->execute();
             } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
+                echo " Database Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }        
         $res = $res->fetchAll(PDO::FETCH_COLUMN);
@@ -93,7 +93,7 @@ function listOfTickers(){
                 $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = '".$value."' AND ((DATEDIFF('".$today."', tested_for_today)>7) OR tested_for_today is null) AND downloaded is null" );           
                 $res->execute();
             } catch(PDOException $ex) {
-                echo "\nDatabase Error"; //user message
+                echo " Database Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }
             $res = $res->fetchAll(PDO::FETCH_COLUMN);
@@ -104,7 +104,7 @@ function listOfTickers(){
                     $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = '".$value."' " );            
                     $res->execute();
                 } catch(PDOException $ex) {
-                    echo "\nDatabase Error"; //user message
+                    echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
                 $res = $res->fetchAll(PDO::FETCH_COLUMN);

@@ -83,7 +83,7 @@ function listOfTickers(){
         
         $res->execute();
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     $row = $res->fetchAll(PDO::FETCH_COLUMN);
@@ -106,7 +106,7 @@ function listOfTickersOTC(){
             AND a.otc = 'Y') ");        
         $res->execute();
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     $row = $res->fetchAll(PDO::FETCH_COLUMN);

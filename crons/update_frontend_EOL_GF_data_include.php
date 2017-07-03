@@ -15,7 +15,7 @@ function update_frontend_EOL_GF_data($eticker, $tickerArray, $tAdded) {
 	try { 
 		$res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$eticker'");        
 	} catch(PDOException $ex) {
-		echo "\nDatabase Error"; //user message
+		echo " Database Error"; //user message
 		die("Line: ".__LINE__." - ".$ex->getMessage());
 	}
 	$counter = $res->rowCount();
@@ -51,7 +51,7 @@ function update_frontend_EOL_GF_data($eticker, $tickerArray, $tAdded) {
     try {
         $res = $db->query("delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     echo "done<br>\n";
@@ -59,7 +59,7 @@ function update_frontend_EOL_GF_data($eticker, $tickerArray, $tAdded) {
     try {
         $res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     echo "done<br>\n";
@@ -67,7 +67,7 @@ function update_frontend_EOL_GF_data($eticker, $tickerArray, $tAdded) {
     try {
         $res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     echo "done<br>\n";
@@ -75,7 +75,7 @@ function update_frontend_EOL_GF_data($eticker, $tickerArray, $tAdded) {
     try {
         $res = $db->query("delete a from reports_dupont_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     echo "done<br>\n";
@@ -83,7 +83,7 @@ function update_frontend_EOL_GF_data($eticker, $tickerArray, $tAdded) {
     try {
         $res = $db->query("delete a from reports_accrual_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
     } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
+        echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     echo "done<br>\n";
