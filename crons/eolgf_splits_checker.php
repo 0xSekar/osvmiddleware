@@ -66,7 +66,7 @@ foreach($list as $i => $ticker){
 
 resumeEcho($count);
 
-if($lot>0){
+if($count[0]>0){
     ratings();
 }
 

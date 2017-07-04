@@ -47,11 +47,8 @@ foreach($list as $i => $ticker){
     $count = statusCounter($ticker, $chek, $count);
 }
 
-$tlot = $lot;
-
 $list = listOfTickersOTC();
 $lot = count($list);
-$tlot = $tlot + $lot;
 
 foreach($list as $i => $ticker){
     echo "Downloading data for ". $ticker."... ";
@@ -61,7 +58,7 @@ foreach($list as $i => $ticker){
 
 resumeEcho($count);
 
-if($tlot>0){
+if($count[0]>0){
     ratings();
 }
 
