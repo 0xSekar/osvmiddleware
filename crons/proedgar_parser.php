@@ -13,7 +13,7 @@ $str = $emailcontents;
 preg_match($re, $str, $matches);
 $ticker = $matches[1];
 
-if(isset($ticker) & isset($emailsubject)){
+if(!empty($ticker) && !empty($emailsubject)){
     $eol_ticker = $ticker; //eol_ticker is to conform to EOL single quote standards, just to download
     $eol_ticker = str_replace(".", "'", $eol_ticker);
     $eol_ticker = str_replace(",", "'", $eol_ticker);
@@ -56,10 +56,10 @@ if(isset($ticker) & isset($emailsubject)){
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }        
         }
+    }
 }else{
      echo "Missing parameters </br>\n";
      exit();
-}
 }
 
 function get_string_between($string, $start, $end) {
