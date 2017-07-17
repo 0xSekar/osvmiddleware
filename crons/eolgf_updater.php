@@ -70,7 +70,7 @@ function listOfTickers(){
     try {
         $res = $db->prepare("SELECT a.ticker FROM tickers_proedgard_updates AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE (a.downloaded is null AND b.ticker is null 
             AND 
-            (a.subject LIKE '%filed a 20_F %' OR a.subject LIKE '%filed a 20_F/A %' OR a.subject LIKE '%filed a 10_Q %' OR a.subject LIKE '%filed a 10_Q/A %' OR a.subject LIKE '%filed a 10-K %' OR a.subject LIKE '%filed a 10-K/A %') 
+            (a.subject LIKE '%filed a 20-F %' OR a.subject LIKE '%filed a 20-F/A %' OR a.subject LIKE '%filed a 10-Q %' OR a.subject LIKE '%filed a 10-Q/A %' OR a.subject LIKE '%filed a 10-K %' OR a.subject LIKE '%filed a 10-K/A %') 
             AND (
             (DATEDIFF('".$today."',a.insdate) > 90 AND (a.tested_for_today is null OR (a.tested_for_today is not null AND DATEDIFF('".$today."', a.tested_for_today)>6))) 
             OR 
@@ -94,7 +94,7 @@ function listOfTickersOTC(){
     try {
         $res = $db->prepare("SELECT a.ticker FROM tickers_proedgard_updates AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE (a.downloaded is null AND b.ticker is null
             AND 
-            (a.subject LIKE '%filed a 20_F %' OR a.subject LIKE '%filed a 20_F/A %' OR a.subject LIKE '%filed a 10_Q %' OR a.subject LIKE '%filed a 10_Q/A %' OR a.subject LIKE '%filed a 10-K %' OR a.subject LIKE '%filed a 10-K/A %') 
+            (a.subject LIKE '%filed a 20-F %' OR a.subject LIKE '%filed a 20-F/A %' OR a.subject LIKE '%filed a 10-Q %' OR a.subject LIKE '%filed a 10-Q/A %' OR a.subject LIKE '%filed a 10-K %' OR a.subject LIKE '%filed a 10-K/A %') 
             AND (
             (DATEDIFF('".$today."',a.insdate) > 90 AND (a.tested_for_today is null OR (a.tested_for_today is not null AND DATEDIFF('".$today."', a.tested_for_today)>6))) 
             OR 

@@ -39,7 +39,7 @@ if(!empty($ticker) && !empty($emailsubject)){
     if ($key == null OR $key == "" OR empty($key)) {
         echo "Invalid appkey</br>\n";
     } else {
-        if (strpos($emailsubject, 'filed a NT 10-K') !== true) {        
+        if (strpos($emailsubject, 'filed a NT') !== true) {        
             $fileddate = trim(get_string_between($emailsubject, 'on', 'at'));        
             $my_date = date('Y-m-d', strtotime($fileddate));
             $params = array(
