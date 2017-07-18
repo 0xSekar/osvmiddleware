@@ -500,23 +500,22 @@ function update_yahoo_daily($pticker = NULL) {
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
 
-                //INFORM BACKEND
+                //Register to force update when GF updates data
                 if(is_null($pticker)) {
-                    if($resJS['status']['code'] == 200 && !is_null($resJS['results'][0]['sharesOutstanding'])){
-                        $sharesOut = $resJS['results'][0]['sharesOutstanding']/1000;
-                        //report to webservice so backend updates his own data
-                        $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
-                    } else {
-                        if($yquery) {
-                            //Need to get latest shares outstandings from yahoo quotes to compare on webservices
-                            $response = $yql->execute("select * from osv.finance.quotes where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
-                            $sharesOut = 0;
-                            if(isset($response->query) && isset($response->query->results)) {
-                                $sharesOut = $response->query->results->quote->SharesOutstanding / 1000000;
-                            }
-                            //report to webservice so backend updates his own data
-                            $tmp = file_get_contents("http://".SERVERHOST."/webservice/gf_split_parser.php?ticker=".$row["ticker"]."&split_date=".date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate))."&appkey=DgmNyOv2tUKBG5n6JzUI&shares=".$sharesOut, false, $context);
+                    try {
+                        $query_split = "SELECT * FROM `reports_header` a LEFT JOIN reports_gf_data b ON a.id=b.report_id where a.ticker_id= ? AND a.report_type = 'QTR' ORDER BY a.report_date DESC limit 1"; 
+                        $res_split = $db->prepare($query_split);
+                        $res_split->execute(array($row["id"]));
+                        $row_split = $res_split->fetch(PDO::FETCH_ASSOC);
+                        if (empty($row_split["EPSBasic"])) {
+                            $row_split["EPSBasic"] = 0;
                         }
+                        $query_split = "INSERT INTO tickers_split_parser (ticker, insdate, split_date, old_eps, updated_date, tested_for_today) values (?, NOW(), ?, ?, NULL, NULL)";
+                        $res_split = $db->prepare($query_split);
+                        $res_split->execute(array($row["ticker"],date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate)),$row_split["EPSBasic"]));
+                    } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
                 }
             }

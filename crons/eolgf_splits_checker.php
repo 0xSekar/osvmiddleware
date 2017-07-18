@@ -95,7 +95,6 @@ function listOfTickers(){
                 if($val[0] == "EPS (Basic)"){
                     $i = count($val)-1;
                     $EPS = $val[$i];
-                    var_dump($EPS);
                     continue 1;
                 } 
             }            
