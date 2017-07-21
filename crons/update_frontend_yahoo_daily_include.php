@@ -70,7 +70,7 @@ function update_yahoo_daily($pticker = NULL) {
         if($yquery) {
             //UPDATE DIVIDEN HISTORY
             $response = $yql->execute("select * from osv.finance.dividendhistory where startDate = '".date("Y-m-d", strtotime("-1 years"))."' and endDate = '".date("Y-m-d")."' and  symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");	
-            if(isset($response->query) && isset($response->query->results)) {
+            if(isset($response->query) && isset($response->query->results) && (is_array($response->query->results->quote) || ($response->query->results->quote instanceof Traversable))) {
                 foreach($response->query->results->quote as $element) {
                     if (isset($element->Date) && !is_null($element->Date) && $element->Date!="0000-00-00") {
 
@@ -776,6 +776,22 @@ function update_yahoo_daily($pticker = NULL) {
         echo "Removing old Quality Checks (BENEISH)... ";
         try {
             $res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        echo "done<br>\n";
+        echo "Removing old Quality Checks (DUPONT)... ";
+        try {
+            $res = $db->query("delete a from reports_dupont_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        echo "done<br>\n";
+        echo "Removing old Quality Checks (ACCRUAL)... ";
+        try {
+            $res = $db->query("delete a from reports_accrual_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
         } catch(PDOException $ex) {
             echo "\nDatabase Error"; //user message
             die("Line: ".__LINE__." - ".$ex->getMessage());
