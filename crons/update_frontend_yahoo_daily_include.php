@@ -355,6 +355,16 @@ function update_yahoo_daily($pticker = NULL) {
                             die("Line: ".__LINE__." - ".$ex->getMessage());
                         }
                     }
+                    $query_div = "DELETE FROM tickers_yahoo_historical_data WHERE ticker_id = ? AND adj_close IS NULL";
+                    $params = array();
+                    $params[] = $row["id"];
+                    try {
+                        $resbc = $db->prepare($query_div);
+                        $resbc->execute($params);
+                    } catch(PDOException $ex) {
+                        echo "\nDatabase Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                    }
                 } else {
                     $enotfound ++;
                 }
@@ -379,6 +389,14 @@ function update_yahoo_daily($pticker = NULL) {
             }
         }	
         echo " Done<br>\n";
+    }
+    $query_div = "DELETE FROM tickers_yahoo_historical_data WHERE adj_close IS NULL";
+    try {
+        $resbc = $db->prepare($query_div);
+        $resbc->execute();
+    } catch(PDOException $ex) {
+        echo "\nDatabase Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
     }
 
     echo "\nUpdating Tickers (barchart)...<br>\n";
