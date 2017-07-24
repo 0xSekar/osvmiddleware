@@ -41,6 +41,7 @@ $count = array(0,0,0);
 $list = listOfTickers();
 $lot = count($list);
 
+echo "Starting main Process...<br>\n";
 foreach($list as $i => $ticker){
     echo "Downloading data for ". $ticker."... ";
     $chek = ckeckNDown($ticker, $AnnLot, $QtrLot);
@@ -50,17 +51,18 @@ foreach($list as $i => $ticker){
 $list = listOfTickersOTC();
 $lot = count($list);
 
+echo "\n<br>Starting OTC Process...<br>\n";
 foreach($list as $i => $ticker){
     echo "Downloading data for ". $ticker."... ";
     $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE);
     $count = statusCounter($ticker, $chek, $count);
 }
 
-resumeEcho($count);
-
 if($count[0]>0){
     ratings();
 }
+
+resumeEcho($count);
 
 // --------------------------------- Functions --------------------------------- 
 

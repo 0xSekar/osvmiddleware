@@ -54,7 +54,7 @@ function update_yahoo_daily($pticker = NULL) {
         $addq = " AND ticker = '".$pticker."' ";
     }
 
-    echo "Updating Tickers (yahoo)...<br>\n";
+    echo "\n<br>Updating Tickers (yahoo)...<br>\n";
 
     //Select all tickers not updated for at least a day
     try {

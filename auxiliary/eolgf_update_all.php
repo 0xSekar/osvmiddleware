@@ -47,11 +47,11 @@ foreach($list as $i => $ticker){
     $count = statusCounter($ticker, $chek, $count);
 }
 
-resumeEcho($count);
-
 if($lot>0){
     ratings();
 }
+
+resumeEcho($count);
 
 // --------------------------------- Functions --------------------------------- 
 

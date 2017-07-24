@@ -242,7 +242,7 @@ function update_ratings() {
             UNION SELECT 2 AS rank, report_id, -P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV < 0 AND P_BV IS NOT NULL
             UNION SELECT 3 AS rank, report_id, P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV IS NULL
             ORDER BY rank, value
             ";
         try {

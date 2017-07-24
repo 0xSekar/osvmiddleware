@@ -64,11 +64,11 @@ foreach($list as $i => $ticker){
     };
 }
 
-resumeEcho($count);
-
 if($count[0]>0){
     ratings();
 }
+
+resumeEcho($count);
 
 // --------------------------------- Functions --------------------------------- 
 

@@ -8,7 +8,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
     $tAdded = FALSE;
     $today = date('Y/m/d H:i:s');
 
-        // ******** Intern Id Fetch *********
+    // ******** Intern Id Fetch *********
     try {
         $res = $db->prepare("SELECT id FROM tickers WHERE ticker = ?");
         $res->execute(array(strval($ticker)));
@@ -40,7 +40,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
             }
             return '-3';
         }
-            
+
         if(strpos($exchange, 'OTC') !== FALSE && $OTC == FALSE){ //cambiar =OTC por contiene OTC
             try {
                 $res = $db->prepare("UPDATE tickers_proedgard_updates SET otc = 'Y' WHERE ticker = ?");
@@ -53,10 +53,10 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
         }else{
             //Agrego
             if($OTC == FALSE){
-            $intId = addTicker($ticker, $arrayeol1);
-            echo " Ticker added to DB ";
-            $proc = TRUE;
-            $tAdded = TRUE;
+                $intId = addTicker($ticker, $arrayeol1);
+                echo " Ticker added to DB ";
+                $proc = TRUE;
+                $tAdded = TRUE;
             }
         }
 
@@ -73,10 +73,10 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                 $price = $resJS['results'][0]['lastPrice']; //si este es menor q 1 nada, si es mayor q uno agrego y pongo el nuevo int id para q siga procesando
                 if($price > 1){
                     $intId = addTicker($ticker, $arrayeol1);
-                    echo " Ticker OTC added to DB, price high than U\$s 1 ";
+                    echo " Ticker OTC added to DB, price higher than U\$S 1 ";
                     $proc = TRUE;
                 }else{ 
-                    echo " Ticker marked as tested, price is under U\$s 1 ";
+                    echo " Ticker marked as tested, price is under U\$S 1 ";
                     try {
                         $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
                         $res->execute(array(strval($ticker)));
@@ -84,8 +84,9 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                         echo " Database Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
                     } //proc == FALSE
+                    return '3';
                 } 
-                
+
             }else{
                 if($code == 204){
                     //borro registro de la tabla proedgard
@@ -105,8 +106,8 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
         }
 
         if($proc == FALSE){
-        echo " Id on tickers table doesnt exist ";
-        return '-1';
+            echo " Id on tickers table doesnt exist ";
+            return '-1';
         }
     }else{
         $intId = $row[0]['id'];
@@ -123,29 +124,29 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
         $eolFQ = strval($arrayeol['FiscalQuarter'][$col]);               
 
         //if($force==FALSE){
-            // ******** BD information Fetch *********
-            try {
-                $res = $db->prepare("SELECT fiscal_year, fiscal_quarter FROM reports_header WHERE ticker_id = ? ORDER BY fiscal_year ASC, fiscal_quarter ASC"); //order by fiscal y y dsp fq
-                $res->execute(array(strval($intId)));
-            } catch(PDOException $ex) {
-                echo " Database Error"; //user message
-                die("Line: ".__LINE__." - ".$ex->getMessage());
-            }
+        // ******** BD information Fetch *********
+        try {
+            $res = $db->prepare("SELECT fiscal_year, fiscal_quarter FROM reports_header WHERE ticker_id = ? ORDER BY fiscal_year ASC, fiscal_quarter ASC"); //order by fiscal y y dsp fq
+            $res->execute(array(strval($intId)));
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
 
-            $row = $res->fetchAll();
-            $line = count($row)-1;
-            if($line == -1){
-                echo " Id doesnt exist on reports_header ";//forzar descarga
-                $force = TRUE;
-                $dbFY = 2000;
-                $dbFQ = 1;
-            }else{
-                $dbFY = $row[$line]['fiscal_year'];
-                $dbFQ = $row[$line]['fiscal_quarter'];
-            }
+        $row = $res->fetchAll();
+        $line = count($row)-1;
+        if($line == -1){
+            echo " Id doesnt exist on reports_header ";//forzar descarga
+            $force = TRUE;
+            $dbFY = 2000;
+            $dbFQ = 1;
+        }else{
+            $dbFY = $row[$line]['fiscal_year'];
+            $dbFQ = $row[$line]['fiscal_quarter'];
+        }
         //}
 
-        
+
         if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ) || $force == TRUE || $proc == TRUE){ 
             $downOK = downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded);
 
@@ -200,12 +201,12 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
             }            
         }else{
             try {
-                    $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
-                    $res->execute(array(strval($ticker)));
-                } catch(PDOException $ex) {
-                    echo " Database Error"; //user message
-                    die("Line: ".__LINE__." - ".$ex->getMessage());
-                }
+                $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
+                $res->execute(array(strval($ticker)));
+            } catch(PDOException $ex) {
+                echo " Database Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
             return '0';
         }
 
@@ -237,7 +238,7 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
         $guruok = TRUE; //error if guru is missing
     }
     if($checkqtr && $checkann && $guruok) { 
-        
+
         $arrayguru = parseguru($arrayguru, $fechaeol, $AnnLot, $QtrLotExt); //parse guru        
         $returnGuru = holes($arrayguru, $arrayeol, $AnnLot, $QtrLotExt); 
         $arraymerged = array_merge($returnGuru, $arrayeol);
@@ -248,7 +249,7 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
         if (isset($returnGuru['InterestExpense'])) {
             $arraymerged['InterestExpense'] = $returnGuru['InterestExpense'];
         }
-        
+
         $arraymerged = cleanZero($arraymerged);
         $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
@@ -294,7 +295,7 @@ function addTicker($ticker, $EOLQtr){
                     ':industry' => (is_null($EOLQtr['Industry'][$col])?'':$EOLQtr['Industry'][$col]), 
                     ':sector' => (is_null($EOLQtr['Sector'][$col])?'':$EOLQtr['Sector'][$col]),
                     ':country' => (is_null($EOLQtr['Country'][$col])?'':$EOLQtr['Country'][$col])
-                   ));
+                    ));
         $id = $db->lastInsertId();
         $res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_barchart_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
     } catch(PDOException $ex) {
@@ -346,7 +347,7 @@ function holes($arrayguru, $arrayeol, $AnnLot, $QtrLot){
                     case $AnnLot+1 : //First QTR
                         $gfDiff = dayGap($periodEndDate[$col], $fiscalPeriod[$col]);
                         $gfDiffPost = dayGap($periodEndDate[$col], $fiscalPeriod[$col+1]);
-                        
+
                         if($gfDiff<$gfDiffPost){
                             $order[$col] = array(strval($col), strval($gfDiff));
                         }else{
@@ -456,21 +457,21 @@ function dayGap($day_i, $day_f){
     $days = (strtotime($day_i)-strtotime($day_f))/86400;
     $days = intval(round($days));
     $days = abs($days); 
-         
+
     return $days;
 }
 
 function cleanZero($arraymerged){
     foreach($arraymerged['PeriodEndDate'] as $col => $value) {
-            if($col < 0) {
-                continue;
-            } else {
-                if($arraymerged['PeriodEndDate'][$col] == '0'){ 
-                    $arraymerged = cleanForm($arraymerged, $col); //eol.php function
-                    $arraymerged = cleanZero($arraymerged);
-                    return $arraymerged;
-                }
-            }    
+        if($col < 0) {
+            continue;
+        } else {
+            if($arraymerged['PeriodEndDate'][$col] == '0'){ 
+                $arraymerged = cleanForm($arraymerged, $col); //eol.php function
+                $arraymerged = cleanZero($arraymerged);
+                return $arraymerged;
+            }
+        }    
     }
     return $arraymerged;
 }
@@ -541,48 +542,50 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
 
 function statusCounter($tick, $code, $count){
     switch($code) {
+        case '3': // OTC detect 
+            $count[1]++;
+            break;
+
         case '2': // OTC detect 
-        echo "OTC ticker marked: ".$tick."<br>\n";
-        break;
+            echo "OTC ticker marked: ".$tick."<br>\n";
+            break;
 
         case '1': // Updated correctly 
-        echo "Updating ticker: ".$tick."<br>\n";
-        $count[0]++;
-        break;
+            echo "Updating ticker: ".$tick."<br>\n";
+            $count[0]++;
+            break;
 
         case '0': // Dont need update
-        echo "Ticker ".$tick." is updated<br>\n";
-        $count[1]++;
-        break;
+            echo "Ticker ".$tick." is updated<br>\n";
+            $count[1]++;
+            break;
 
         case '-1': // Error
-        echo "Error for ticker ".$tick."<br>\n";
-        $count[2]++;
-        break;
+            echo "Error for ticker ".$tick."<br>\n";
+            $count[2]++;
+            break;
 
         case '-2': // ErrorS
-        echo "Error of data downloading for ticker ".$tick."<br>\n";
-        $count[2]++;
-        break; 
+            echo "Error of data downloading for ticker ".$tick."<br>\n";
+            $count[2]++;
+            break; 
 
         case '-3': // Error
-        echo "Error: EOL data failed (marked as tested) for ticker ".$tick."<br>\n";
-        $count[2]++;
-        break;
+            echo "Error: EOL data failed (marked as tested) for ticker ".$tick."<br>\n";
+            $count[2]++;
+            break;
     }         
     return $count;
 }
 
 function resumeEcho($count){
-    echo "\n\n
-    ".$count[0]+$count[1]+$count[2]." total Tickers.<br>\n
-    ".$count[0]." stocks Updated<br>\n
-    ".$count[1]." stocks Don't Need Update<br>\n
-    ".$count[2]." stocks With Errors <br>\n\n";
+    echo "<br>\n \n";
+    echo $count[0]+$count[1]+$count[2];
+    echo " total Tickers.<br>\n".$count[0]." stocks Updated<br>\n".$count[1]." stocks Don't Need Update<br>\n".$count[2]." stocks With Errors <br>\n\n";
 }
 
 function ratings(){ 
-    echo "Updating Ratings... ";
+    echo "<br>\nUpdating Ratings... ";
     update_ratings();
     echo "Done<br>\n";
     echo "Updating Ratings TTM... ";
