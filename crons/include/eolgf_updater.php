@@ -76,7 +76,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                     echo " Ticker OTC added to DB, price higher than U\$S 1 ";
                     $proc = TRUE;
                 }else{ 
-                    echo " Ticker marked as tested, price is under U\$S 1 ";
+                    echo " Ticker marked as tested, price is under U\$S 1 \n";
                     try {
                         $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
                         $res->execute(array(strval($ticker)));
