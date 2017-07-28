@@ -116,6 +116,19 @@ function continuityControl($arrayControl, $type){  //Check continuity on fiscal 
             $sameYear = $arrayControl['fiscalYear'][$col]==$arrayControl['fiscalYear'][$col-1];
             $prevYear = $arrayControl['fiscalYear'][$col]==(($arrayControl['fiscalYear'][$col-1])-1);
             $prevQtr = $arrayControl['FiscalQuarter'][$col]==(($arrayControl['FiscalQuarter'][$col-1])-1);
+            $prev = $arrayControl['fiscalYear'][$col-1].$arrayControl['FiscalQuarter'][$col-1];
+            $act = $arrayControl['fiscalYear'][$col].$arrayControl['FiscalQuarter'][$col];
+        }
+        if($prev < $act){
+            if($col!=1){
+                $arrayControl = cleanForm($arrayControl, $col);
+                $arrayControl = continuityControl($arrayControl, $type);
+                return $arrayControl;  
+            }else{
+                $arrayControl = cleanForm($arrayControl, $col-1);
+                $arrayControl = continuityControl($arrayControl, $type);
+                return $arrayControl;  
+            }
         }
         if($type == 'ANN' && $col>0 && $prevYear == FALSE && $arrayControl['fiscalYear'][$col]!="0" && $arrayControl['fiscalYear'][$col-1]!="0"){                    
             $arrayControl = makeHole($arrayControl, $col, $type);
