@@ -60,7 +60,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
             }
         }
 
-        if($OTC==TRUE){  //precio? agrego?
+        if($OTC==TRUE){  
 
             $resJS = array();
             $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$ticker."&mode=I&fields=lastPrice";
@@ -70,7 +70,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
             $code = $resJS['status']['code'];
 
             if($code == 200){
-                $price = $resJS['results'][0]['lastPrice']; //si este es menor q 1 nada, si es mayor q uno agrego y pongo el nuevo int id para q siga procesando
+                $price = $resJS['results'][0]['lastPrice']; // >1 add and process
                 if($price > 1){
                     $intId = addTicker($ticker, $arrayeol1);
                     echo " Ticker OTC added to DB, price higher than U\$S 1 ";
@@ -83,13 +83,12 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                     } catch(PDOException $ex) {
                         echo " Database Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());
-                    } //proc == FALSE
+                    } 
                     return '3';
                 } 
 
             }else{
                 if($code == 204){
-                    //borro registro de la tabla proedgard
                     try {
                         $res = $db->prepare("DELETE FROM tickers_proedgard_updates WHERE ticker = ?");
                         $res->execute(array(strval($ticker)));
@@ -123,10 +122,9 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
         $eolFY = strval($arrayeol['fiscalYear'][$col]);
         $eolFQ = strval($arrayeol['FiscalQuarter'][$col]);               
 
-        //if($force==FALSE){
         // ******** BD information Fetch *********
         try {
-            $res = $db->prepare("SELECT fiscal_year, fiscal_quarter FROM reports_header WHERE ticker_id = ? ORDER BY fiscal_year ASC, fiscal_quarter ASC"); //order by fiscal y y dsp fq
+            $res = $db->prepare("SELECT fiscal_year, fiscal_quarter FROM reports_header WHERE ticker_id = ? ORDER BY fiscal_year ASC, fiscal_quarter ASC"); 
             $res->execute(array(strval($intId)));
         } catch(PDOException $ex) {
             echo " Database Error"; //user message
@@ -136,7 +134,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
         $row = $res->fetchAll();
         $line = count($row)-1;
         if($line == -1){
-            echo " Id doesnt exist on reports_header ";//forzar descarga
+            echo " Id doesnt exist on reports_header "; //force download
             $force = TRUE;
             $dbFY = 2000;
             $dbFQ = 1;
@@ -144,7 +142,6 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
             $dbFY = $row[$line]['fiscal_year'];
             $dbFQ = $row[$line]['fiscal_quarter'];
         }
-        //}
 
 
         if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ) || $force == TRUE || $proc == TRUE){ 
@@ -219,13 +216,13 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
     $checkqtr = TRUE;
     $return = array();    
 
-    $eolfileA = getEOLXML($ticker, 'ANN', '25'); //15 ann
+    $eolfileA = getEOLXML($ticker, 'ANN', '25'); 
     $checkann = check_eol_xml($eolfileA);
 
     $QtrLotExt = strval(count($arrayeol['fiscalYear']) - $AnnLot);
     if($checkann == TRUE) {$arrayeol = eol_xml_parser($eolfileA["xml"], 'ANN', $arrayeol, $AnnLot, $QtrLotExt);}
 
-    $fechaeol = date("Y-m-d", strtotime($arrayeol["FiledDate"][$AnnLot])); //position 16 is last annual 
+    $fechaeol = date("Y-m-d", strtotime($arrayeol["FiledDate"][$AnnLot]));  
 
     //   *************************  Download GF *********************************************
     $gurufile = downloadguru($ticker);
@@ -235,11 +232,11 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
     if($arrayguru == FALSE || count($arrayguru)<3){
         $guruok = FALSE;
     }else{
-        $guruok = TRUE; //error if guru is missing
+        $guruok = TRUE; 
     }
     if($checkqtr && $checkann && $guruok) { 
 
-        $arrayguru = parseguru($arrayguru, $fechaeol, $AnnLot, $QtrLotExt); //parse guru        
+        $arrayguru = parseguru($arrayguru, $fechaeol, $AnnLot, $QtrLotExt);        
         $returnGuru = holes($arrayguru, $arrayeol, $AnnLot, $QtrLotExt); 
         $arraymerged = array_merge($returnGuru, $arrayeol);
 
@@ -423,7 +420,7 @@ function holes($arrayguru, $arrayeol, $AnnLot, $QtrLot){
             }            
         }
     }
-    // ---- Only return new guru that has changes 
+    // Only return new guru that has changes 
     return $arrayGuruNew;    
 }
 
@@ -565,7 +562,7 @@ function statusCounter($tick, $code, $count){
             $count[2]++;
             break;
 
-        case '-2': // ErrorS
+        case '-2': // Errors
             echo "Error of data downloading for ticker ".$tick."<br>\n";
             $count[2]++;
             break; 

@@ -41,21 +41,29 @@ $count = array(0,0,0);
 $list = listOfTickers();
 $lot = count($list);
 
-echo "Starting main Process...<br>\n";
-foreach($list as $i => $ticker){
-    echo "Downloading data for ". $ticker."... ";
-    $chek = ckeckNDown($ticker, $AnnLot, $QtrLot);
-    $count = statusCounter($ticker, $chek, $count);
+if(! is_null($list)){
+    echo "Starting main Process...<br>\n";
+    foreach($list as $i => $ticker){
+        echo "Downloading data for ". $ticker."... ";
+        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot);
+        $count = statusCounter($ticker, $chek, $count);
+    }
+}else{
+    echo "No tickers to Process...<br>\n";
 }
 
 $list = listOfTickersOTC();
 $lot = count($list);
 
-echo "\n<br>Starting OTC Process...<br>\n";
-foreach($list as $i => $ticker){
-    echo "Downloading data for ". $ticker."... ";
-    $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE);
-    $count = statusCounter($ticker, $chek, $count);
+if(! is_null($list)){
+    echo "\n<br>Starting OTC Process...<br>\n";
+    foreach($list as $i => $ticker){
+        echo "Downloading data for ". $ticker."... ";
+        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE);
+        $count = statusCounter($ticker, $chek, $count);
+    }
+}else{
+    echo "No tickers to Process...<br>\n";
 }
 
 if($count[0]>0){
@@ -87,7 +95,11 @@ function listOfTickers(){
     }
     $row = $res->fetchAll(PDO::FETCH_COLUMN);
     $row = array_unique($row);
-    return $row;
+    if(count($row)>0){
+        return $row;
+    }else{
+        return NULL;
+    }
 }
 
 function listOfTickersOTC(){
@@ -110,7 +122,11 @@ function listOfTickersOTC(){
     }
     $row = $res->fetchAll(PDO::FETCH_COLUMN);
     $row = array_unique($row);
-    return $row;
+    if(count($row)>0){
+        return $row;
+    }else{
+        return NULL;
+    }
 }
 
 ?>

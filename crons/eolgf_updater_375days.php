@@ -44,7 +44,7 @@ $lot = count($list);
 if(! is_null($list)){
     foreach($list as $i => $ticker){
         echo "Downloading data for ". $ticker."... ";
-        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, FALSE);
+        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE, FALSE);
         $count = statusCounter($ticker, $chek, $count);
     }
 }
@@ -62,7 +62,7 @@ function listOfTickers(){
     $today = date('Y/m/d');
     $tickers = array();
     try {
-        $res = $db->prepare("SELECT ticker_id FROM tickers_control WHERE (DATEDIFF('".$today."',last_eol_date) > 100)");        
+        $res = $db->prepare("SELECT ticker_id FROM tickers_control WHERE (DATEDIFF('".$today."',last_eol_date) > 375)");        
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message
@@ -71,7 +71,7 @@ function listOfTickers(){
     $ids = $res->fetchAll(PDO::FETCH_COLUMN);
     foreach ($ids as $key => $value) {
         try {
-            $res = $db->prepare("SELECT ticker FROM tickers WHERE id = '".$value."' AND exchange != 'OTC'");            
+            $res = $db->prepare("SELECT ticker FROM tickers WHERE id = '".$value."' AND exchange = 'OTC'");            
             $res->execute();
         } catch(PDOException $ex) {
             echo " Database Error"; //user message
@@ -81,8 +81,8 @@ function listOfTickers(){
         if(isset($res[0])){
             $tickers[] = $res[0];
         }        
-    }    
-    if(count($tickers)>0){  
+    }
+    if(count($tickers)>0){    
         foreach ($tickers as $key => $value) {
             try {
                     $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = '".$value."' ");            
@@ -122,7 +122,7 @@ function listOfTickers(){
     }else{
         echo " There is no tickers to process ";
         return NULL;
-    }
+    }    
 }
 
 ?>

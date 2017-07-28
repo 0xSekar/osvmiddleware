@@ -94,7 +94,7 @@ function eol_xml_parser($EOLXML, $type, $arrayeol, $AnnLot, $QtrLot) {
                 $arrayeol[$name][0] = $name;
                 $arrayeol[$name][$column] = strval($value);                            
             }else{
-                if($col<0 || $col>=$tam || ($type=='QTR' && $col>=$QtrLot) || ($type=='ANN' && $col>=$AnnLot)) { // 
+                if($col<0 || $col>=$tam || ($type=='QTR' && $col>=$QtrLot) || ($type=='ANN' && $col>=$AnnLot)) {  
                     continue;
                 } else {
                     $arrayeol[$name][$column] = strval($value);                
@@ -181,7 +181,7 @@ function duplicateFetchAndInform($arrayControl){ //Detect duplicates and report 
     for($c=0;$c<$max;$c++){
         for($d=$c+1;$d<$max;$d++){
             if($d!=$c && $arrayControl['fiscalYear'][$c]==$arrayControl['fiscalYear'][$d] && $arrayControl['FiscalQuarter'][$c]==$arrayControl['FiscalQuarter'][$d] && $arrayControl['fiscalYear'][$d]!=0){
-                echo " Informe - Duplicado ".$c." con ".$d;
+                echo " Duplicate report found: ".$c." with ".$d;
             }
         }
     }

@@ -93,7 +93,7 @@ function parseguru($data, $fechaeol, $AnnLot, $QtrLot) {
     }
 
     // QUARTERS
-    for ($j = $iniQtr; $j <= $finQtr; $j++) { //for ($j = 63; $j <= 102; $j++) {
+    for ($j = $iniQtr; $j <= $finQtr; $j++) { 
         for ($i = $iniline; $i <= $endline; $i ++) {
 
             $currentvalue = $data[$i][$j];

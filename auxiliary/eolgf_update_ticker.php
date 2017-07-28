@@ -36,8 +36,10 @@ $db = Database::GetInstance();
 $AnnLot = 15;
 $QtrLot = 20;
 
+$otc = FALSE;
+
 //$ticker = $_REQUEST['ticker'];
-$ticker = 'A';
+$ticker = 'AABB';
 
 if($ticker!=NULL){
     try {
@@ -49,8 +51,20 @@ if($ticker!=NULL){
         }        
     $res = $res->fetchAll(PDO::FETCH_COLUMN);
     if(!isset($res[0])){
-       echo "Downloading data for ". $ticker."... ";
-        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
+        try {
+            $res = $db->prepare("SELECT exchange FROM tickers WHERE ticker = '".$ticker."' ");            
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }        
+        $res = $res->fetchAll(PDO::FETCH_COLUMN);
+        if($res[0] == 'OTC') {
+            $otc = TRUE;
+        }
+
+        echo "Downloading data for ". $ticker."... ";
+        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, $otc, TRUE);
         $count = statusCounter($ticker, $chek, $count);
         ratings();
     }

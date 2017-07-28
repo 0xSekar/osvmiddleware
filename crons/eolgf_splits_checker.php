@@ -41,27 +41,29 @@ $count = array(0,0,0);
 $list = listOfTickers();
 $lot = count($list);
 
-foreach($list as $i => $ticker){
-    echo "Downloading data for ". $ticker."... ";
-    $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
-    $count = statusCounter($ticker, $chek, $count);    
-    if($chek==1){
-        try {
-            $res = $db->prepare("UPDATE tickers_split_parser SET updated_date = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
-            $res->execute(array(strval($ticker)));
-        } catch(PDOException $ex) {
-            echo " Database Error"; //user message
-            die("Line: ".__LINE__." - ".$ex->getMessage());
+if(! is_null($list)){
+    foreach($list as $i => $ticker){
+        echo "Downloading data for ". $ticker."... ";
+        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
+        $count = statusCounter($ticker, $chek, $count);    
+        if($chek==1){
+            try {
+                $res = $db->prepare("UPDATE tickers_split_parser SET updated_date = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
+                $res->execute(array(strval($ticker)));
+            } catch(PDOException $ex) {
+                echo " Database Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
+        }else{
+            try {
+                $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND  tested_for_today is null) ");            
+                $res->execute(array(strval($ticker)));
+            } catch(PDOException $ex) {
+                echo " Database Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
         }
-    }else{
-        try {
-            $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND  tested_for_today is null) ");            
-            $res->execute(array(strval($ticker)));
-        } catch(PDOException $ex) {
-            echo " Database Error"; //user message
-            die("Line: ".__LINE__." - ".$ex->getMessage());
-        }
-    };
+    }
 }
 
 if($count[0]>0){
@@ -86,44 +88,49 @@ function listOfTickers(){
     $tickers = $res->fetchAll(PDO::FETCH_COLUMN);
     $tickers = array_unique($tickers);
 
-    foreach ($tickers as $key => $value) {
-        $gurufile = downloadguru($value);
-        $arrayguru = array_map('str_getcsv', preg_split('/\r*\n+|\r+/', $gurufile));
+    if(count($tickers)>0){ 
+        foreach ($tickers as $key => $value) {
+            $gurufile = downloadguru($value);
+            $arrayguru = array_map('str_getcsv', preg_split('/\r*\n+|\r+/', $gurufile));
 
-        if(count($arrayguru)>20){
-            foreach($arrayguru as $name => $val) {
-                if($val[0] == "EPS (Basic)"){
-                    $i = count($val)-1;
-                    $EPS = $val[$i];
-                    continue 1;
-                } 
-            }            
-            try {
-                $res = $db->prepare("SELECT ticker FROM tickers_split_parser WHERE ticker = '".$value."' AND  old_eps != '".$EPS."' ");            
-                $res->execute();
-            } catch(PDOException $ex) {
-                echo " Database Error"; //user message
-                die("Line: ".__LINE__." - ".$ex->getMessage());
-            }
-            $res = $res->fetchAll(PDO::FETCH_COLUMN);
-            if(isset($res[0])){
-                $tickerstoupdate[] = $res[0];
-                
-            }else{
+            if(count($arrayguru)>20){
+                foreach($arrayguru as $name => $val) {
+                    if($val[0] == "EPS (Basic)"){
+                        $i = count($val)-1;
+                        $EPS = $val[$i];
+                        continue 1;
+                    } 
+                }            
                 try {
-                    $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = '".$value."' AND  tested_for_today is null) ");            
+                    $res = $db->prepare("SELECT ticker FROM tickers_split_parser WHERE ticker = '".$value."' AND  old_eps != '".$EPS."' ");            
                     $res->execute();
                 } catch(PDOException $ex) {
                     echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
-            }
-        }else{
-            //guru bad
-            echo " Guru error ";
-        }       
+                $res = $res->fetchAll(PDO::FETCH_COLUMN);
+                if(isset($res[0])){
+                    $tickerstoupdate[] = $res[0];
+                    
+                }else{
+                    try {
+                        $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = '".$value."' AND  tested_for_today is null) ");            
+                        $res->execute();
+                    } catch(PDOException $ex) {
+                        echo " Database Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                    }
+                }
+            }else{
+                //guru bad
+                echo " Guru error ";
+            }       
+        }
+        return $tickerstoupdate;
+    }else{
+        echo " There is no tickers to process ";
+        return NULL;
     }
-    return $tickerstoupdate;
 }
 
 ?>

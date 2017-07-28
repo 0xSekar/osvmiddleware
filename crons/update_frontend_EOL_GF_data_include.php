@@ -90,7 +90,7 @@ function update_frontend_EOL_GF_data($eticker, $rawdata, $tAdded) {
 
 
     echo "Updating EOD valuation for new tickers... ";
-    update_eod_valuation($dates->ticker_id); // id del ticker que lo tgo q consultar en tabla tickers
+    update_eod_valuation($dates->ticker_id); 
     echo "done<br>\n";
 
     return;

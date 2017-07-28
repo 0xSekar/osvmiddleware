@@ -41,10 +41,27 @@ $count = array(0,0,0);
 $list = listOfTickers();
 $lot = count($list);
 
-foreach($list as $i => $ticker){
-    echo "Downloading data for ". $ticker."... ";
-    $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
-    $count = statusCounter($ticker, $chek, $count);
+if(! is_null($list)){
+    foreach($list as $i => $ticker){
+        echo "Downloading data for ". $ticker."... ";
+        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
+        $count = statusCounter($ticker, $chek, $count);
+    }
+}else{
+    echo "No tickers to Process...<br>\n";
+}
+
+$list = listOfTickersOTC();
+$lot = $lot + count($list);
+
+if(! is_null($list)){
+    foreach($list as $i => $ticker){
+        echo "Downloading data for ". $ticker."... ";
+        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE, TRUE);
+        $count = statusCounter($ticker, $chek, $count);
+    }
+}else{
+    echo "No OTC tickers to Process...<br>\n";
 }
 
 if($lot>0){
@@ -59,7 +76,7 @@ function listOfTickers(){
     $db = Database::GetInstance(); 
     $today = date('Y/m/d');
     try {
-        $res = $db->prepare("SELECT a.ticker FROM tickers AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.is_old = FALSE AND b.ticker is null");
+        $res = $db->prepare("SELECT a.ticker FROM tickers AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.is_old = FALSE AND b.ticker is null AND a.exchange != 'OTC'");
         
         $res->execute();
     } catch(PDOException $ex) {
@@ -68,7 +85,31 @@ function listOfTickers(){
     }
     $row = $res->fetchAll(PDO::FETCH_COLUMN);
     $row = array_unique($row);
-    return $row;
+    if(count($row)>0){
+        return $row;
+    }else{
+        return NULL;
+    }
+}
+
+function listOfTickersOTC(){
+    $db = Database::GetInstance(); 
+    $today = date('Y/m/d');
+    try {
+        $res = $db->prepare("SELECT a.ticker FROM tickers AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.is_old = FALSE AND b.ticker is null AND a.exchange = 'OTC'");
+        
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $row = $res->fetchAll(PDO::FETCH_COLUMN);
+    $row = array_unique($row);
+    if(count($row)>0){
+        return $row;
+    }else{
+        return NULL;
+    }
 }
 
 ?>
