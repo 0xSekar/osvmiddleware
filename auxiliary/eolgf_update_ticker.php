@@ -21,15 +21,26 @@ include_once('../crons/include/guru.php');
 include_once('../crons/include/eol.php'); 
 include_once('../crons/include/eolgf_updater.php');
 
+ini_set('output_buffering', 'off');
+ini_set('zlib.output_compression', false);
+ini_set('implicit_flush', true);
+
 set_time_limit(0);                   // ignore php timeout
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
 // Should never be cached - do not remove this
-header("Content-type: text/xml; charset=utf-8");
+header("Content-type: text/plain");
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+
+for($i = 0; $i < 1000; $i++) {
+    echo ' ';
+}
+
+@ob_flush();
+@flush();
 
 $db = Database::GetInstance(); 
 
@@ -37,18 +48,18 @@ $AnnLot = 15;
 $QtrLot = 20;
 
 $otc = FALSE;
+$count = array(0,0,0);
 
-//$ticker = $_REQUEST['ticker'];
-$ticker = 'AABB';
+$ticker = $_REQUEST['ticker'];
 
 if($ticker!=NULL){
     try {
-            $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = '".$ticker."' ");            
-            $res->execute();
-        } catch(PDOException $ex) {
-            echo " Database Error"; //user message
-            die("Line: ".__LINE__." - ".$ex->getMessage());
-        }        
+        $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = '".$ticker."' ");            
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }        
     $res = $res->fetchAll(PDO::FETCH_COLUMN);
     if(!isset($res[0])){
         try {

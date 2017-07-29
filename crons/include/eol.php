@@ -14,7 +14,7 @@ function getEOLXML($ticker, $dura, $numper) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $result['xml'] = curl_exec($ch);
     $result['status_code'] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
+
     if ($errno = curl_errno($ch)) {
         $result['error_code'] = $errno;
         $result['error_msg'] = curl_strerror($errno);
@@ -55,10 +55,10 @@ function eol_xml_parser($EOLXML, $type, $arrayeol, $AnnLot, $QtrLot) {
         foreach ($doc->arrayData as $row) {
             foreach ($row as $name => $value) {
                 if($col < 0) {
-                        continue;
-                    } else {
-                        $arrayAux[$name][$col] = $value;                        
-                    }            
+                    continue;
+                } else {
+                    $arrayAux[$name][$col] = $value;                        
+                }            
             }
             $col++;
         }        
@@ -100,8 +100,8 @@ function eol_xml_parser($EOLXML, $type, $arrayeol, $AnnLot, $QtrLot) {
                     $arrayeol[$name][$column] = strval($value);                
                 }
             }
-        $first = FALSE;
-        $column--;
+            $first = FALSE;
+            $column--;
         }
     }
     return $arrayeol;
@@ -118,16 +118,16 @@ function continuityControl($arrayControl, $type){  //Check continuity on fiscal 
             $prevQtr = $arrayControl['FiscalQuarter'][$col]==(($arrayControl['FiscalQuarter'][$col-1])-1);
             $prev = $arrayControl['fiscalYear'][$col-1].$arrayControl['FiscalQuarter'][$col-1];
             $act = $arrayControl['fiscalYear'][$col].$arrayControl['FiscalQuarter'][$col];
-        }
-        if($prev < $act){
-            if($col!=1){
-                $arrayControl = cleanForm($arrayControl, $col);
-                $arrayControl = continuityControl($arrayControl, $type);
-                return $arrayControl;  
-            }else{
-                $arrayControl = cleanForm($arrayControl, $col-1);
-                $arrayControl = continuityControl($arrayControl, $type);
-                return $arrayControl;  
+            if($prev < $act){
+                if($col!=1){
+                    $arrayControl = cleanForm($arrayControl, $col);
+                    $arrayControl = continuityControl($arrayControl, $type);
+                    return $arrayControl;  
+                }else{
+                    $arrayControl = cleanForm($arrayControl, $col-1);
+                    $arrayControl = continuityControl($arrayControl, $type);
+                    return $arrayControl;  
+                }
             }
         }
         if($type == 'ANN' && $col>0 && $prevYear == FALSE && $arrayControl['fiscalYear'][$col]!="0" && $arrayControl['fiscalYear'][$col-1]!="0"){                    
@@ -212,33 +212,33 @@ function cleanForm($arrayClean, $column){    //Erase all data in "$column" posit
 function check_eol_xml($resp) { //resp as EOLXML
     $res = TRUE;
     switch ($resp['status_code']) {
-                    case 200:
-                        // still two cases either there is valid data or not
-                        if ((stripos($resp['xml'], 'There is no data') !== false) OR (stripos($resp['xml'], 'No data available') !== false)) {                                                       
-                            echo "<Error><Message>There is no data for the current request </Message></Error>"; 
-                            $res = FALSE;
-                        }
-                        break;
-                    case 400:
-                        echo "<Error><Message>Error 400, Bad Request</Message></Error>"; 
-                        $res = FALSE;
-                        break;
-                    case 403:
-                        echo "<Error><Message>Error 403, Forbidden</Message></Error>"; 
-                        $res = FALSE;
-                        break;
-                    case 500:
-                        echo "<Error><Message>Error 500, Internal Server Error</Message></Error>"; 
-                        $res = FALSE;
-                        break;
-                    case 504:
-                        echo "<Error><Message>Error 504, Gateway timeout</Message></Error>";
-                        $res = FALSE; 
-                        break;
-                    default:
-                        echo "<Error><Message>Other error in data source service</Message></Error>"; 
-                        $res = FALSE;
-                }
+        case 200:
+            // still two cases either there is valid data or not
+            if ((stripos($resp['xml'], 'There is no data') !== false) OR (stripos($resp['xml'], 'No data available') !== false)) {                                                       
+                echo "<Error><Message>There is no data for the current request </Message></Error>"; 
+                $res = FALSE;
+            }
+            break;
+        case 400:
+            echo "<Error><Message>Error 400, Bad Request</Message></Error>"; 
+            $res = FALSE;
+            break;
+        case 403:
+            echo "<Error><Message>Error 403, Forbidden</Message></Error>"; 
+            $res = FALSE;
+            break;
+        case 500:
+            echo "<Error><Message>Error 500, Internal Server Error</Message></Error>"; 
+            $res = FALSE;
+            break;
+        case 504:
+            echo "<Error><Message>Error 504, Gateway timeout</Message></Error>";
+            $res = FALSE; 
+            break;
+        default:
+            echo "<Error><Message>Other error in data source service</Message></Error>"; 
+            $res = FALSE;
+    }
     return $res;
 }
 ?>
