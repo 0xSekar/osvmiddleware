@@ -71,9 +71,13 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
 
             if($code == 200){
                 $price = $resJS['results'][0]['lastPrice']; // >1 add and process
-                if($price > 1){
-                    $intId = addTicker($ticker, $arrayeol1);
-                    echo " Ticker OTC added to DB, price higher than U\$S 1 ";
+                if($price > 1 || $force = TRUE){
+                        $intId = addTicker($ticker, $arrayeol1);
+                    if($price > 1) {
+                        echo " Ticker OTC added to DB, price higher than U\$S 1 ";
+                    } else {
+                        echo " Price is under U\$S 1 but forced";
+                    }
                     $proc = TRUE;
                 }else{ 
                     echo " Ticker marked as tested, price is under U\$S 1 \n";
@@ -147,7 +151,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
         if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ) || $force == TRUE || $proc == TRUE){ 
             $downOK = downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded);
 
-            if($downOK & $force == FALSE){ 
+            if($downOK && $force == FALSE){ 
                 try {
                     $res = $db->prepare("UPDATE tickers_proedgard_updates SET downloaded = 'Y', updated_date = '".$today."' WHERE (ticker = ? AND downloaded is null) ");
                     $res->execute(array(strval($ticker)));
@@ -164,7 +168,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                 }
                 return '1';
             }else{
-                if ($downOK & $force == TRUE) {
+                if ($downOK && $force == TRUE) {
                     if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ)) {
                         try {
                             $res = $db->prepare("UPDATE tickers_proedgard_updates SET downloaded = 'Y', updated_date = '".$today."' WHERE (ticker = ? AND downloaded is null) ");
@@ -282,7 +286,7 @@ function addTicker($ticker, $EOLQtr){
     try {
         $res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
         $res->execute(array(
-                    ':ticker' => (is_null($ticker)?'':$ticker),
+                    ':ticker' => (is_null($ticker)?'':strtoupper($ticker)),
                     ':cik' => (is_null($EOLQtr['CIK'][$col])?'':$EOLQtr['CIK'][$col]), 
                     ':company' => (is_null($EOLQtr['COMPANYNAME'][$col])?'':$EOLQtr['COMPANYNAME'][$col]), 
                     ':exchange' => $rowe["exchange"], 

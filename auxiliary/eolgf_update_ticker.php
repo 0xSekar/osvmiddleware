@@ -70,14 +70,20 @@ if($ticker!=NULL){
             die("Line: ".__LINE__." - ".$ex->getMessage());
         }        
         $res = $res->fetchAll(PDO::FETCH_COLUMN);
-        if($res[0] == 'OTC') {
+        if(isset($res[0]) && $res[0] == 'OTC') {
             $otc = TRUE;
         }
 
         echo "Downloading data for ". $ticker."... ";
         $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, $otc, TRUE);
+        if($chek == 2) {
+            echo "<br>\nProcessing OTC... ";
+            $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, TRUE, TRUE);
+        }
         $count = statusCounter($ticker, $chek, $count);
-        ratings();
+        if($count[0] > 0) {
+            ratings();
+        }
     }
 }
 
