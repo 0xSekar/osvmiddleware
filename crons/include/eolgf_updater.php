@@ -284,8 +284,12 @@ function addTicker($ticker, $EOLQtr){
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     try {
-        $res = $db->prepare("INSERT INTO tickers (ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
+        $res = $db->prepare("SELECT id FROM tickers_id_history WHERE ticker = ?");
+        $res->execute(array(strtoupper($ticker)));
+        $tick_id = $res->fetchColumn();
+        $res = $db->prepare("INSERT INTO tickers (id, ticker, cik, company, exchange, sic, entityid, formername, industry, sector, country) VALUES (:ticker_id, :ticker, :cik, :company, :exchange, :sic, :entityid, :formername, :industry, :sector, :country)");
         $res->execute(array(
+                    ':ticker_id' => (empty($tick_id)?NULL:$tick_id),
                     ':ticker' => (is_null($ticker)?'':strtoupper($ticker)),
                     ':cik' => (is_null($EOLQtr['CIK'][$col])?'':$EOLQtr['CIK'][$col]), 
                     ':company' => (is_null($EOLQtr['COMPANYNAME'][$col])?'':$EOLQtr['COMPANYNAME'][$col]), 
@@ -297,7 +301,11 @@ function addTicker($ticker, $EOLQtr){
                     ':sector' => (is_null($EOLQtr['Sector'][$col])?'':$EOLQtr['Sector'][$col]),
                     ':country' => (is_null($EOLQtr['Country'][$col])?'':$EOLQtr['Country'][$col])
                     ));
-        $id = $db->lastInsertId();
+        if(empty($tick_id)) {
+            $id = $db->lastInsertId();
+        } else {
+            $id = $tick_id;
+        }
         $res = $db->exec("INSERT into tickers_control (ticker_id, last_eol_date, last_yahoo_date, last_barchart_date, last_volatile_date, last_estimates_date) VALUES ($id, '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01', '2000-01-01')");
     } catch(PDOException $ex) {
         echo " Database Error"; //user message

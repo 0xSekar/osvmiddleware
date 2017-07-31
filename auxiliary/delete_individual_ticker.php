@@ -56,6 +56,12 @@ try {
 	//$row = mysql_fetch_assoc($res);
 	$row = $res->fetch(PDO::FETCH_ASSOC);
 	$ticker_id = $row["id"];
+        $query = "INSERT IGNORE INTO tickers_id_history (id, ticker) values (?,?)";
+        $params = array();
+        $params[] = $ticker_id;
+        $params[] = strtoupper($_GET['ticker']);
+        $res = $db->prepare($query);
+        $res->execute($params);
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
 	die("Line: ".__LINE__." - ".$ex->getMessage());
