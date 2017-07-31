@@ -253,11 +253,7 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
 
         $arraymerged = cleanZero($arraymerged);        
         $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);   
-        echo "\nANTES  d final ctrl\n";
-        var_dump($arraymerged['FiscalPeriod']);    
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
-        echo "\nDESPUES d final ctrl\n";
-        var_dump($arraymerged['FiscalPeriod']);
 
         update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
 

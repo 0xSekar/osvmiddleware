@@ -10,8 +10,6 @@ function nullValues(&$item, $key) {
 function update_frontend_EOL_GF_data($eticker, $rawdata, $tAdded) {
     $db = Database::GetInstance(); 
 
-    update_yahoo_daily($eticker);
-
     try { 
         $res = $db->query("SELECT b.* FROM tickers a LEFT JOIN tickers_control b ON a.id = b.ticker_id WHERE a.ticker = '$eticker'");        
     } catch(PDOException $ex) {
@@ -19,8 +17,10 @@ function update_frontend_EOL_GF_data($eticker, $rawdata, $tAdded) {
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
     $counter = $res->rowCount();
-    if($counter == 0) continue;
+    if($counter == 0) return;
     $dates = $res->fetch(PDO::FETCH_OBJ);
+
+    update_yahoo_daily($eticker);
 
     array_walk_recursive($rawdata, 'nullValues');
 

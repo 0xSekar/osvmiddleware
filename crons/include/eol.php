@@ -175,11 +175,9 @@ function duplicateControl($arrayControl){  //Detect duplicates and calls "cleanF
         if($col>0 && $arrayControl['fiscalYear'][$col] == $arrayControl['fiscalYear'][$col-1] && $arrayControl['FiscalQuarter'][$col]== $arrayControl['FiscalQuarter'][$col-1] && $arrayControl['fiscalYear'][$col] != 0){                    
             if(date("Y-m-d", strtotime($arrayControl['ReceivedDate'][$col-1])) <= date("Y-m-d", strtotime($arrayControl['ReceivedDate'][$col]))){
                 $arrayControl = cleanForm($arrayControl, $col-1);
-                echo "borro por if ".$col-1;
                 $arrayControl = duplicateControl($arrayControl);
                 return $arrayControl;
             }else{
-                echo "borro por else ".$col;
                 $arrayControl = cleanForm($arrayControl, $col);
                 $arrayControl = duplicateControl($arrayControl);
                 return $arrayControl;
