@@ -31,7 +31,7 @@ header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $db = Database::GetInstance(); 
-$today = date('Y/m/d');
+$today = date('Y/m/d H:i:s');
 
 $AnnLot = 15;
 $QtrLot = 20;
@@ -56,7 +56,7 @@ if(! is_null($list)){
             }
         }else{
             try {
-                $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND  tested_for_today is null) ");            
+                $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
                 $res->execute(array(strval($ticker)));
             } catch(PDOException $ex) {
                 echo " Database Error"; //user message
@@ -77,7 +77,7 @@ resumeEcho($count);
 function listOfTickers(){
     $db = Database::GetInstance(); 
     $tickerstoupdate = array();
-    $today = date('Y/m/d');
+    $today = date('Y/m/d H:i:s');
     try {
         $res = $db->prepare("SELECT a.ticker FROM tickers_split_parser AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.updated_date is null AND b.ticker is null AND (DATEDIFF('".$today."',a.tested_for_today) > 2 OR a.tested_for_today is null)");        
         $res->execute();
@@ -114,7 +114,7 @@ function listOfTickers(){
                     
                 }else{
                     try {
-                        $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = '".$value."' AND  tested_for_today is null) ");            
+                        $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = '".$value."' AND updated_date is null) ");            
                         $res->execute();
                     } catch(PDOException $ex) {
                         echo " Database Error"; //user message

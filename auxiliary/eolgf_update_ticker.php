@@ -50,8 +50,8 @@ $QtrLot = 20;
 $otc = FALSE;
 $count = array(0,0,0);
 
-//$ticker = $_REQUEST['ticker'];
-$ticker = 'AUNFF';
+$ticker = $_REQUEST['ticker'];
+//$ticker = 'AUNFF';
 
 if($ticker!=NULL){
     try {
