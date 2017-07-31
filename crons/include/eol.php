@@ -61,18 +61,18 @@ function eol_xml_parser($EOLXML, $type, $arrayeol, $AnnLot, $QtrLot) {
                 }            
             }
             $col++;
-        }        
+        } 
 
     } catch (Exception $e) {
         $msg = "We have a problem: " . $e->getMessage();
         echo "<Error><Message>$msg</Message></Error>"; 
-    }  
+    }
 
-    // ---- Duplicates control section ----
+    // ---- Duplicates control section ---- 
     $arrayAux = duplicateControl($arrayAux);
     $arrayAux = duplicateFetchAndInform($arrayAux);
     $arrayAux = continuityControl($arrayAux, $type);
-
+    
     if($type == 'QTR'){ $QtrLot = count($arrayAux['fiscalYear']); }                     
 
     // ---- All controls complete => Copying only 15 annuals or 20 qtrs ---- 
@@ -118,13 +118,14 @@ function continuityControl($arrayControl, $type){  //Check continuity on fiscal 
             $prevQtr = $arrayControl['FiscalQuarter'][$col]==(($arrayControl['FiscalQuarter'][$col-1])-1);
             $prev = $arrayControl['fiscalYear'][$col-1].$arrayControl['FiscalQuarter'][$col-1];
             $act = $arrayControl['fiscalYear'][$col].$arrayControl['FiscalQuarter'][$col];
+           
             if($prev < $act){
                 if($col!=1){
-                    $arrayControl = cleanForm($arrayControl, $col);
+                    $arrayControl = cleanForm($arrayControl, $col);                    
                     $arrayControl = continuityControl($arrayControl, $type);
                     return $arrayControl;  
                 }else{
-                    $arrayControl = cleanForm($arrayControl, $col-1);
+                    $arrayControl = cleanForm($arrayControl, $col-1);                    
                     $arrayControl = continuityControl($arrayControl, $type);
                     return $arrayControl;  
                 }
@@ -174,9 +175,11 @@ function duplicateControl($arrayControl){  //Detect duplicates and calls "cleanF
         if($col>0 && $arrayControl['fiscalYear'][$col] == $arrayControl['fiscalYear'][$col-1] && $arrayControl['FiscalQuarter'][$col]== $arrayControl['FiscalQuarter'][$col-1] && $arrayControl['fiscalYear'][$col] != 0){                    
             if(date("Y-m-d", strtotime($arrayControl['ReceivedDate'][$col-1])) <= date("Y-m-d", strtotime($arrayControl['ReceivedDate'][$col]))){
                 $arrayControl = cleanForm($arrayControl, $col-1);
+                echo "borro por if ".$col-1;
                 $arrayControl = duplicateControl($arrayControl);
                 return $arrayControl;
             }else{
+                echo "borro por else ".$col;
                 $arrayControl = cleanForm($arrayControl, $col);
                 $arrayControl = duplicateControl($arrayControl);
                 return $arrayControl;

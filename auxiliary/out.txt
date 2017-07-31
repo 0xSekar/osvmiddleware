@@ -1,0 +1,497 @@
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Downloading data for AUNFF...  Duplicate report found: 19 with 23
+ANtes de duplicate 
+array(6) {
+  [0]=>
+  string(4) "2014"
+  [1]=>
+  string(4) "2013"
+  [2]=>
+  string(4) "2012"
+  [3]=>
+  string(4) "2011"
+  [4]=>
+  string(4) "2010"
+  [5]=>
+  string(4) "2010"
+}
+array(6) {
+  [0]=>
+  string(1) "4"
+  [1]=>
+  string(1) "4"
+  [2]=>
+  string(1) "4"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "4"
+  [5]=>
+  string(1) "4"
+}
+-1ANtes de duplicate fetch and inform 
+array(5) {
+  [0]=>
+  string(4) "2014"
+  [1]=>
+  string(4) "2013"
+  [2]=>
+  string(4) "2012"
+  [3]=>
+  string(4) "2011"
+  [4]=>
+  string(4) "2010"
+}
+array(5) {
+  [0]=>
+  string(1) "4"
+  [1]=>
+  string(1) "4"
+  [2]=>
+  string(1) "4"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "4"
+}
+ANtes de continuity control 
+array(5) {
+  [0]=>
+  string(4) "2014"
+  [1]=>
+  string(4) "2013"
+  [2]=>
+  string(4) "2012"
+  [3]=>
+  string(4) "2011"
+  [4]=>
+  string(4) "2010"
+}
+array(5) {
+  [0]=>
+  string(1) "4"
+  [1]=>
+  string(1) "4"
+  [2]=>
+  string(1) "4"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "4"
+}
+despues de continuity control 
+array(5) {
+  [0]=>
+  string(4) "2014"
+  [1]=>
+  string(4) "2013"
+  [2]=>
+  string(4) "2012"
+  [3]=>
+  string(4) "2011"
+  [4]=>
+  string(4) "2010"
+}
+array(5) {
+  [0]=>
+  string(1) "4"
+  [1]=>
+  string(1) "4"
+  [2]=>
+  string(1) "4"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "4"
+}
+final del eol 
+array(5) {
+  [0]=>
+  string(4) "2014"
+  [1]=>
+  string(4) "2013"
+  [2]=>
+  string(4) "2012"
+  [3]=>
+  string(4) "2011"
+  [4]=>
+  string(4) "2010"
+}
+array(5) {
+  [0]=>
+  string(1) "4"
+  [1]=>
+  string(1) "4"
+  [2]=>
+  string(1) "4"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "4"
+}
+
+ANTES  d final ctrl
+array(29) {
+  [0]=>
+  string(12) "FiscalPeriod"
+  [1]=>
+  string(8) "20101230"
+  [2]=>
+  string(8) "20111230"
+  [3]=>
+  string(8) "20121230"
+  [4]=>
+  string(8) "20131230"
+  [5]=>
+  string(8) "20141230"
+  [6]=>
+  string(1) "0"
+  [7]=>
+  string(8) "20110930"
+  [8]=>
+  string(8) "20111230"
+  [9]=>
+  string(8) "20120330"
+  [10]=>
+  string(8) "20120630"
+  [11]=>
+  string(8) "20120930"
+  [12]=>
+  string(8) "20121230"
+  [13]=>
+  string(8) "20130330"
+  [14]=>
+  string(8) "20130630"
+  [15]=>
+  string(8) "20130930"
+  [16]=>
+  string(8) "20131230"
+  [17]=>
+  string(8) "20140330"
+  [18]=>
+  string(8) "20140630"
+  [19]=>
+  string(8) "20140930"
+  [20]=>
+  string(8) "20141230"
+  [21]=>
+  string(8) "20150330"
+  [22]=>
+  string(8) "20150630"
+  [23]=>
+  string(8) "20150930"
+  [24]=>
+  string(8) "20151230"
+  [25]=>
+  string(8) "20160330"
+  [26]=>
+  string(8) "20160630"
+  [27]=>
+  string(8) "20160930"
+  [28]=>
+  string(8) "20161230"
+}
+
+DESPUES d final ctrl
+array(36) {
+  [0]=>
+  string(12) "FiscalPeriod"
+  [1]=>
+  string(1) "0"
+  [2]=>
+  string(1) "0"
+  [3]=>
+  string(1) "0"
+  [4]=>
+  string(1) "0"
+  [5]=>
+  string(1) "0"
+  [6]=>
+  string(1) "0"
+  [7]=>
+  string(1) "0"
+  [8]=>
+  string(1) "0"
+  [9]=>
+  string(1) "0"
+  [10]=>
+  string(1) "0"
+  [11]=>
+  string(8) "20101230"
+  [12]=>
+  string(8) "20111230"
+  [13]=>
+  string(8) "20121230"
+  [14]=>
+  string(8) "20131230"
+  [15]=>
+  string(8) "20141230"
+  [16]=>
+  string(8) "20120330"
+  [17]=>
+  string(8) "20120630"
+  [18]=>
+  string(8) "20120930"
+  [19]=>
+  string(8) "20121230"
+  [20]=>
+  string(8) "20130330"
+  [21]=>
+  string(8) "20130630"
+  [22]=>
+  string(8) "20130930"
+  [23]=>
+  string(8) "20131230"
+  [24]=>
+  string(8) "20140330"
+  [25]=>
+  string(8) "20140630"
+  [26]=>
+  string(8) "20140930"
+  [27]=>
+  string(8) "20141230"
+  [28]=>
+  string(8) "20150330"
+  [29]=>
+  string(8) "20150630"
+  [30]=>
+  string(8) "20150930"
+  [31]=>
+  string(8) "20151230"
+  [32]=>
+  string(8) "20160330"
+  [33]=>
+  string(8) "20160630"
+  [34]=>
+  string(8) "20160930"
+  [35]=>
+  string(8) "20161230"
+}
+
+<br>Updating Tickers (yahoo)...<br>
+
+Updating Tickers (barchart)...<br>
+done<br>
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 382
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/raw_data_update_queries.php on line 383
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+
+Notice: Undefined index: SharesOutstandingY in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+
+Notice: Undefined index: SharesOutstandingBC in /home/erika/osv/crons/include/update_quality_checks.php on line 218
+Removing old Quality Checks (PIO)... done<br>
+Removing old Quality Checks (ALTMAN)... done<br>
+Removing old Quality Checks (BENEISH)... done<br>
+Removing old Quality Checks (DUPONT)... done<br>
+Removing old Quality Checks (ACCRUAL)... done<br>
+Updating EOD valuation for new tickers... 
+Warning: file_get_contents(http://www.oldschoolvalue.com/app/classes/middleware_val_util.php?id=860&appkey=DgmNyOv2tUKBG5n6JzUI): failed to open stream: HTTP request failed! HTTP/1.1 404 Not Found
+ in /home/erika/osv/crons/include/update_eod_valuation.php on line 15
+done<br>
+ Forced updated Updating ticker: AUNFF<br>
+<br>
+Updating Ratings... 
+Warning: Division by zero in /home/erika/osv/crons/include/update_ratings.php on line 67
+Done<br>
+Updating Ratings TTM... Done<br>
+Updating is_old tickers table field... Done<br>

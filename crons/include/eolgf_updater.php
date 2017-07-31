@@ -251,9 +251,13 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
             $arraymerged['InterestExpense'] = $returnGuru['InterestExpense'];
         }
 
-        $arraymerged = cleanZero($arraymerged);
-        $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);
+        $arraymerged = cleanZero($arraymerged);        
+        $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);   
+        echo "\nANTES  d final ctrl\n";
+        var_dump($arraymerged['FiscalPeriod']);    
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
+        echo "\nDESPUES d final ctrl\n";
+        var_dump($arraymerged['FiscalPeriod']);
 
         update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
 
@@ -508,12 +512,12 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
             }else{
                 $arrayComplete[$name] = array_fill(0, $Lot+1, "0");
                 $arrayComplete[$name][0] = $arraymerged[$name][0];
-                $colOrig = $AnnQty;
+                $colOrig = $AnnQty+1;
                 $col = $AnnLot;
                 $AnnCount = $AnnQty;
                 $QtrCount = $QtrQty;               
                 while($col>0){
-                    if($AnnCount>0){
+                    if($AnnCount>=0){
                         $arrayComplete[$name][$col] = $arraymerged[$name][$colOrig];
                         $colOrig--;
                         $AnnCount--;
@@ -525,7 +529,7 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
                 $colOrig = $LotOrig-1;
                 $col = $Lot;
                 while($col>$AnnLot) {
-                    if($QtrCount>0){
+                    if($QtrCount>=0){
                         $arrayComplete[$name][$col] = $arraymerged[$name][$colOrig];
                         $colOrig--;
                         $QtrCount--;
