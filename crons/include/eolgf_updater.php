@@ -225,8 +225,7 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
 
     $QtrLotExt = strval(count($arrayeol['fiscalYear']) - $AnnLot);
     if($checkann == TRUE) {$arrayeol = eol_xml_parser($eolfileA["xml"], 'ANN', $arrayeol, $AnnLot, $QtrLotExt);}
-
-    $fechaeol = date("Y-m-d", strtotime($arrayeol["FiledDate"][$AnnLot]));  
+    
 
     //   *************************  Download GF *********************************************
     $gurufile = downloadguru($ticker);
@@ -239,8 +238,14 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
         $guruok = TRUE; 
     }
     if($checkqtr && $checkann && $guruok) { 
+        $arrayeol = homoDates($arrayeol, 'EOL');
 
-        $arrayguru = parseguru($arrayguru, $fechaeol, $AnnLot, $QtrLotExt);        
+        $q = count($arrayeol['PeriodEndDate'])-1;
+        $fechaeol = $arrayeol['PeriodEndDate'][$AnnLot];  
+        $fechaeolQ = $arrayeol['PeriodEndDate'][$q];
+
+        $arrayguru = parseguru($arrayguru, $fechaeol, $fechaeolQ, $AnnLot, $QtrLotExt);         
+
         $returnGuru = holes($arrayguru, $arrayeol, $AnnLot, $QtrLotExt); 
         $arraymerged = array_merge($returnGuru, $arrayeol);
 
@@ -322,7 +327,6 @@ function holes($arrayguru, $arrayeol, $AnnLot, $QtrLot){
     $order = array_fill(0, $Lot, array('0','0'));
 
     $arrayguru = homoDates($arrayguru, 'GF');
-    $arrayeol = homoDates($arrayeol, 'EOL');
 
     $fiscalPeriod = $arrayguru['FiscalPeriod'];
     $periodEndDate = $arrayeol['PeriodEndDate'];

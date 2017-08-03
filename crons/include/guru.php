@@ -25,7 +25,7 @@ if (!function_exists('str_getcsv')) {
 
 }
 
-function parseguru($data, $fechaeol, $AnnLot, $QtrLot) {     
+function parseguru($data, $fechaeol, $fechaeolQ, $AnnLot, $QtrLot) {     
     $iniline = 0;
     $endline = 0;
     $cnt = 0;
@@ -58,16 +58,33 @@ function parseguru($data, $fechaeol, $AnnLot, $QtrLot) {
     }
 
     //Dates checking
-    $fechaguru = date("Y-m-d", strtotime($data[$endline][$ANN]));
+    $fechaguru = guruDateForm($data[$iniline][$finANN-1]);
+    $fechaguruQ = guruDateForm($data[$iniline][$finQtr]);
 
-    if($fechaguru !== $fechaeol) {
-        $ANN = $ANN-1;
-        $iniANN = $iniANN-1; //4
-        $finANN = $finANN-1; //20
+    $diffANN = dateDifference($fechaguru, $fechaeol);
+    $diffQTR = dateDifference($fechaguruQ, $fechaeolQ);    
+
+    while($diffANN > 7 && $finANN > $iniANN) {        
+        if($iniANN > 1){
+            $ANN--;
+            $iniANN--; //4
+        }
+        $finANN--; //20        
+        $fechaguru = guruDateForm($data[$iniline][$finANN-1]);
+        $diffANN = dateDifference($fechaguru, $fechaeol);        
     }
 
+    while($diffQTR > 7 && $finQtr > $iniQtr) {        
+        if($iniQtr > $finANN+2){
+            $iniQtr--; 
+        }
+        $finQtr--; 
+        $fechaguruQ = guruDateForm($data[$iniline][$finQtr]);
+        $diffQTR = dateDifference($fechaguruQ, $fechaeolQ);
+    }
+    
     // ANNUALS
-    for ($j = 0; $j <= $ANN; $j++) {
+    for ($j = 0; $j < $finANN; $j++) {
         for ($i = $iniline; $i <= $endline; $i ++) {
             $currentvalue = $data[$i][$j];            
             $currentname = $data[$i][0];
@@ -94,7 +111,7 @@ function parseguru($data, $fechaeol, $AnnLot, $QtrLot) {
 
     // QUARTERS
     for ($j = $iniQtr; $j <= $finQtr; $j++) { 
-        for ($i = $iniline; $i <= $endline; $i ++) {
+        for ($i = $iniline; $i <= $endline; $i++) {
 
             $currentvalue = $data[$i][$j];
             $currentname = $data[$i][0];
@@ -121,6 +138,7 @@ function parseguru($data, $fechaeol, $AnnLot, $QtrLot) {
 
     //UNSET SOBRANTES
     for ($i = $iniline; $i <= $endline; $i ++) {
+        array_splice($data[$i], $finQtr+1);
         array_splice($data[$i], $finANN, $iniQtr-$finANN+1); 
         array_splice($data[$i], 1, $iniANN);      
     }
@@ -133,7 +151,7 @@ function parseguru($data, $fechaeol, $AnnLot, $QtrLot) {
     foreach ($data as $line) {
         $dataname[$line[0]] = $line;
     }    
-    unset ($data);    
+    unset ($data);   
 
     return $dataname;
 }
@@ -187,6 +205,26 @@ function downloadguru($ticker) {
 
     //nov 5 2015 original: return $fileurl;
     return $ret;
+}
+
+function dateDifference($date_1 , $date_2 , $differenceFormat = '%a' )
+{
+    $datetime1 = date_create($date_1);
+    $datetime2 = date_create($date_2);
+    
+    $interval = date_diff($datetime1, $datetime2);
+    
+    return $interval->format($differenceFormat);    
+}
+
+function guruDateForm($guruDate){
+    $month = substr($guruDate, -2);
+    if($month != "02"){
+        $guruDate = $guruDate."30";
+    }else{
+        $guruDate = $guruDate."28";
+    }
+    return $guruDate;
 }
 
 ?>
