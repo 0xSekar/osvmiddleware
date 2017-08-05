@@ -69,7 +69,7 @@ function eol_xml_parser($EOLXML, $type, $arrayeol, $AnnLot, $QtrLot) {
     }
 
     // ---- Duplicates control section ---- 
-    $arrayAux = duplicateControl($arrayAux);
+    $arrayAux = duplicateControl($arrayAux, $type);
     $arrayAux = duplicateFetchAndInform($arrayAux);
     $arrayAux = continuityControl($arrayAux, $type);
     
@@ -170,16 +170,31 @@ function makeHole($arrayClean, $column, $type){    //Move data in "$column" posi
     return $arrayClean;
 }
 
-function duplicateControl($arrayControl){  //Detect duplicates and calls "cleanForm" to erase it from the array
+function duplicateControl($arrayControl, $type){  //Detect duplicates and calls "cleanForm" to erase it from the array
     foreach ($arrayControl['fiscalYear'] as $col => $value) {
-        if($col>0 && $arrayControl['fiscalYear'][$col] == $arrayControl['fiscalYear'][$col-1] && $arrayControl['FiscalQuarter'][$col]== $arrayControl['FiscalQuarter'][$col-1] && $arrayControl['fiscalYear'][$col] != 0){                    
-            if(date("Y-m-d", strtotime($arrayControl['ReceivedDate'][$col-1])) <= date("Y-m-d", strtotime($arrayControl['ReceivedDate'][$col]))){
+        if($col>0 && $arrayControl['fiscalYear'][$col] == $arrayControl['fiscalYear'][$col-1] && $arrayControl['FiscalQuarter'][$col]== $arrayControl['FiscalQuarter'][$col-1] && $arrayControl['fiscalYear'][$col] != 0){    
+            if(isset($arrayControl['PeriodEndDate'][$col-2])){
+                $PeD = date("Y-m-d", strtotime($arrayControl['PeriodEndDate'][$col-2]));
+            }else{
+                $PeD = date("Y-m-d", strtotime($arrayControl['PeriodEndDate'][$col+1]));
+            }    
+
+            if($type=='ANN'){
+                $dayGap = 365;
+            }else{
+                $dayGap = 90;
+            }        
+
+            $diffDate = abs(dateDifference($PeD, date("Y-m-d", strtotime($arrayControl['PeriodEndDate'][$col]))));
+            $diffPrevDate = abs(dateDifference($PeD, date("Y-m-d", strtotime($arrayControl['PeriodEndDate'][$col-1]))));
+
+            if(abs($diffDate-$dayGap) <= abs($diffPrevDate-$dayGap)){
                 $arrayControl = cleanForm($arrayControl, $col-1);
-                $arrayControl = duplicateControl($arrayControl);
+                $arrayControl = duplicateControl($arrayControl, $type);
                 return $arrayControl;
             }else{
                 $arrayControl = cleanForm($arrayControl, $col);
-                $arrayControl = duplicateControl($arrayControl);
+                $arrayControl = duplicateControl($arrayControl, $type);
                 return $arrayControl;
             }                    
         }
