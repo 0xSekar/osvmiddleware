@@ -44,14 +44,13 @@ for($i = 0; $i < 1000; $i++) {
 
 $db = Database::GetInstance(); 
 
-$AnnLot = 15;
-$QtrLot = 20;
+$AnnLot = AREPORTS;
+$QtrLot = QREPORTS;
 
 $otc = FALSE;
 $count = array(0,0,0);
 
-//$ticker = $_REQUEST['ticker'];
-$ticker = 'AUNFF';
+$ticker = $_REQUEST['ticker'];
 
 if($ticker!=NULL){
     try {

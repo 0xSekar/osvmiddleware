@@ -33,8 +33,8 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 $db = Database::GetInstance(); 
 $today = date('Y/m/d H:i:s');
 
-$AnnLot = 15;
-$QtrLot = 20;
+$AnnLot = AREPORTS;
+$QtrLot = QREPORTS;
 
 $count = array(0,0,0);
 

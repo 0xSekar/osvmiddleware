@@ -64,16 +64,6 @@ function parseguru($data, $fechaeol, $fechaeolQ, $AnnLot, $QtrLot) {
     $diffANN = dateDifference($fechaguru, $fechaeol);
     $diffQTR = dateDifference($fechaguruQ, $fechaeolQ);    
 
-    while($diffANN > 7 && $finANN > $iniANN) {        
-        if($iniANN > 1){
-            $ANN--;
-            $iniANN--; //4
-        }
-        $finANN--; //20        
-        $fechaguru = guruDateForm($data[$iniline][$finANN-1]);
-        $diffANN = dateDifference($fechaguru, $fechaeol);        
-    }
-
     while($diffQTR > 7 && $finQtr > $iniQtr) {        
         if($iniQtr > $finANN+2){
             $iniQtr--; 
@@ -83,6 +73,17 @@ function parseguru($data, $fechaeol, $fechaeolQ, $AnnLot, $QtrLot) {
         $diffQTR = dateDifference($fechaguruQ, $fechaeolQ);
     }
     
+    while($diffANN > 7 && $finANN > $iniANN) {        
+        if($iniANN > 1){
+            $iniANN--; //4
+        } else {
+            $ANN--;
+        }
+        $finANN--; //20        
+        $fechaguru = guruDateForm($data[$iniline][$finANN-1]);
+        $diffANN = dateDifference($fechaguru, $fechaeol);        
+    }
+
     // ANNUALS
     for ($j = 0; $j < $finANN; $j++) {
         for ($i = $iniline; $i <= $endline; $i ++) {
@@ -207,12 +208,12 @@ function downloadguru($ticker) {
     return $ret;
 }
 
-function dateDifference($date_1 , $date_2 , $differenceFormat = '%a' )
+function dateDifference($date_1 , $date_2 , $differenceFormat = '%r%a')
 {
     $datetime1 = date_create($date_1);
     $datetime2 = date_create($date_2);
     
-    $interval = date_diff($datetime1, $datetime2);
+    $interval = date_diff($datetime2, $datetime1);
     
     return $interval->format($differenceFormat);    
 }
