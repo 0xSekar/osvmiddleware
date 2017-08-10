@@ -244,8 +244,7 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
         $fechaeol = $arrayeol['PeriodEndDate'][$AnnLot];  
         $fechaeolQ = $arrayeol['PeriodEndDate'][$q];
 
-        $arrayguru = parseguru($arrayguru, $fechaeol, $fechaeolQ, $AnnLot, $QtrLotExt);         
-
+        $arrayguru = parseguru($arrayguru, $fechaeol, $fechaeolQ, $AnnLot, $QtrLotExt);  
         $returnGuru = holes($arrayguru, $arrayeol, $AnnLot, $QtrLotExt); 
         $arraymerged = array_merge($returnGuru, $arrayeol);
 
@@ -256,8 +255,8 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
             $arraymerged['InterestExpense'] = $returnGuru['InterestExpense'];
         }
 
-        $arraymerged = cleanZero($arraymerged);        
-        $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);   
+        $arraymerged = cleanZero($arraymerged);   
+        $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);  
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
 
         update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
@@ -403,10 +402,10 @@ function holes($arrayguru, $arrayeol, $AnnLot, $QtrLot){
         }else{
             continue;
         }
-    }
+    }    
 
     foreach ($order as $key => $value) {
-        if($key<(count($order)-2) && $order[$key][0]==$order[$key+1][0] && $order[$key][0]!='0'){
+        if($key<(count($order)-1) && $order[$key][0]==$order[$key+1][0] && $order[$key][0]!='0'){
             if($order[$key][1]<$order[$key+1][1]){
                 $order[$key+1][0] = 'hole';
             }else{
