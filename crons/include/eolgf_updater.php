@@ -245,7 +245,7 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
         $fechaeolQ = $arrayeol['PeriodEndDate'][$q];
 
         $arrayguru = parseguru($arrayguru, $fechaeol, $fechaeolQ, $AnnLot, $QtrLotExt);  
-        $returnGuru = holes($arrayguru, $arrayeol, $AnnLot, $QtrLotExt); 
+        $returnGuru = holes($arrayguru, $arrayeol, $AnnLot, $QtrLotExt);       
         $arraymerged = array_merge($returnGuru, $arrayeol);
 
         if (isset($returnGuru['InterestIncome'])) {
@@ -255,10 +255,10 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
             $arraymerged['InterestExpense'] = $returnGuru['InterestExpense'];
         }
 
-        $arraymerged = cleanZero($arraymerged);   
-        $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);  
+        $arraymerged = cleanZero($arraymerged);     
+        $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);        
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
-
+        
         update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
 
         return TRUE;
@@ -519,20 +519,20 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
             }else{
                 $arrayComplete[$name] = array_fill(0, $Lot+1, "0");
                 $arrayComplete[$name][0] = $arraymerged[$name][0];
-                $colOrig = $AnnQty+1;
+                $colOrig = $AnnQty;
                 $col = $AnnLot;
                 $AnnCount = $AnnQty;
                 $QtrCount = $QtrQty;               
                 while($col>0){
-                    if($AnnCount>=0){
+                    if($AnnCount>0){
                         $arrayComplete[$name][$col] = $arraymerged[$name][$colOrig];
                         $colOrig--;
                         $AnnCount--;
                     }else{
                         $arrayComplete[$name][$col] = '0';
-                    }
+                    }                    
                     $col--;                
-                }                
+                }                 
                 $colOrig = $LotOrig-1;
                 $col = $Lot;
                 while($col>$AnnLot) {
@@ -545,7 +545,7 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
                     }
                     $col--;                
                 }             
-            }
+            }        
         }        
         return $arrayComplete;
     }
