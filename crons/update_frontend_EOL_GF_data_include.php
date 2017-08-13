@@ -276,6 +276,8 @@ function update_frontend_EOL_GF_data($eticker = null) {
 				update_pio_checks($dates->ticker_id);
 				update_altman_checks($dates->ticker_id);
 				update_beneish_checks($dates->ticker_id);
+				update_dupont_checks($dates->ticker_id);
+				update_accrual_checks($dates->ticker_id);
 
 				//Finally update local report date
 				try {
