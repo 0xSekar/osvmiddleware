@@ -1,5 +1,5 @@
 <?php
-function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
+function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $missGuru = false){
     $db = Database::GetInstance(); 
     $arrayeol = array();
     $arrayeol1 = array();
@@ -21,7 +21,6 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
     $exist = count($row);
     $proc = FALSE;
     if($exist == 0){
-        //conseguir exchenge de bajar un QTR de eol para ver lo q sigue
         $eolfileQ1 = getEOLXML($ticker, 'QTR', '1'); //1 qtr
         $checkqtr1 = check_eol_xml($eolfileQ1);
         $exchange = 'no market';
@@ -41,7 +40,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
             return '-3';
         }
 
-        if(strpos($exchange, 'OTC') !== FALSE && $OTC == FALSE){ //cambiar =OTC por contiene OTC
+        if(strpos($exchange, 'OTC') !== FALSE && $OTC == FALSE){ 
             try {
                 $res = $db->prepare("UPDATE tickers_proedgard_updates SET otc = 'Y' WHERE ticker = ?");
                 $res->execute(array(strval($ticker)));
@@ -186,12 +185,14 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                         }
                         return '1';
                     } else {
-                        try {
-                            $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
-                            $res->execute(array(strval($ticker)));
-                        } catch(PDOException $ex) {
-                            echo " Database Error"; //user message
-                            die("Line: ".__LINE__." - ".$ex->getMessage());
+                        if(!$missGuru){
+                            try {
+                                $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
+                                $res->execute(array(strval($ticker)));
+                            } catch(PDOException $ex) {
+                                echo " Database Error"; //user message
+                                die("Line: ".__LINE__." - ".$ex->getMessage());
+                            }
                         }
                         echo " Forced updated ";
                         return '1';
@@ -200,14 +201,14 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false){
                     return '-2'; //Download error
                 }
             }            
-        }else{
+        }else{            
             try {
                 $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
                 $res->execute(array(strval($ticker)));
             } catch(PDOException $ex) {
                 echo " Database Error"; //user message
                 die("Line: ".__LINE__." - ".$ex->getMessage());
-            }
+            }            
             return '0';
         }
 
@@ -258,9 +259,12 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
         $arraymerged = cleanZero($arraymerged);     
         $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);        
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
-        
-        update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
 
+        $gLP = guruLastPeriodCheck($arraymerged, $ticker);
+
+        if(!$gLP){
+            update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
+        }
         return TRUE;
     }else{
         return FALSE; //Download error
@@ -550,6 +554,53 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
         return $arrayComplete;
     }
     return $arraymerged;
+}
+
+function guruLastPeriodCheck($array, $ticker){ 
+    $col = count($array['FiscalPeriod'])-1;    
+
+    $today = date('Y/m/d H:i:s');
+    $db = Database::GetInstance(); 
+    try {
+        $res = $db->prepare("SELECT missing_gf_period FROM tickers_proedgard_updates WHERE ticker = ? AND missing_gf_period is not null");          
+        $res->execute(array(strval($ticker)));
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_COLUMN);
+    if(isset($res[0])){    
+        if($array['FiscalPeriod'][$col] == '0'){
+            try {
+                $res = $db->prepare("UPDATE tickers_proedgard_updates SET missing_gf_period = '".$today."' WHERE (ticker = ?)");
+                $res->execute(array(strval($ticker))); 
+            } catch(PDOException $ex) {
+                echo " Database Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
+            return TRUE; 
+        }else{            
+            try {    
+                $res = $db->prepare("UPDATE tickers_proedgard_updates SET missing_gf_period = 'NULL' WHERE (ticker = ? AND missing_gf_period is not null)");
+                $res->execute(array(strval($ticker))); 
+            } catch(PDOException $ex) {
+                echo " Database Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
+            return FALSE; 
+        }
+    }else{            
+        if($array['FiscalPeriod'][$col] == '0'){
+            try {
+                $res = $db->prepare("UPDATE tickers_proedgard_updates SET missing_gf_period = '".$today."' WHERE (ticker = ? AND missing_gf_period is null)");
+                $res->execute(array(strval($ticker))); 
+            } catch(PDOException $ex) {
+                echo " Database Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
+        }
+        return FALSE; 
+    }
 }
 
 function statusCounter($tick, $code, $count){
