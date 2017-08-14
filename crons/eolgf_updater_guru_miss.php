@@ -62,7 +62,7 @@ function listOfTickers(){
     $today = date('Y/m/d');
 
     try {
-        $res = $db->prepare("SELECT a.ticker FROM tickers_proedgard_updates AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE b.ticker is null AND a.missing_gf_period is not NULL AND (DATEDIFF('".$today."',a.missing_gf_period) > 1)");        
+        $res = $db->prepare("SELECT a.ticker FROM tickers_proedgard_updates AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE b.ticker is null AND a.missing_gf_period is not NULL AND (DATEDIFF('".$today."',a.missing_gf_period) >= 1)");        
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message

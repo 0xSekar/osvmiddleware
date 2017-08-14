@@ -148,7 +148,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
 
 
         if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ) || $force == TRUE || $proc == TRUE){ 
-            $downOK = downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded);
+            $downOK = downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded, $force, $missGuru);
 
             if($downOK && $force == FALSE){ 
                 try {
@@ -193,9 +193,13 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
                                 echo " Database Error"; //user message
                                 die("Line: ".__LINE__." - ".$ex->getMessage());
                             }
+                            echo " Forced updated ";
+                            return '1';
+                        }else{
+                            echo " Don't need update, waiting Guru last period  ";
+                            return '0';
                         }
-                        echo " Forced updated ";
-                        return '1';
+                        
                     }
                 }else{
                     return '-2'; //Download error
@@ -217,7 +221,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
     }
 }
 
-function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
+function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded, $force, $missGuru){
     $checkqtr = TRUE;
     $return = array();    
 
@@ -260,9 +264,9 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded){
         $arraymerged = arrayTrim($arraymerged, $AnnLot, $QtrLot);        
         $arraymerged = finalControl($arraymerged, $AnnLot, $QtrLot);
 
-        $gLP = guruLastPeriodCheck($arraymerged, $ticker);
+        $gLP = guruLastPeriodCheck($arraymerged, $ticker); //TRUE when guru last period is missing
 
-        if(!$gLP){
+        if(!$gLP || ($force && !$missGuru)){
             update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
         }
         return TRUE;
