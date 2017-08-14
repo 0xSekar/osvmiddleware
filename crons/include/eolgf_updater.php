@@ -6,7 +6,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
     $dbFY = 0;
     $dbFQ = 0;
     $tAdded = FALSE;
-    $today = date('Y/m/d H:i:s');
+    $today = date('Y-m-d H:i:s');
 
     // ******** Intern Id Fetch *********
     try {
@@ -559,7 +559,7 @@ function finalControl($arraymerged, $AnnLot, $QtrLot){
 function guruLastPeriodCheck($array, $ticker){ 
     $col = count($array['FiscalPeriod'])-1;    
 
-    $today = date('Y/m/d H:i:s');
+    $today = date('Y-m-d H:i:s');
     $db = Database::GetInstance(); 
     try {
         $res = $db->prepare("SELECT missing_gf_period FROM tickers_proedgard_updates WHERE ticker = ? AND missing_gf_period is not null");          
@@ -581,7 +581,7 @@ function guruLastPeriodCheck($array, $ticker){
             return TRUE; 
         }else{            
             try {    
-                $res = $db->prepare("UPDATE tickers_proedgard_updates SET missing_gf_period = 'NULL' WHERE (ticker = ? AND missing_gf_period is not null)");
+                $res = $db->prepare("UPDATE tickers_proedgard_updates SET missing_gf_period = NULL WHERE (ticker = ? AND missing_gf_period is not null)");
                 $res->execute(array(strval($ticker))); 
             } catch(PDOException $ex) {
                 echo " Database Error"; //user message
