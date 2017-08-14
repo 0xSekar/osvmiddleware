@@ -2,194 +2,12 @@
 error_reporting(E_ALL & ~E_NOTICE);
 error_reporting(0);
 include_once('../db/db.php');
+include_once('../crons/include/update_quality_checks.php');
 $db = Database::GetInstance();
 
 set_time_limit(0);                   // ignore php timeout
-try {
-    $res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
-} catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die("Line: ".__LINE__." - ".$ex->getMessage());
-}
 
-$query = "SELECT * FROM reports_header where report_type='ANN' order by ticker_id, fiscal_year";
-try {
-    $res = $db->query($query);
-} catch(PDOException $ex) {
-    echo "\nDatabase Error"; //user message
-    die("- Line: ".__LINE__." - ".$ex->getMessage());
-}
-$pid = 0;
-$ppid = 0;
-$idChange = true;
-$first = true;
-while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-    $query = "SELECT * FROM `reports_header` a, reports_incomeconsolidated b, reports_balanceconsolidated c, reports_gf_data d WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.id= " . $row["id"];
-    try {
-        $res2 = $db->query($query);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $rawdata = $res2->fetch(PDO::FETCH_ASSOC);
-    if($rawdata == false || count($rawdata) == 0) {
-        continue;
-    }
-    if ($row["ticker_id"] != $pid) {
-        $ppid = $pid;
-        $pid = $row["ticker_id"];
-        $idChange = true;
-    } else {
-        $first = false;
-        $idChange = false;
-    }
-    array_walk_recursive($rawdata, 'nullValues');
-
-    $qquote = "Select * from tickers_yahoo_historical_data where ticker_id = '".$row["ticker_id"]."' and report_date <= '".$rawdata["report_date"]."' order by report_date desc limit 1";
-    $price = null;
-    try {
-        $rquote =$db->query($qquote);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    if($rowcount = $rquote->rowCount() > 0) {
-        $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
-        $price = $pricerow["adj_close"];
-        $rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
-    }
-
-    $query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarketValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `MarketValueofEquity`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X4`=?, `X5`=?, `AltmanZNormal`=?, `AltmanZRevised`=?";
-    $params = array();
-    $params[] = ($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"]);
-    $params[] = $rawdata["TotalAssets"];
-    $params[] = $rawdata["TotalLiabilities"];
-    $params[] = $rawdata["RetainedEarnings"];
-    $params[] = $rawdata["EBIT"];
-    $params[] = $price * toFloat($rawdata["SharesOutstandingDiluted"]) * 1000000 ;
-    $params[] = $rawdata["TotalRevenue"] ;
-    $x1 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? (($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"])/$rawdata["TotalAssets"]) : 'null');
-    $x2 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["RetainedEarnings"]/$rawdata["TotalAssets"]) : 'null');
-    $x3 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["EBIT"]/$rawdata["TotalAssets"]) : 'null');
-    $x4 = ($rawdata["TotalLiabilities"] !== 'null' && $rawdata["TotalLiabilities"] != 0 ? (($price * toFloat($rawdata["SharesOutstandingDiluted"]) * 1000000)/$rawdata["TotalLiabilities"]) : 'null');
-    $x5 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["TotalRevenue"]/$rawdata["TotalAssets"]) : 'null');
-    $params[] = $x1;
-    $params[] = $x2;
-    $params[] = $x3;
-    $params[] = $x4;
-    $params[] = $x5;
-    $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null' && $x5 !== 'null') ? (1.2*$x1+1.4*$x2+3.3*$x3+0.6*$x4+0.999*$x5) : 'null');
-    $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null') ? (6.56*$x1+3.26*$x2+6.72*$x3+1.05*$x4) : 'null');
-    $params = array_merge($params,$params);
-    array_unshift($params,$rawdata["id"]);
-
-    try {
-        $res1 = $db->prepare($query1);
-        $res1->execute($params);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-
-    //Update TTM Data
-    if($idChange && !$first) {
-        altmanTTM($ppid);
-    }
-    $first = false;
-}
-altmanTTM($pid);
-
-function altmanTTM($ppid) {
-    $db = Database::GetInstance();
-    $tquery = "SELECT * FROM ttm_incomeconsolidated a, ttm_balanceconsolidated b, ttm_gf_data c WHERE a.ticker_id=b.ticker_id AND a.ticker_id=c.ticker_id AND a.ticker_id= " . $ppid;
-    try {
-        $tres = $db->query($tquery);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $trawdata = $tres->fetch(PDO::FETCH_ASSOC);
-    array_walk_recursive($trawdata, 'nullValues');
-    $qquote = "SELECT * FROM tickers_yahoo_quotes_2 WHERE ticker_id = '$ppid'";
-    try {
-        $rquote = $db->query($qquote);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $row_count = $rquote->rowCount();
-    if($row_count > 0) {
-        $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
-        $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
-    }
-
-    $query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `SharesOutstandingDiluted`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X5`=?";   
-    $params = array();
-
-    $params[] = (($trawdata["TotalCurrentAssets"] == 'null' && $trawdata["TotalCurrentLiabilities"] == 'null') ? null: ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])) ;
-    $params[] = $trawdata["TotalAssets"] == 'null' ? null: $trawdata["TotalAssets"];
-    $params[] = $trawdata["TotalLiabilities"] == 'null' ? null: $trawdata["TotalLiabilities"];
-    $params[] = $trawdata["RetainedEarnings"] == 'null' ? null: $trawdata["RetainedEarnings"];
-    $params[] = $trawdata["EBIT"] == 'null' ? null: $trawdata["EBIT"];
-    $params[] = ($trawdata["SharesOutstandingDiluted"] == 'null' ? null: (toFloat($trawdata["SharesOutstandingDiluted"]) * 1000000));
-    $params[] = $trawdata["TotalRevenue"]  == 'null' ? null: $trawdata["TotalRevenue"];
-    $x1 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? (($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])/$trawdata["TotalAssets"]) : 'null');
-    $x2 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["RetainedEarnings"]/$trawdata["TotalAssets"]) : 'null');
-    $x3 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["EBIT"]/$trawdata["TotalAssets"]) : 'null');
-    $x5 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["TotalRevenue"]/$trawdata["TotalAssets"]) : 'null');
-    $params[] = $x1;
-    $params[] = $x2;
-    $params[] = $x3;
-    $params[] = $x5;
-    $params = array_merge($params,$params);
-    array_unshift($params,$ppid);
-
-    try {
-        $res2 = $db->prepare($query1);
-        $res2->execute($params);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-
-    //Update MRQ Data
-
-    $tquery = "SELECT * FROM `reports_header` a, reports_incomeconsolidated b, reports_balanceconsolidated c, reports_gf_data d WHERE a.id=b.report_id AND a.id=c.report_id AND a.id=d.report_id AND a.ticker_id= " . $ppid . " AND report_type='QTR' order by fiscal_year desc, fiscal_quarter desc limit 1";
-    try {
-        $tres =$db->query($tquery);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("- Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $trawdata = $tres->fetch(PDO::FETCH_ASSOC);
-    array_walk_recursive($trawdata, 'nullValues');
-    $query1 = "INSERT INTO `mrq_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X5`=?";
-    $params = array();
-    $params[] = (($trawdata["TotalCurrentAssets"] == 'null' && $trawdata["TotalCurrentLiabilities"] == 'null') ? null: ($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])) ;
-    $params[] = $trawdata["TotalAssets"] == 'null' ? null: $trawdata["TotalAssets"];
-    $params[] = $trawdata["TotalLiabilities"] == 'null' ? null: $trawdata["TotalLiabilities"];
-    $params[] = $trawdata["RetainedEarnings"] == 'null' ? null: $trawdata["RetainedEarnings"];
-    $params[] = $trawdata["EBIT"] == 'null' ? null: $trawdata["EBIT"];
-    $params[] = $trawdata["TotalRevenue"]  == 'null' ? null: $trawdata["TotalRevenue"];
-    $x1 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? (($trawdata["TotalCurrentAssets"] - $trawdata["TotalCurrentLiabilities"])/$trawdata["TotalAssets"]) : 'null');
-    $x2 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["RetainedEarnings"]/$trawdata["TotalAssets"]) : 'null');
-    $x3 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["EBIT"]/$trawdata["TotalAssets"]) : 'null');
-    $x5 = ($trawdata["TotalAssets"] !== 'null' && $trawdata["TotalAssets"] != 0 ? ($trawdata["TotalRevenue"]/$trawdata["TotalAssets"]) : 'null');
-    $params[] = $x1;
-    $params[] = $x2;
-    $params[] = $x3;
-    $params[] = $x5;
-    $params = array_merge($params,$params);
-    array_unshift($params,$ppid);
-
-    try {
-        $res3 = $db->prepare($query1);
-        $res3->execute($params);
-    } catch(PDOException $ex) {
-        echo "\nDatabase Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-}
+update_altman_checks();
 
 function toFloat($num) {
     if (is_null($num)) {
@@ -210,8 +28,11 @@ function toFloat($num) {
             preg_replace("/[^\-0-9]/", "", substr($num, $sep+1, strlen($num)))
             );
 }
+
 function nullValues(&$item, $key) {
-    if(strlen(trim($item)) == 0) {
+    if (is_null($item)) {
+        $item = 'null';
+    } else if(strlen(trim($item)) == 0) {
         $item = 'null';
     } else if($item == "-") {
         $item = 'null';
