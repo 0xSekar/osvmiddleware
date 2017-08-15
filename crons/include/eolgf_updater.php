@@ -150,7 +150,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
         if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ) || $force == TRUE || $proc == TRUE){ 
             $downOK = downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded, $force, $missGuru);
 
-            if($downOK && $force == FALSE){ 
+            if($downOK == 1 && $force == FALSE){ 
                 try {
                     $res = $db->prepare("UPDATE tickers_proedgard_updates SET downloaded = 'Y', updated_date = '".$today."' WHERE (ticker = ? AND downloaded is null) ");
                     $res->execute(array(strval($ticker)));
@@ -167,7 +167,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
                 }
                 return '1';
             }else{
-                if ($downOK && $force == TRUE) {
+                if ($downOK == 1 && $force == TRUE) {
                     if($eolFY>$dbFY || ($eolFY==$dbFY && $eolFQ>$dbFQ)) {
                         try {
                             $res = $db->prepare("UPDATE tickers_proedgard_updates SET downloaded = 'Y', updated_date = '".$today."' WHERE (ticker = ? AND downloaded is null) ");
@@ -193,16 +193,18 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
                                 echo " Database Error"; //user message
                                 die("Line: ".__LINE__." - ".$ex->getMessage());
                             }
-                            echo " Forced updated ";
                             return '1';
                         }else{
-                            echo " Don't need update, waiting Guru last period  ";
-                            return '0';
+                            return '1';
                         }
-                        
                     }
                 }else{
-                    return '-2'; //Download error
+                    if ($downOK == -1) {
+                        return '-2'; //Download error
+                    } else {
+                        echo "Don't need update, waiting Guru last period<br>\n";
+                        return '0';
+                    }
                 }
             }            
         }else{            
@@ -223,7 +225,6 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
 
 function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded, $force, $missGuru){
     $checkqtr = TRUE;
-    $return = array();    
 
     $eolfileA = getEOLXML($ticker, 'ANN', '25'); 
     $checkann = check_eol_xml($eolfileA);
@@ -269,9 +270,13 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded, $force, $miss
         if(!$gLP || ($force && !$missGuru)){
             update_frontend_EOL_GF_data($ticker, $arraymerged, $tAdded);
         }
-        return TRUE;
+        if ($missGuru && $gLP) {
+            return 0;
+        } else {
+            return 1;
+        }
     }else{
-        return FALSE; //Download error
+        return -1; //Download error
     }
 }
 
