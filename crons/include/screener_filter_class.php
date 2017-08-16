@@ -29,7 +29,7 @@ class screener_filter {
 		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_fields_temp LIKE screener_filter_fields");
 		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_criteria_temp LIKE screener_filter_criteria");
 		$pfinalrun = array();
-		for ($i = 0; $i<14; $i++) {
+		for ($i = 0; $i<17; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
 				$query = "INSERT INTO screener_filter_fields_temp (field_id, report_type, metadata_id) VALUES (?, ?, ?)";
