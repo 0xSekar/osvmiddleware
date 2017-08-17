@@ -427,10 +427,10 @@ function update_yahoo_daily($pticker = NULL) {
         if($yquery) {
             $sresponse = $yql->execute("select * from osv.finance.splits where symbol = '".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
         }
-        $sym = $row["ticker"]; //get symbol from yahoo rawdata
+        $sym = str_replace("-", ".", $row["ticker"]);
         //Prequering Quotes in case we need for splits
         $resJS = array();
-        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume";
+        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$sym."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume";
         $resOD = file_get_contents($queryOD);
         $resJS = json_decode($resOD, true);
 

@@ -1,7 +1,8 @@
 <?php
 function getEOLXML($ticker, $dura, $numper) {
     $result = array();
-    $url = "http://edgaronline.api.mashery.com/v1/corefinancials?primarysymbols=" . $ticker . "&duration=" . $dura . "&conceptgroups=all&numperiods=" . $numper . "&appkey=sr4dj7ny6mbt77p8gdntdp3x";
+    $eol_ticker = str_replace("-", "'", $ticker);
+    $url = "http://edgaronline.api.mashery.com/v1/corefinancials?primarysymbols=" . $eol_ticker . "&duration=" . $dura . "&conceptgroups=all&numperiods=" . $numper . "&appkey=sr4dj7ny6mbt77p8gdntdp3x";
     $ua = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"; //this is not needed but we keep this for safe side as code is only handling XML not JSON.
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

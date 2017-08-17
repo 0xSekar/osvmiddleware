@@ -62,7 +62,8 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
         if($OTC==TRUE){  
 
             $resJS = array();
-            $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$ticker."&mode=I&fields=lastPrice";
+            $bc_ticker = str_replace("-", ".", $ticker);
+            $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$bc_ticker."&mode=I&fields=lastPrice";
             $resOD = file_get_contents($queryOD);
             $resJS = json_decode($resOD, true);
 

@@ -15,11 +15,11 @@ $ticker = $matches[1];
 
 if(!empty($ticker) && !empty($emailsubject)){
     $eol_ticker = $ticker; //eol_ticker is to conform to EOL single quote standards, just to download
-    $eol_ticker = str_replace(".", "'", $eol_ticker);
-    $eol_ticker = str_replace(",", "'", $eol_ticker);
-    $eol_ticker = str_replace("/", "'", $eol_ticker);
-    $eol_ticker = str_replace("-", "'", $eol_ticker);
-    $eol_ticker = str_replace("'", "'", $eol_ticker);
+    $eol_ticker = str_replace(".", "-", $eol_ticker);
+    $eol_ticker = str_replace(",", "-", $eol_ticker);
+    $eol_ticker = str_replace("/", "-", $eol_ticker);
+    $eol_ticker = str_replace("-", "-", $eol_ticker);
+    $eol_ticker = str_replace("'", "-", $eol_ticker);
     $appkey = $_REQUEST['appkey'];
     $params = array(
         'appkey' => $appkey,
@@ -44,7 +44,7 @@ if(!empty($ticker) && !empty($emailsubject)){
             $my_date = date('Y-m-d', strtotime($fileddate));
             $params = array(
                 'emailsubject' => $emailsubject,
-                'ticker' => $ticker,            
+                'ticker' => $eol_ticker,            
                 'my_date' => $my_date
             );
             $sql = "INSERT INTO tickers_proedgard_updates (subject, ticker, insdate, downloaded, filed_date, updated_date, tested_for_today, otc)  VALUES  (:emailsubject, :ticker, now(), null, :my_date, null, null, '')";

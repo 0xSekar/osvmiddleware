@@ -199,7 +199,8 @@ function downloadguru($ticker) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cookie: __cfduid=db284b1be505b19bca351c95b20396f1c1424133754; optimizelyEndUserId=oeu1424135374936r0.6779736422467977; optimizelySegments=" % "7B" % "7D; optimizelyBuckets=" % "7B" % "7D; __utma=141914404.1346358840.1424134442.1424134442.1424140928.2; __utmb=141914404.1.10.1424140928; __utmc=141914404; __utmz=141914404.1424134442.1.1.utmcsr=172.20.70.128|utmccn=(referral)|utmcmd=referral|utmcct=/scr/s.php; linkedin_oauth_61zs5c03pdk4_crc=null"));
 
     //set the URL to the protected file
-    curl_setopt($ch, CURLOPT_URL, 'http://www.gurufocus.com/download_financials_in_CSV.php?symbol=' . $ticker);
+    $gf_ticker = str_replace("-", ".", $ticker);
+    curl_setopt($ch, CURLOPT_URL, 'http://www.gurufocus.com/download_financials_in_CSV.php?symbol=' . $gf_ticker);
     $ret = curl_exec($ch);
 
     curl_close($ch);
