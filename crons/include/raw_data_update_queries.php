@@ -1131,43 +1131,45 @@ function update_raw_data_tickers($dates, $rawdata) {
     }
 
     //Update Max/Min/Median data
-    foreach($max_min_array as $key => $value) {
-        $tmp_array = array_diff(array_slice($value,-5),array(null, "null"));
-        sort($tmp_array);
-        $max_min_array[$key] = $tmp_array;
-    }
-    for($step = 0; $step < 3; $step++) {
-        if($step == 0) {
-            $t1 = "5yr_min_key_ratios";
-        } else if($step == 1) {
-            $t1 = "5yr_median_key_ratios";
-        } else {
-            $t1 = "5yr_max_key_ratios";
+    if(count($max_min_array) > 0) {
+        foreach($max_min_array as $key => $value) {
+            $tmp_array = array_diff(array_slice($value,-5),array(null, "null"));
+            sort($tmp_array);
+            $max_min_array[$key] = $tmp_array;
         }
-        $query = "INSERT INTO $t1 (`ticker_id`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?) ON DUPLICATE KEY UPDATE `ReportDatePrice`=?, `CashFlow`=?, `MarketCap`=?, `EnterpriseValue`=?, `GoodwillIntangibleAssetsNet`=?, `TangibleBookValue`=?, `ExcessCash`=?, `TotalInvestedCapital`=?, `WorkingCapital`=?, `P_E`=?, `P_E_CashAdjusted`=?, `EV_EBITDA`=?, `EV_EBIT`=?, `P_S`=?, `P_BV`=?, `P_Tang_BV`=?, `P_CF`=?, `P_FCF`=?, `P_OwnerEarnings`=?, `FCF_S`=?, `FCFYield`=?, `MagicFormulaEarningsYield`=?, `ROE`=?, `ROA`=?, `ROIC`=?, `CROIC`=?, `GPA`=?, `BooktoMarket`=?, `QuickRatio`=?, `CurrentRatio`=?, `TotalDebt_EquityRatio`=?, `LongTermDebt_EquityRatio`=?, `ShortTermDebt_EquityRatio`=?, `AssetTurnover`=?, `CashPercofRevenue`=?, `ReceivablesPercofRevenue`=?, `SG_APercofRevenue`=?, `R_DPercofRevenue`=?, `DaysSalesOutstanding`=?, `DaysInventoryOutstanding`=?, `DaysPayableOutstanding`=?, `CashConversionCycle`=?, `ReceivablesTurnover`=?, `InventoryTurnover`=?, `AverageAgeofInventory`=?, `IntangiblesPercofBookValue`=?, `InventoryPercofRevenue`=?, `LT_DebtasPercofInvestedCapital`=?, `ST_DebtasPercofInvestedCapital`=?, `LT_DebtasPercofTotalDebt`=?, `ST_DebtasPercofTotalDebt`=?, `TotalDebtPercofTotalAssets`=?, `WorkingCapitalPercofPrice`=?";
-        $params = array();
-        foreach($max_min_array as $value) {
-            $count = count($value) - 1;
-            if($count < 0) {
-                $params[] = null;
-                continue;
-            }
-            if ($step == 0) {
-                $params[] = $value[0];
-            } else if ($step == 1) {
-                $params[] = ($count % 2 == 0 ? $value[$count/2] : ($value[floor($count/2)] + $value[ceil($count/2)]) / 2);
+        for($step = 0; $step < 3; $step++) {
+            if($step == 0) {
+                $t1 = "5yr_min_key_ratios";
+            } else if($step == 1) {
+                $t1 = "5yr_median_key_ratios";
             } else {
-                $params[] = $value[$count];
+                $t1 = "5yr_max_key_ratios";
             }
-        }
-        $params = array_merge($params,$params);
-        array_unshift($params,$dates->ticker_id);
-        try {
-            $res = $db->prepare($query);
-            $res->execute($params);
-        } catch(PDOException $ex) {
-            echo "\nDatabase Error"; //user message
-            die("Line: ".__LINE__." - ".$ex->getMessage());
+            $query = "INSERT INTO $t1 (`ticker_id`, `ReportDatePrice`, `CashFlow`, `MarketCap`, `EnterpriseValue`, `GoodwillIntangibleAssetsNet`, `TangibleBookValue`, `ExcessCash`, `TotalInvestedCapital`, `WorkingCapital`, `P_E`, `P_E_CashAdjusted`, `EV_EBITDA`, `EV_EBIT`, `P_S`, `P_BV`, `P_Tang_BV`, `P_CF`, `P_FCF`, `P_OwnerEarnings`, `FCF_S`, `FCFYield`, `MagicFormulaEarningsYield`, `ROE`, `ROA`, `ROIC`, `CROIC`, `GPA`, `BooktoMarket`, `QuickRatio`, `CurrentRatio`, `TotalDebt_EquityRatio`, `LongTermDebt_EquityRatio`, `ShortTermDebt_EquityRatio`, `AssetTurnover`, `CashPercofRevenue`, `ReceivablesPercofRevenue`, `SG_APercofRevenue`, `R_DPercofRevenue`, `DaysSalesOutstanding`, `DaysInventoryOutstanding`, `DaysPayableOutstanding`, `CashConversionCycle`, `ReceivablesTurnover`, `InventoryTurnover`, `AverageAgeofInventory`, `IntangiblesPercofBookValue`, `InventoryPercofRevenue`, `LT_DebtasPercofInvestedCapital`, `ST_DebtasPercofInvestedCapital`, `LT_DebtasPercofTotalDebt`, `ST_DebtasPercofTotalDebt`, `TotalDebtPercofTotalAssets`, `WorkingCapitalPercofPrice`) VALUES (?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?) ON DUPLICATE KEY UPDATE `ReportDatePrice`=?, `CashFlow`=?, `MarketCap`=?, `EnterpriseValue`=?, `GoodwillIntangibleAssetsNet`=?, `TangibleBookValue`=?, `ExcessCash`=?, `TotalInvestedCapital`=?, `WorkingCapital`=?, `P_E`=?, `P_E_CashAdjusted`=?, `EV_EBITDA`=?, `EV_EBIT`=?, `P_S`=?, `P_BV`=?, `P_Tang_BV`=?, `P_CF`=?, `P_FCF`=?, `P_OwnerEarnings`=?, `FCF_S`=?, `FCFYield`=?, `MagicFormulaEarningsYield`=?, `ROE`=?, `ROA`=?, `ROIC`=?, `CROIC`=?, `GPA`=?, `BooktoMarket`=?, `QuickRatio`=?, `CurrentRatio`=?, `TotalDebt_EquityRatio`=?, `LongTermDebt_EquityRatio`=?, `ShortTermDebt_EquityRatio`=?, `AssetTurnover`=?, `CashPercofRevenue`=?, `ReceivablesPercofRevenue`=?, `SG_APercofRevenue`=?, `R_DPercofRevenue`=?, `DaysSalesOutstanding`=?, `DaysInventoryOutstanding`=?, `DaysPayableOutstanding`=?, `CashConversionCycle`=?, `ReceivablesTurnover`=?, `InventoryTurnover`=?, `AverageAgeofInventory`=?, `IntangiblesPercofBookValue`=?, `InventoryPercofRevenue`=?, `LT_DebtasPercofInvestedCapital`=?, `ST_DebtasPercofInvestedCapital`=?, `LT_DebtasPercofTotalDebt`=?, `ST_DebtasPercofTotalDebt`=?, `TotalDebtPercofTotalAssets`=?, `WorkingCapitalPercofPrice`=?";
+            $params = array();
+            foreach($max_min_array as $value) {
+                $count = count($value) - 1;
+                if($count < 0) {
+                    $params[] = null;
+                    continue;
+                }
+                if ($step == 0) {
+                    $params[] = $value[0];
+                } else if ($step == 1) {
+                    $params[] = ($count % 2 == 0 ? $value[$count/2] : ($value[floor($count/2)] + $value[ceil($count/2)]) / 2);
+                } else {
+                    $params[] = $value[$count];
+                }
+            }
+            $params = array_merge($params,$params);
+            array_unshift($params,$dates->ticker_id);
+            try {
+                $res = $db->prepare($query);
+                $res->execute($params);
+            } catch(PDOException $ex) {
+                echo "\nDatabase Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
         }
     }
 
