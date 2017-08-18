@@ -15,7 +15,7 @@ class screener_filter {
 		//Populate field list
 		$this->fieldCol[-1]["id"] = array("table" => "tickers", "title" => "ID", "tooltip" => "Internal Ticker ID", "format" => "osvnumber:0", "stitle" => "ID", "min" => null, "max" => null);
 		$this->fieldCol[-1]["ticker"] = array("table" => "tickers", "title" => "Symbol", "tooltip" => "Symbol", "format" => "osvtext", "stitle" => "Symbol", "min" => null, "max" => null);
-		$flist = $this->getTooltip(null, null, null, array(0,1,2,3,4,5,6,7,8,9,10,11,12,13));
+		$flist = $this->getTooltip(null, null, null, array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16));
 		foreach($flist as $field_group => $data1) {
 			foreach($data1 as $field_name => $data) {
 				$this->fieldCol[$field_group][$data["field_name"]] = array("table" => $data["table_name"], "title" => $data["title"], "tooltip" => $data["tooltip"], "format" => $data["format"], "stitle" => $data["short_title"], "min" => $data["min"], "max" => $data["max"], "sel_group" => $data["field_group"], "metadata_id" => $data["metadata_id"]);
@@ -29,7 +29,7 @@ class screener_filter {
 		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_fields_temp LIKE screener_filter_fields");
 		$q = $this->db->query("CREATE TEMPORARY TABLE screener_filter_criteria_temp LIKE screener_filter_criteria");
 		$pfinalrun = array();
-		for ($i = 0; $i<14; $i++) {
+		for ($i = 0; $i<17; $i++) {
 			foreach ($this->fieldCol[$i] as $key => $value) {
 				$params = array();
 				$query = "INSERT INTO screener_filter_fields_temp (field_id, report_type, metadata_id) VALUES (?, ?, ?)";
@@ -143,6 +143,15 @@ class screener_filter {
                                 case 7:
                                         $p1[] = $counter+80000;
                                         break;
+                                case 14:
+                                        $p1[] = $counter+90000;
+                                        break;
+                                case 15:
+                                        $p1[] = $counter+100000;
+                                        break;
+                                case 16:
+                                        $p1[] = $counter+110000;
+                                        break;
                                 default:
                                         $p1[] = $counter;
                         }
@@ -211,6 +220,15 @@ class screener_filter {
 					case 7:
 						$line["tooltip"] = "10 Year Compounded Annual Growth Rate. " . $line["tooltip"];
 						break;
+					case 14:
+						$line["tooltip"] = "5 Year Maximum Value. " . $line["tooltip"];
+						break;
+					case 15:
+						$line["tooltip"] = "5 Year Minimum Value. " . $line["tooltip"];
+						break;
+					case 16:
+						$line["tooltip"] = "5 Year Median Value. " . $line["tooltip"];
+						break;
 				}
 			}
 			if($addSufix) {
@@ -244,6 +262,18 @@ class screener_filter {
 					case 7:
 						$line["title"] .= ", 10Yr Growth";
 						$line["short_title"] .= ", 10yCAGR";
+						break;
+					case 14:
+						$line["title"] .= ", 5Yr Max";
+						$line["short_title"] .= ", 5yMax";
+						break;
+					case 15:
+						$line["title"] .= ", 5Yr Min";
+						$line["short_title"] .= ", 5yMin";
+						break;
+					case 16:
+						$line["title"] .= ", 5Yr Median";
+						$line["short_title"] .= ", 5yMed";
 						break;
 				}
 			}

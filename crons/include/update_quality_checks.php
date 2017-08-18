@@ -23,6 +23,7 @@ function update_pio_checks($ti = null) {
     $query2 = array();
     $rawdata = null;
     $prawdata = null;
+    $max_min = array();
     while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $total = 0;
         $value = 0;
@@ -31,6 +32,8 @@ function update_pio_checks($ti = null) {
             $pid = $row["ticker_id"];
             $idChange = true;
             $querypre = $query2;
+            $pre_max_min = $max_min;
+            $max_min = array();
         } else {
             $first = false;
             $idChange = false;
@@ -137,6 +140,7 @@ function update_pio_checks($ti = null) {
             $params[] = ($value);
         }
         $params[] = ($total);
+        $max_min[] = $total;
         $params = array_merge($params,$params);
         $query2 = $params;
         array_unshift($params,$row["id"]);
@@ -152,12 +156,14 @@ function update_pio_checks($ti = null) {
         //Update TTM Data
         if($idChange && !$first) {
             pioTTM($ppid,$prawdata,$querypre,$pprawdata);
+            pioMinMax($ppid, $pre_max_min);
         }
         $first = false;
     }
 
     if (!$first) {
         pioTTM($pid,$rawdata,$query2,$prawdata);
+        pioMinMax($pid, $max_min);
     }
 }
 
@@ -183,11 +189,14 @@ function update_altman_checks($ti = null) {
     $ppid = 0;
     $idChange = true;
     $first = true;  
+    $max_min = array();
     while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         if ($row["ticker_id"] != $pid) {
             $ppid = $pid;
             $pid = $row["ticker_id"];
             $idChange = true;
+            $pre_max_min = $max_min;
+            $max_min = array();
         } else {
             $first = false;
             $idChange = false;
@@ -227,22 +236,21 @@ function update_altman_checks($ti = null) {
         $params[] = ($rawdata["EBIT"] =='null' ? null:$rawdata["EBIT"]);
         $params[] = $price * toFloat($rawdata["SharesOutstandingDiluted"]) * 1000000;
         $params[] = $rawdata["TotalRevenue"];
-        $x1 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? (($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"])/$rawdata["TotalAssets"]) : null);
-        $x2 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["RetainedEarnings"]/$rawdata["TotalAssets"]) : null);
-        $x3 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["EBIT"]/$rawdata["TotalAssets"]) : null);
-        $x4 = ($rawdata["TotalLiabilities"] !== 'null' && $rawdata["TotalLiabilities"] != 0 ? (($price * toFloat($rawdata["SharesOutstandingDiluted"]) * 1000000)/$rawdata["TotalLiabilities"]) : null);
-        $x5 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["TotalRevenue"]/$rawdata["TotalAssets"]) : null);
+        $max_min["x1"][] = $x1 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? (($rawdata["TotalCurrentAssets"] - $rawdata["TotalCurrentLiabilities"])/$rawdata["TotalAssets"]) : null);
+        $max_min["x2"][] = $x2 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["RetainedEarnings"]/$rawdata["TotalAssets"]) : null);
+        $max_min["x3"][] = $x3 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["EBIT"]/$rawdata["TotalAssets"]) : null);
+        $max_min["x4"][] = $x4 = ($rawdata["TotalLiabilities"] !== 'null' && $rawdata["TotalLiabilities"] != 0 ? (($price * toFloat($rawdata["SharesOutstandingDiluted"]) * 1000000)/$rawdata["TotalLiabilities"]) : null);
+        $max_min["x5"][] = $x5 = ($rawdata["TotalAssets"] !== 'null' && $rawdata["TotalAssets"] != 0 ? ($rawdata["TotalRevenue"]/$rawdata["TotalAssets"]) : null);
 
         $params[] = $x1;
         $params[] = $x2;
         $params[] = $x3;
         $params[] = $x4;
         $params[] = $x5;
-        $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null' && $x5 !== 'null') ? (1.2*$x1+1.4*$x2+3.3*$x3+0.6*$x4+0.999*$x5) : null);
-        $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null') ? (6.56*$x1+3.26*$x2+6.72*$x3+1.05*$x4) : null);
-        $paramid = ($rawdata["id"] =='null' ? null:$rawdata["id"]);
+        $max_min["AltmanZNormal"][] = $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null' && $x5 !== 'null') ? (1.2*$x1+1.4*$x2+3.3*$x3+0.6*$x4+0.999*$x5) : null);
+        $max_min["AltmanZRevised"][] = $params[] = (($x1 !== 'null' && $x2 !== 'null' && $x3 !== 'null' && $x4 !== 'null') ? (6.56*$x1+3.26*$x2+6.72*$x3+1.05*$x4) : null);
         $params = array_merge($params,$params);
-        array_unshift($params,$paramid);
+        array_unshift($params,$row["id"]);
 
         try {
             $res1 = $db->prepare($query1);
@@ -255,11 +263,13 @@ function update_altman_checks($ti = null) {
         //Update TTM Data
         if($idChange && !$first) {
             altmanTTM($ppid);
+            altmanMinMax($ppid, $pre_max_min);
         }
         $first = false;
     }
     if (!$first) {
         altmanTTM($pid);
+        altmanMinMax($pid, $max_min);
     }
 }
 
@@ -287,12 +297,15 @@ function update_beneish_checks($ti = null) {
     $first = true;
     $query2 = array();
     $rawdata = null;
+    $max_min = array();
     while ($row = $res->fetch(PDO::FETCH_ASSOC)) {          
         if ($row["ticker_id"] != $pid) {
             $ppid = $pid;
             $pid = $row["ticker_id"];
             $idChange = true;
             $querypre = $query2;
+            $pre_max_min = $max_min;
+            $max_min = array();
         } else {
             $first = false;
             $idChange = false;
@@ -310,6 +323,7 @@ function update_beneish_checks($ti = null) {
         //Update TTM Data
         if($idChange && !$first) {
             beneishTTM($ppid,$prawdata,$querypre);
+            beneishMinMax($ppid, $pre_max_min);
         }
 
         $query1 = "INSERT INTO `reports_beneish_checks` (`report_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
@@ -318,44 +332,44 @@ function update_beneish_checks($ti = null) {
         $vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : ($rawdata["TotalReceivablesNet"]/$rawdata["TotalRevenue"]);
         $vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : ($prawdata["TotalReceivablesNet"]/$prawdata["TotalRevenue"]);
         $dsri = ((is_null($vv) || $vv == 0) ? null : ($vn/$vv));
-        $params[] = $dsri;
+        $max_min["DSRI"][] = $params[] = $dsri;
         //GMI
         $vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : (($rawdata["TotalRevenue"]-$rawdata["CostofRevenue"])/$rawdata["TotalRevenue"]);
         $vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : (($prawdata["TotalRevenue"]-$prawdata["CostofRevenue"])/$prawdata["TotalRevenue"]);
         $gmi = ((is_null($vn) || $vn == 0) ? null : ($vv/$vn));
-        $params[] = $gmi;
+        $max_min["GMI"][] = $params[] = $gmi;
         //AQI
         $vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? null : (($rawdata["TotalAssets"]-$rawdata["PropertyPlantEquipmentNet"]-$rawdata["TotalCurrentAssets"])/$rawdata["TotalAssets"]);
         $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? null : (($prawdata["TotalAssets"]-$prawdata["PropertyPlantEquipmentNet"]-$prawdata["TotalCurrentAssets"])/$prawdata["TotalAssets"]);
         $aqi = ((is_null($vv) || $vv == 0) ? null : ($vn/$vv));
-        $params[] = $aqi;
+        $max_min["AQI"][] = $params[] = $aqi;
         //SGI
         $sgi = ((is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : ($rawdata["TotalRevenue"]/$prawdata["TotalRevenue"]));
-        $params[] = $sgi;
+        $max_min["SGI"][] = $params[] = $sgi;
         //DEPI
         $vn = ((is_null($rawdata["CFDepreciationAmortization"]) && is_null($rawdata["PropertyPlantEquipmentNet"])) || ($rawdata["CFDepreciationAmortization"]+$rawdata["PropertyPlantEquipmentNet"]) == 0) ? null : ($rawdata["CFDepreciationAmortization"]/($rawdata["CFDepreciationAmortization"]+$rawdata["PropertyPlantEquipmentNet"]));
         $vv = ((is_null($prawdata["CFDepreciationAmortization"]) && is_null($prawdata["PropertyPlantEquipmentNet"])) || ($prawdata["CFDepreciationAmortization"]+$prawdata["PropertyPlantEquipmentNet"]) == 0) ? null : ($prawdata["CFDepreciationAmortization"]/($prawdata["CFDepreciationAmortization"]+$prawdata["PropertyPlantEquipmentNet"]));
         $depi = ((is_null($vn) || $vn == 0) ? null : ($vv/$vn));
-        $params[] = $depi;
+        $max_min["DEPI"][] = $params[] = $depi;
         //SGAI
         $vn = (is_null($rawdata["TotalRevenue"]) || $rawdata["TotalRevenue"] == 0) ? null : ($rawdata["SellingGeneralAdministrativeExpenses"]/$rawdata["TotalRevenue"]);
         $vv = (is_null($prawdata["TotalRevenue"]) || $prawdata["TotalRevenue"] == 0) ? null : ($prawdata["SellingGeneralAdministrativeExpenses"]/$prawdata["TotalRevenue"]);
         $sgai = ((is_null($vv) || $vv == 0) ? null : ($vn/$vv));
-        $params[] = $sgai;
+        $max_min["SGAI"][] = $params[] = $sgai;
         //TATA
         $tata = ((is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? null : (($rawdata["IncomebeforeExtraordinaryItems"]-$rawdata["CashfromOperatingActivities"])/$rawdata["TotalAssets"]));
-        $params[] = $tata;
+        $max_min["TATA"][] = $params[] = $tata;
         //LVGI
         $vn = (is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? null : (($rawdata["TotalCurrentLiabilities"]+$rawdata["TotalLongtermDebt"])/$rawdata["TotalAssets"]);
         $vv = (is_null($prawdata["TotalAssets"]) || $prawdata["TotalAssets"] == 0) ? null : (($prawdata["TotalCurrentLiabilities"]+$prawdata["TotalLongtermDebt"])/$prawdata["TotalAssets"]);
         $lvgi = ((is_null($vv) || $vv == 0) ? null : ($vn/$vv));
-        $params[] = $lvgi;
+        $max_min["LVGI"][] = $params[] = $lvgi;
         //BM5
         $bm5 = -6.065+(0.823*($dsri == 'null'?0:$dsri))+(0.906*($gmi=='null'?0:$gmi))+(0.593*($aqi=='null'?0:$aqi))+(0.717*($sgi=='null'?0:$sgi))+(0.107*($depi=='null'?0:$depi));
-        $params[] = $bm5;
+        $max_min["BM5"][] = $params[] = $bm5;
         //BM8
         $bm8 = -4.84+(0.92*($dsri == 'null'?0:$dsri))+(0.528*($gmi=='null'?0:$gmi))+(0.404*($aqi=='null'?0:$aqi))+(0.892*($sgi=='null'?0:$sgi))+(0.115*($depi=='null'?0:$depi))-(0.172*($sgai=='null'?0:$sgai))+(4.679*($tata=='null'?0:$tata))-(0.327*($lvgi=='null'?0:$lvgi));
-        $params[] = $bm8;
+        $max_min["BM8"][] = $params[] = $bm8;
         $params = array_merge($params,$params);
         $query2 = $params;
         array_unshift($params,$row["id"]);
@@ -376,6 +390,7 @@ function update_beneish_checks($ti = null) {
     }
     if (!$first) {        
         beneishTTM($pid,$rawdata,$query2);
+        beneishMinMax($pid, $max_min);
     }
 }
 
@@ -484,12 +499,15 @@ function update_accrual_checks($ti = null) {
     $first = true;
     $rawdata = array();
     $query2 = array();
+    $max_min = array();
     while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         if ($row["ticker_id"] != $pid) {
             $ppid = $pid;
             $pid = $row["ticker_id"];
             $idChange = true;
             $querypre = $query2;
+            $pre_max_min = $max_min;
+            $max_min = array();
         } else {
             $first = false;
             $idChange = false;
@@ -507,6 +525,7 @@ function update_accrual_checks($ti = null) {
         //Update TTM Data
         if($idChange && !$first) {
             accrualTTM($ppid,$prawdata,$querypre);
+            accrualMinMax($ppid, $pre_max_min);
             $prawdata = array();
         }
 
@@ -531,20 +550,20 @@ function update_accrual_checks($ti = null) {
         $params[] = $noa;
         //BSAA
         $bsaa = (is_null($noa_v)) ? null : ($noa - $noa_v);
-        $params[] = $bsaa;
+        $max_min["balance_sheet_aggregate_accrual"][] = $params[] = $bsaa;
         //CFAA
         $cfaa = $rawdata["NetIncome"] - ($rawdata["CashfromOperatingActivities"] + $rawdata["CashfromInvestingActivities"]);
         $den = (is_null($noa_v)) ? null : (($noa + $noa_v) / 2);
-        $params[] = $cfaa;
+        $max_min["cash_flow_aggregate_accrual"][] = $params[] = $cfaa;
         //BSAR
         $bsar = ((is_null($den) || $den == 0) ? null : ($bsaa/$den));
-        $params[] = $bsar;
+        $max_min["balance_sheet_accrual_ratio"][] = $params[] = $bsar;
         //CFAR
         $cfar = ((is_null($den) || $den == 0) ? null : ($cfaa/$den));
-        $params[] = $cfar;
+        $max_min["cash_flow_accrual_ratio"][] = $params[] = $cfar;
         //SAR
         $sar = ((is_null($rawdata["TotalAssets"]) || $rawdata["TotalAssets"] == 0) ? null : (($rawdata["NetIncome"] - $rawdata["CashfromOperatingActivities"] - $rawdata["CashfromInvestingActivities"])/$rawdata["TotalAssets"]));
-        $params[] = $sar;
+        $max_min["sloan_accrual_ratio"][] = $params[] = $sar;
         //price
         $params[] = $price;
 
@@ -563,6 +582,7 @@ function update_accrual_checks($ti = null) {
     }
     if (!$first) {
         accrualTTM($pid, $rawdata, $query2);
+        accrualMinMax($pid, $max_min);
     }
 }
 
@@ -982,4 +1002,170 @@ function accrualTTM($ppid,$prawdata,$querypre) {
     }
 }
 
+function pioMinMax($pid, $max_min_array) {
+    $db = Database::GetInstance();
+    $max_min_array = array_slice($max_min_array,-5);
+    sort($max_min_array);
+    $step = array();
+    $step[0] = 0;
+    $step[2] = count($max_min_array) - 1;
+    if($step[2] < 0) {
+        $step[2]++;
+    }
+    $step[1] = $step[2] / 2;
+    foreach($step as $key => $i) {
+        if($key == 0) {
+            $t1 = "5yr_min_pio_checks";
+            $value = $max_min_array[$i];
+        } else if($key == 1) {
+            $t1 = "5yr_median_pio_checks";
+            $value = ($i % 2 == 0 ? $max_min_array[$i] : ($max_min_array[floor($i)] + $max_min_array[ceil($i)]) / 2);
+        } else {
+            $t1 = "5yr_max_pio_checks";
+            $value = $max_min_array[$i];
+        }
+        if (count($max_min_array) == 0) {
+            $value = null;
+        }
+        $query = "INSERT INTO $t1 (`ticker_id`, `pioTotal`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `pioTotal`=?";
+        try {
+            $res = $db->prepare($query);
+            $res->execute(array($pid, $value, $value));
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+
+    }
+}
+
+function altmanMinMax($pid, $max_min_array) {
+    $db = Database::GetInstance();
+    foreach($max_min_array as $key => $value) {
+        $tmp_array = array_diff(array_slice($value,-5),array(null, "null"));
+        sort($tmp_array);
+        $max_min_array[$key] = $tmp_array;
+    }
+    for($step = 0; $step < 3; $step++) {
+        if($step == 0) {
+            $t1 = "5yr_min_alt_checks";
+        } else if($step == 1) {
+            $t1 = "5yr_median_alt_checks";
+        } else {
+            $t1 = "5yr_max_alt_checks";
+        }
+        $query = "INSERT INTO $t1 (`ticker_id`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ? ,?, ?, ?) ON DUPLICATE KEY UPDATE `X1`=?, `X2`=?, `X3`=?, `X4`=?, `X5`=?, `AltmanZNormal`=?, `AltmanZRevised`=?";
+        $params = array();
+        foreach($max_min_array as $value) {
+            $count = count($value) - 1;
+            if($count < 0) {
+                $params[] = null;
+                continue;
+            }
+            if ($step == 0) {
+                $params[] = $value[0];
+            } else if ($step == 1) {
+                $params[] = ($count % 2 == 0 ? $value[$count/2] : ($value[floor($count/2)] + $value[ceil($count/2)]) / 2);
+            } else {
+                $params[] = $value[$count];
+            }
+        }
+        $params = array_merge($params,$params);
+        array_unshift($params,$pid);
+        try {
+            $res = $db->prepare($query);
+            $res->execute($params);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+    }
+}
+
+function beneishMinMax($pid, $max_min_array) {
+    $db = Database::GetInstance();
+    foreach($max_min_array as $key => $value) {
+        array_shift($value); 
+        $tmp_array = array_diff(array_slice($value,-5),array(null, "null"));
+        sort($tmp_array);
+        $max_min_array[$key] = $tmp_array;
+    }
+    for($step = 0; $step < 3; $step++) {
+        if($step == 0) {
+            $t1 = "5yr_min_beneish_checks";
+        } else if($step == 1) {
+            $t1 = "5yr_median_beneish_checks";
+        } else {
+            $t1 = "5yr_max_beneish_checks";
+        }
+        $query = "INSERT INTO $t1 (`ticker_id`, `DSRI`, `GMI`, `AQI`, `SGI`, `DEPI`, `SGAI`, `TATA`, `LVGI`, `BM5`, `BM8`) VALUES (?, ?, ?, ?, ? ,?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `DSRI`=?, `GMI`=?, `AQI`=?, `SGI`=?, `DEPI`=?, `SGAI`=?, `TATA`=?, `LVGI`=?, `BM5`=?, `BM8`=?";
+        $params = array();
+        foreach($max_min_array as $value) {
+            $count = count($value) - 1;
+            if($count < 0) {
+                $params[] = null;
+                continue;
+            }
+            if ($step == 0) {
+                $params[] = $value[0];
+            } else if ($step == 1) {
+                $params[] = ($count % 2 == 0 ? $value[$count/2] : ($value[floor($count/2)] + $value[ceil($count/2)]) / 2);
+            } else {
+                $params[] = $value[$count];
+            }
+        }
+        $params = array_merge($params,$params);
+        array_unshift($params,$pid);
+        try {
+            $res = $db->prepare($query);
+            $res->execute($params);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+    }
+}
+
+function accrualMinMax($pid, $max_min_array) {
+    $db = Database::GetInstance();
+    foreach($max_min_array as $key => $value) {
+        $tmp_array = array_diff(array_slice($value,-5),array(null, "null"));
+        sort($tmp_array);
+        $max_min_array[$key] = $tmp_array;
+    }
+    for($step = 0; $step < 3; $step++) {
+        if($step == 0) {
+            $t1 = "5yr_min_accrual_checks";
+        } else if($step == 1) {
+            $t1 = "5yr_median_accrual_checks";
+        } else {
+            $t1 = "5yr_max_accrual_checks";
+        }
+        $query = "INSERT INTO $t1 (`ticker_id`, `balance_sheet_aggregate_accrual`, `cash_flow_aggregate_accrual`, `balance_sheet_accrual_ratio`, `cash_flow_accrual_ratio`, `sloan_accrual_ratio`) VALUES (?, ?, ?, ?, ? ,?) ON DUPLICATE KEY UPDATE `balance_sheet_aggregate_accrual`=?, `cash_flow_aggregate_accrual`=?, `balance_sheet_accrual_ratio`=?, `cash_flow_accrual_ratio`=?, `sloan_accrual_ratio`=?";
+        $params = array();
+        foreach($max_min_array as $value) {
+            $count = count($value) - 1;
+            if($count < 0) {
+                $params[] = null;
+                continue;
+            }
+            if ($step == 0) {
+                $params[] = $value[0];
+            } else if ($step == 1) {
+                $params[] = ($count % 2 == 0 ? $value[$count/2] : ($value[floor($count/2)] + $value[ceil($count/2)]) / 2);
+            } else {
+                $params[] = $value[$count];
+            }
+        }
+        $params = array_merge($params,$params);
+        array_unshift($params,$pid);
+        try {
+            $res = $db->prepare($query);
+            $res->execute($params);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+    }
+}
 ?>
