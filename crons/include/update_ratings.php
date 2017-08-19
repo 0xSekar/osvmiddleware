@@ -260,13 +260,13 @@ function update_ratings() {
         foreach($values as $id => $value) {
             //PENALIZE RATINGS
             //FCF / Sales
-            if(is_null($value["Q1"])) {
+            if(!array_key_exists("Q1",$value) || is_null($value["Q1"])) {
                 $values[$id]["QPP1"] = $tickerCount;
             } else {
                 $values[$id]["QPP1"] = $value["QP1"];
             }
             //CROIC
-            if(is_null($value["Q2"])) {
+            if(!array_key_exists("Q2",$value) || is_null($value["Q2"])) {
                 $values[$id]["QPP2"] = $tickerCount;
             } else {
                 $values[$id]["QPP2"] = $value["QP2"];
@@ -274,37 +274,37 @@ function update_ratings() {
             //PIO F Score
             $values[$id]["QPP3"] = $value["QP3"];
             //SalesPercChange
-            if(is_null($value["G1"])) {
+            if(!array_key_exists("G1",$value) || is_null($value["G1"])) {
                 $values[$id]["GPP1"] = $tickerCount;
             } else {
                 $values[$id]["GPP1"] = $value["GP1"];
             }
             //Sales5YYCGrPerc
-            if(is_null($value["G2"])) {
+            if(!array_key_exists("G2",$value) || is_null($value["G2"])) {
                 $values[$id]["GPP2"] = $tickerCount;
             } else {
                 $values[$id]["GPP2"] = $value["GP2"];
             }
             //GrossProfitAstTotal
-            if(is_null($value["G3"])) {
+            if(!array_key_exists("G3",$value) || is_null($value["G3"])) {
                 $values[$id]["GPP3"] = $tickerCount;
             } else {
                 $values[$id]["GPP3"] = $value["GP3"];
             }
             //EV/EBIT
-            if(is_null($value["V1"])) {
+            if(!array_key_exists("V1",$value) || is_null($value["V1"])) {
                 $values[$id]["VPP1"] = $tickerCount;
             } else {
                 $values[$id]["VPP1"] = $value["VP1"];
             }
             //P/FCF
-            if(is_null($value["V2"])) {
+            if(!array_key_exists("V2",$value) || is_null($value["V2"])) {
                 $values[$id]["VPP2"] = $tickerCount;
             } else {
                 $values[$id]["VPP2"] = $value["VP2"];
             }
             //-Pr2BookQ
-            if(is_null($value["V3"])) {
+            if(!array_key_exists("V3",$value) || is_null($value["V3"])) {
                 $values[$id]["VPP3"] = $tickerCount;
             } else {
                 $values[$id]["VPP3"] = $value["VP3"];
@@ -359,19 +359,19 @@ function update_ratings() {
             $values[$id]["VPS3"] = ($values[$id]["VPT3"] - 50) * $squ + 50;
 
             //Apply Weight
-            $values[$id]["QPW1"] = is_null($values[$id]["Q1"])?0:($values[$id]["QPS1"] * $qw1);
-            $values[$id]["QPW2"] = is_null($values[$id]["Q2"])?0:($values[$id]["QPS2"] * $qw2);
-            $values[$id]["QPW3"] = is_null($values[$id]["Q3"])?0:($values[$id]["QPS3"] * $qw3);
+            $values[$id]["QPW1"] = (!array_key_exists("Q1",$values[$id]) || is_null($values[$id]["Q1"]))?0:($values[$id]["QPS1"] * $qw1);
+            $values[$id]["QPW2"] = (!array_key_exists("Q2",$values[$id]) || is_null($values[$id]["Q2"]))?0:($values[$id]["QPS2"] * $qw2);
+            $values[$id]["QPW3"] = (!array_key_exists("Q3",$values[$id]) || is_null($values[$id]["Q3"]))?0:($values[$id]["QPS3"] * $qw3);
             $values[$id]["QF"] = $values[$id]["QPW1"] + $values[$id]["QPW2"] + $values[$id]["QPW3"];
-            $values[$id]["GPW1"] = is_null($values[$id]["G1"])?0:($values[$id]["GPS1"] * $gw1);
-            $values[$id]["GPW2"] = is_null($values[$id]["G2"])?0:($values[$id]["GPS2"] * $gw2);
-            $values[$id]["GPW3"] = is_null($values[$id]["G3"])?0:($values[$id]["GPS3"] * $gw3);
-            $values[$id]["GPW4"] = is_null($values[$id]["Q3"])?0:($values[$id]["QPS3"] * $gw4);
+            $values[$id]["GPW1"] = (!array_key_exists("G1",$values[$id]) || is_null($values[$id]["G1"]))?0:($values[$id]["GPS1"] * $gw1);
+            $values[$id]["GPW2"] = (!array_key_exists("G2",$values[$id]) || is_null($values[$id]["G2"]))?0:($values[$id]["GPS2"] * $gw2);
+            $values[$id]["GPW3"] = (!array_key_exists("G3",$values[$id]) || is_null($values[$id]["G3"]))?0:($values[$id]["GPS3"] * $gw3);
+            $values[$id]["GPW4"] = (!array_key_exists("Q3",$values[$id]) || is_null($values[$id]["Q3"]))?0:($values[$id]["QPS3"] * $gw4);
             $values[$id]["GF"] = $values[$id]["GPW1"] + $values[$id]["GPW2"] + $values[$id]["GPW3"] + $values[$id]["GPW4"];
-            $values[$id]["VPW1"] = is_null($values[$id]["V1"])?0:($values[$id]["VPS1"] * $vw1);
-            $values[$id]["VPW2"] = is_null($values[$id]["V2"])?0:($values[$id]["VPS2"] * $vw2);
-            $values[$id]["VPW3"] = is_null($values[$id]["V3"])?0:($values[$id]["VPS3"] * $vw3);
-            $values[$id]["VPW4"] = is_null($values[$id]["Q3"])?0:($values[$id]["QPS3"] * $vw4);
+            $values[$id]["VPW1"] = (!array_key_exists("V1",$values[$id]) || is_null($values[$id]["V1"]))?0:($values[$id]["VPS1"] * $vw1);
+            $values[$id]["VPW2"] = (!array_key_exists("V2",$values[$id]) || is_null($values[$id]["V2"]))?0:($values[$id]["VPS2"] * $vw2);
+            $values[$id]["VPW3"] = (!array_key_exists("V3",$values[$id]) || is_null($values[$id]["V3"]))?0:($values[$id]["VPS3"] * $vw3);
+            $values[$id]["VPW4"] = (!array_key_exists("Q3",$values[$id]) || is_null($values[$id]["Q3"]))?0:($values[$id]["QPS3"] * $vw4);
             $values[$id]["VF"] = $values[$id]["VPW1"] + $values[$id]["VPW2"] + $values[$id]["VPW3"] + $values[$id]["VPW4"];
             $values[$id]["AS"] = ($values[$id]["QF"] + $values[$id]["GF"] + $values[$id]["VF"])/3;
             if ($values[$id]["AS"] >= 85)

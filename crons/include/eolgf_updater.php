@@ -72,7 +72,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
             if($code == 200){
                 $price = $resJS['results'][0]['lastPrice']; // >1 add and process
                 if($price > 1 || $force = TRUE){
-                        $intId = addTicker($ticker, $arrayeol1);
+                    $intId = addTicker($ticker, $arrayeol1);
                     if($price > 1) {
                         echo " Ticker OTC added to DB, price higher than U\$S 1 ";
                     } else {
@@ -232,7 +232,7 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded, $force, $miss
 
     $QtrLotExt = strval(count($arrayeol['fiscalYear']) - $AnnLot);
     if($checkann == TRUE) {$arrayeol = eol_xml_parser($eolfileA["xml"], 'ANN', $arrayeol, $AnnLot, $QtrLotExt);}
-    
+
 
     //   *************************  Download GF *********************************************
     $gurufile = downloadguru($ticker);
@@ -658,6 +658,7 @@ function resumeEcho($count){
 }
 
 function ratings(){ 
+    cleanQuality();
     echo "<br>\nUpdating Ratings... ";
     update_ratings();
     echo "Done<br>\n";
@@ -669,4 +670,47 @@ function ratings(){
     echo "Done<br>\n";    
 }
 
+function cleanQuality() {
+    $db = Database::GetInstance(); 
+    echo "Removing old Quality Checks (PIO)... ";
+    try {
+        $res = $db->query("delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    echo "done<br>\n";
+    echo "Removing old Quality Checks (ALTMAN)... ";
+    try {
+        $res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    echo "done<br>\n";
+    echo "Removing old Quality Checks (BENEISH)... ";
+    try {
+        $res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    echo "done<br>\n";
+    echo "Removing old Quality Checks (DUPONT)... ";
+    try {
+        $res = $db->query("delete a from reports_dupont_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    echo "done<br>\n";
+    echo "Removing old Quality Checks (ACCRUAL)... ";
+    try {
+        $res = $db->query("delete a from reports_accrual_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    echo "done<br>\n";
+}
 ?>

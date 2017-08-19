@@ -328,7 +328,7 @@ function update_raw_data_tickers($dates, $rawdata) {
 
     //Update reports_* tables
     foreach($report_tables as $table) {
-        $query = "DELETE FROM $table WHERE report_id IN (SELECT id FROM reports_header WHERE ticker_id = ".$dates->ticker_id.")";
+        $query = "DELETE $table FROM $table INNER JOIN reports_header WHERE $table.report_id = reports_header.id AND reports_header.ticker_id = ".$dates->ticker_id;
         try {
             $db->exec($query);
         } catch(PDOException $ex) {

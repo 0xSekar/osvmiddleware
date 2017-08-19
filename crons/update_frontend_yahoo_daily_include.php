@@ -399,7 +399,7 @@ function update_yahoo_daily($pticker = NULL) {
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
 
-    echo "\nUpdating Tickers (barchart)...<br>\n";
+    echo "Updating Tickers (barchart)...<br>\n";
 
     //Select all tickers not updated for at least a day
     try {
@@ -770,7 +770,6 @@ function update_yahoo_daily($pticker = NULL) {
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }
         }
-        echo " Done<br>\n";
     }
 
     if(is_null($pticker)) {

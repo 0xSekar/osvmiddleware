@@ -47,48 +47,6 @@ function update_frontend_EOL_GF_data($eticker, $rawdata, $tAdded) {
         }
     }
 
-    echo "Removing old Quality Checks (PIO)... ";
-    try {
-        $res = $db->query("delete a from reports_pio_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    echo "done<br>\n";
-    echo "Removing old Quality Checks (ALTMAN)... ";
-    try {
-        $res = $db->query("delete a from reports_alt_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    echo "done<br>\n";
-    echo "Removing old Quality Checks (BENEISH)... ";
-    try {
-        $res = $db->query("delete a from reports_beneish_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    echo "done<br>\n";
-    echo "Removing old Quality Checks (DUPONT)... ";
-    try {
-        $res = $db->query("delete a from reports_dupont_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    echo "done<br>\n";
-    echo "Removing old Quality Checks (ACCRUAL)... ";
-    try {
-        $res = $db->query("delete a from reports_accrual_checks a left join reports_header b on a.report_id = b.id where b.id IS null");
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    echo "done<br>\n";
-
-
     echo "Updating EOD valuation for new tickers... ";
     update_eod_valuation($dates->ticker_id); 
     echo "done<br>\n";

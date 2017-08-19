@@ -50,7 +50,7 @@ $QtrLot = QREPORTS;
 $otc = FALSE;
 $count = array(0,0,0);
 
-$ticker = $_REQUEST['ticker'];
+$ticker = (empty($_REQUEST['ticker']) ? null: $_REQUEST['ticker']);
 
 if($ticker!=NULL){
     try {
