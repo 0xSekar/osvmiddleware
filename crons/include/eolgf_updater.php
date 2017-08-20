@@ -102,6 +102,13 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
                     }
                     echo " Ticker deleted - Barchart code 204 ";
                 }else{
+                    try {
+                        $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
+                        $res->execute(array(strval($ticker)));
+                    } catch(PDOException $ex) {
+                        echo " Database Error"; //user message
+                        die("Line: ".__LINE__." - ".$ex->getMessage());
+                    } 
                     echo " Barchart code is not 204 or 200 ";
                     return '-1';
                 }
@@ -201,6 +208,13 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
                     }
                 }else{
                     if ($downOK == -1) {
+                        try {
+                            $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
+                            $res->execute(array(strval($ticker)));
+                        } catch(PDOException $ex) {
+                            echo " Database Error"; //user message
+                            die("Line: ".__LINE__." - ".$ex->getMessage());
+                        }
                         return '-2'; //Download error
                     } else {
                         echo "Don't need update, waiting Guru last period<br>\n";
@@ -220,6 +234,13 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
         }
 
     }else{        
+        try {
+            $res = $db->prepare("UPDATE tickers_proedgard_updates SET tested_for_today = '".$today."' WHERE (ticker = ? AND downloaded is null)");
+            $res->execute(array(strval($ticker)));
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }            
         return -'2'; //Download error
     }
 }
