@@ -253,6 +253,8 @@ function downNParse($ticker, $arrayeol, $AnnLot, $QtrLot, $tAdded, $force, $miss
 
     $QtrLotExt = strval(count($arrayeol['fiscalYear']) - $AnnLot);
     if($checkann == TRUE) {$arrayeol = eol_xml_parser($eolfileA["xml"], 'ANN', $arrayeol, $AnnLot, $QtrLotExt);}
+    //Replace previous line with the next if we want tickers with only QTR data (very new stocks)
+    //$checkann = TRUE; $arrayeol = eol_xml_parser($eolfileA["xml"], 'ANN', $arrayeol, $AnnLot, $QtrLotExt);
 
 
     //   *************************  Download GF *********************************************

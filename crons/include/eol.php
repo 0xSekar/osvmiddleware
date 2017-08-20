@@ -232,28 +232,28 @@ function check_eol_xml($resp) { //resp as EOLXML
         case 200:
             // still two cases either there is valid data or not
             if ((stripos($resp['xml'], 'There is no data') !== false) OR (stripos($resp['xml'], 'No data available') !== false)) {                                                       
-                echo "<Error><Message>There is no data for the current request </Message></Error>"; 
+                echo "There is no data for the current request. "; 
                 $res = FALSE;
             }
             break;
         case 400:
-            echo "<Error><Message>Error 400, Bad Request</Message></Error>"; 
+            echo "Error 400, Bad Request. "; 
             $res = FALSE;
             break;
         case 403:
-            echo "<Error><Message>Error 403, Forbidden</Message></Error>"; 
+            echo "Error 403, Forbidden. "; 
             $res = FALSE;
             break;
         case 500:
-            echo "<Error><Message>Error 500, Internal Server Error</Message></Error>"; 
+            echo "Error 500, Internal Server Error. "; 
             $res = FALSE;
             break;
         case 504:
-            echo "<Error><Message>Error 504, Gateway timeout</Message></Error>";
+            echo "Error 504, Gateway timeout. ";
             $res = FALSE; 
             break;
         default:
-            echo "<Error><Message>Other error in data source service</Message></Error>"; 
+            echo "Other error in data source service. "; 
             $res = FALSE;
     }
     return $res;
