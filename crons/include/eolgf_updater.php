@@ -71,7 +71,7 @@ function ckeckNDown($ticker, $AnnLot, $QtrLot, $OTC = false, $force = false, $mi
 
             if($code == 200){
                 $price = $resJS['results'][0]['lastPrice']; // >1 add and process
-                if($price > 1 || $force = TRUE){
+                if($price > 1 || $force == TRUE){
                     $intId = addTicker($ticker, $arrayeol1);
                     if($price > 1) {
                         echo " Ticker OTC added to DB, price higher than U\$S 1 ";
