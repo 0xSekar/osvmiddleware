@@ -102,8 +102,8 @@ function listOfTickers(){
                     } 
                 }            
                 try {
-                    $res = $db->prepare("SELECT ticker FROM tickers_split_parser WHERE ticker = '".$value."' AND  old_eps != '".$EPS."' ");            
-                    $res->execute();
+                    $res = $db->prepare("SELECT ticker FROM tickers_split_parser WHERE ticker = ? AND  old_eps != '".$EPS."' ");            
+                    $res->execute(array($value));
                 } catch(PDOException $ex) {
                     echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -114,8 +114,8 @@ function listOfTickers(){
                     
                 }else{
                     try {
-                        $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = '".$value."' AND updated_date is null) ");            
-                        $res->execute();
+                        $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND updated_date is null) ");            
+                        $res->execute(array($value));
                     } catch(PDOException $ex) {
                         echo " Database Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());

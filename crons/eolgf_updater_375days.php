@@ -85,8 +85,8 @@ function listOfTickers(){
     if(count($tickers)>0){    
         foreach ($tickers as $key => $value) {
             try {
-                    $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = '".$value."' ");            
-                    $res->execute();
+                    $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = ?");            
+                    $res->execute(array($value));
                 } catch(PDOException $ex) {
                     echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -94,8 +94,8 @@ function listOfTickers(){
             $res = $res->fetchAll(PDO::FETCH_COLUMN);
             if(!isset($res[0])){
                 try {
-                    $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = '".$value."' AND ((DATEDIFF('".$today."', tested_for_today)>7) OR tested_for_today is null) AND downloaded is null" );           
-                    $res->execute();
+                    $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = ? AND ((DATEDIFF('".$today."', tested_for_today)>7) OR tested_for_today is null) AND downloaded is null" );           
+                    $res->execute(array($value));
                 } catch(PDOException $ex) {
                     echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -105,8 +105,8 @@ function listOfTickers(){
                     $tickerstoupdate[] = $res[0];
                 }else{
                     try {
-                        $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = '".$value."' " );            
-                        $res->execute();
+                        $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = ?" );            
+                        $res->execute(array($value));
                     } catch(PDOException $ex) {
                         echo " Database Error"; //user message
                         die("Line: ".__LINE__." - ".$ex->getMessage());

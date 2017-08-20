@@ -54,8 +54,8 @@ $ticker = (empty($_REQUEST['ticker']) ? null: $_REQUEST['ticker']);
 
 if($ticker!=NULL){
     try {
-        $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = '".$ticker."' ");            
-        $res->execute();
+        $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = ?");            
+        $res->execute(array($ticker));
     } catch(PDOException $ex) {
         echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -63,8 +63,8 @@ if($ticker!=NULL){
     $res = $res->fetchAll(PDO::FETCH_COLUMN);
     if(!isset($res[0])){
         try {
-            $res = $db->prepare("SELECT exchange FROM tickers WHERE ticker = '".$ticker."' ");            
-            $res->execute();
+            $res = $db->prepare("SELECT exchange FROM tickers WHERE ticker = ?");            
+            $res->execute($ticker);
         } catch(PDOException $ex) {
             echo " Database Error"; //user message
             die("Line: ".__LINE__." - ".$ex->getMessage());
