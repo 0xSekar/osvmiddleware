@@ -39,7 +39,10 @@ function parseguru($data, $fechaeol, $fechaeolQ, $AnnLot, $QtrLot) {
         }
         $cnt++;
     }
-
+    if($iniline == 0 || $endline == 0) {
+        return FALSE;
+    }
+    
     if($data[$iniline][1] == "TTM/current") return FALSE;   
 
     //Getting parametters

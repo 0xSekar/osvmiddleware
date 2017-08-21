@@ -64,7 +64,7 @@ if($ticker!=NULL){
     if(!isset($res[0])){
         try {
             $res = $db->prepare("SELECT exchange FROM tickers WHERE ticker = ?");            
-            $res->execute($ticker);
+            $res->execute(array($ticker));
         } catch(PDOException $ex) {
             echo " Database Error"; //user message
             die("Line: ".__LINE__." - ".$ex->getMessage());

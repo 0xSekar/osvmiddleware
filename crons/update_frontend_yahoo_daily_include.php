@@ -770,6 +770,7 @@ function update_yahoo_daily($pticker = NULL) {
                 die("Line: ".__LINE__." - ".$ex->getMessage());
             }
         }
+        echo " Done<br>\n";
     }
 
     if(is_null($pticker)) {
