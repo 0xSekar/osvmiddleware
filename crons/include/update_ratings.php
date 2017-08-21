@@ -109,7 +109,7 @@ function update_ratings() {
 
         //Correction for missing PIO Values
         foreach($values as $id => $value) {
-            if(!isset($value["Q3"]) || is_null($value["Q3"])) {
+            if(!array_key_exists("Q3",$value) || is_null($value["Q3"])) {
                 $values[$id]["Q3"] = null;
                 $values[$id]["QP3"] = $tickerCount;
             }
@@ -272,7 +272,11 @@ function update_ratings() {
                 $values[$id]["QPP2"] = $value["QP2"];
             }
             //PIO F Score
-            $values[$id]["QPP3"] = $value["QP3"];
+            if(!array_key_exists("QP3",$value) || is_null($value["QP3"])) {
+                $values[$id]["QPP3"] = $tickerCount;
+            } else {
+                $values[$id]["QPP3"] = $value["QP3"];
+            }
             //SalesPercChange
             if(!array_key_exists("G1",$value) || is_null($value["G1"])) {
                 $values[$id]["GPP1"] = $tickerCount;
