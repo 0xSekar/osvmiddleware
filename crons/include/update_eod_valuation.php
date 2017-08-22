@@ -20,7 +20,7 @@ function update_eod_valuation($ti = null) {
     }
 
     $params = array();
-    $query = "INSERT INTO tickers_eod_valuation (ticker_id, dcf_eps, dcf_fcf, dcf_oe, graham, ebit, p_dcf_eps, p_dcf_fcf, p_dcf_oe, p_graham, p_ebit, mos_dcf_eps, mos_dcf_fcf, mos_dcf_oe, mos_graham, mos_ebit, nnwc, ncav, p_nnwc, p_ncav, mos_nnwc, mos_ncav) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE dcf_eps=?, dcf_fcf=?, dcf_oe=?, graham=?, ebit=?, p_dcf_eps=?, p_dcf_fcf=?, p_dcf_oe=?, p_graham=?, p_ebit=?, mos_dcf_eps=?, mos_dcf_fcf=?, mos_dcf_oe=?, mos_graham=?, mos_ebit=?, nnwc=?, ncav=?, p_nnwc=?, p_ncav=?, mos_nnwc=?, mos_ncav=?";
+    $query = "INSERT INTO tickers_eod_valuation (ticker_id, dcf_eps, dcf_fcf, dcf_oe, graham, ebit, p_dcf_eps, p_dcf_fcf, p_dcf_oe, p_graham, p_ebit, mos_dcf_eps, mos_dcf_fcf, mos_dcf_oe, mos_graham, mos_ebit, nnwc, ncav, p_nnwc, p_ncav, mos_nnwc, mos_ncav, avg_mos) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE dcf_eps=?, dcf_fcf=?, dcf_oe=?, graham=?, ebit=?, p_dcf_eps=?, p_dcf_fcf=?, p_dcf_oe=?, p_graham=?, p_ebit=?, mos_dcf_eps=?, mos_dcf_fcf=?, mos_dcf_oe=?, mos_graham=?, mos_ebit=?, nnwc=?, ncav=?, p_nnwc=?, p_ncav=?, mos_nnwc=?, mos_ncav=?, avg_mos=?";
     $params[] = $ti;
     $params[] = $result->dcf_eps;
     $params[] = $result->dcf_fcf;
@@ -43,6 +43,7 @@ function update_eod_valuation($ti = null) {
     $params[] = $result->p_ncav;
     $params[] = $result->mos_nnwc;
     $params[] = $result->mos_ncav;
+    $params[] = $result->avg_mos;
     $params[] = $result->dcf_eps;
     $params[] = $result->dcf_fcf;
     $params[] = $result->dcf_oe;
@@ -64,6 +65,7 @@ function update_eod_valuation($ti = null) {
     $params[] = $result->p_ncav;
     $params[] = $result->mos_nnwc;
     $params[] = $result->mos_ncav;
+    $params[] = $result->avg_mos;
 
     try {
         $res1 = $db->prepare($query);
