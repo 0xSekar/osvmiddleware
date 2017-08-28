@@ -430,7 +430,7 @@ function update_yahoo_daily($pticker = NULL) {
         $sym = $row["ticker"]; //get symbol from yahoo rawdata
         //Prequering Quotes in case we need for splits
         $resJS = array();
-        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume";
+        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume,previousTimestamp";
         $resOD = file_get_contents($queryOD);
         $resJS = json_decode($resOD, true);
 
@@ -583,7 +583,7 @@ function update_yahoo_daily($pticker = NULL) {
         //Keystats & Quotes From Barchart
         if($resJS['status']['code'] == 200){
             update_raw_data_barchart_keystats($row["id"], $resJS);
-            $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id` , `Ask`, `AverageDailyVolume`, `Bid`, `Change`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, LastTradeDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE `Ask` = ?, `AverageDailyVolume` = ?, `Bid` = ?, `Change` = ?, `DaysLow` = ?, `DaysHigh` = ?, `YearLow` = ?, `YearHigh` = ?, LastTradeDate = ?";
+            $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id` , `Ask`, `AverageDailyVolume`, `Bid`, `Change`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, LastTradeDate, PreviousTradeDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE `Ask` = ?, `AverageDailyVolume` = ?, `Bid` = ?, `Change` = ?, `DaysLow` = ?, `DaysHigh` = ?, `YearLow` = ?, `YearHigh` = ?, LastTradeDate = ?, PreviousTradeDate = ?";
             $params = array();
             $params[] = $row["id"];
             $params[] = $resJS['results'][0]['ask'];
@@ -595,6 +595,7 @@ function update_yahoo_daily($pticker = NULL) {
             $params[] = $resJS['results'][0]['fiftyTwoWkLow'];
             $params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
             $params[] = substr($resJS['results'][0]['tradeTimestamp'],0,10);
+            $params[] = substr($resJS['results'][0]['previousTimestamp'],0,10);
 
             $params[] = $resJS['results'][0]['ask'];
             $params[] = $resJS['results'][0]['avgVolume'];
@@ -605,6 +606,7 @@ function update_yahoo_daily($pticker = NULL) {
             $params[] = $resJS['results'][0]['fiftyTwoWkLow'];
             $params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
             $params[] = substr($resJS['results'][0]['tradeTimestamp'],0,10);
+            $params[] = substr($resJS['results'][0]['previousTimestamp'],0,10);
             try {
                 $resb = $db->prepare($query);
                 $resb->execute($params);

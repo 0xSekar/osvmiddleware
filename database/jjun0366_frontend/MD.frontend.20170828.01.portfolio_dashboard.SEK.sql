@@ -10,3 +10,5 @@ INSERT INTO `market_indexes` (`index_name`, `report_date`, `value`) VALUES
     ('IWM', '2017-08-01 00:00:00', NULL),
     ('QQQ', '2017-08-01 00:00:00', NULL),
     ('VOO', '2017-08-01 00:00:00', NULL);
+
+ALTER TABLE  `tickers_yahoo_quotes_1` ADD  `PreviousTradeDate` DATE NULL ;
