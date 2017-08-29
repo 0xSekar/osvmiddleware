@@ -58,7 +58,12 @@ function eol_xml_parser($EOLXML, $type, $arrayeol, $AnnLot, $QtrLot) {
                 if($col < 0) {
                     continue;
                 } else {
-                    $arrayAux[$name][$col] = $value;                        
+                    $arrayAux[$name][$col] = $value; 
+                    if($type == 'QTR' && $name == 'PeriodLength'){
+                        $arrayAux[$name][$col] = 3;
+                    }elseif ($type == 'ANN' && $name == 'PeriodLength') {
+                        $arrayAux[$name][$col] = 12;
+                    }
                 }            
             }
             $col++;
