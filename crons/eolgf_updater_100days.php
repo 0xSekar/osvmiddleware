@@ -37,16 +37,28 @@ $AnnLot = AREPORTS;
 $QtrLot = QREPORTS;
 
 $count = array(0,0,0);
+$newlist = array();
 
 $list = listOfTickers();
 $lot = count($list);
 
-if(! is_null($list)){
-    foreach($list as $i => $ticker){
+if($lot>0){
+    $newlist = backOff('B', $list, $newlist, 3, 30, TRUE, 0, 100);
+    $newlist = backOff('B', $list, $newlist, 7, 70, TRUE, 30, 100);
+    $newlist = backOff('B', $list, $newlist, 30, 70, FALSE, 0, 100);
+    $newlist = array_unique($newlist);
+}
+
+$lot = count($newlist);
+
+if($lot>0){
+    foreach($newlist as $i => $ticker){
         echo "Downloading data for ". $ticker."... ";
         $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, FALSE);
         $count = statusCounter($ticker, $chek, $count);
     }
+}else{
+    echo "No tickers to Process...<br>\n";
 }
 
 if($count[0]>0){
@@ -62,65 +74,42 @@ function listOfTickers(){
     $today = date('Y/m/d');
     $tickers = array();
     try {
-        $res = $db->prepare("SELECT ticker_id FROM tickers_control WHERE (DATEDIFF('".$today."',last_eol_date) > 100)");        
+        $res = $db->prepare("SELECT a.ticker_id, last_eol_date, b.country, e.MaxDate, d.FormType FROM tickers_control a LEFT JOIN tickers b ON a.ticker_id=b.id INNER JOIN (SELECT id, MAX(report_date) MaxDate, ticker_id FROM reports_header GROUP BY ticker_id) e ON a.ticker_id = e.ticker_id INNER JOIN reports_financialheader d ON d.report_id=e.id WHERE (DATEDIFF(now(),last_eol_date) > 100) AND (b.country = 'UNITED STATES OF AMERICA' OR FormType = '10-K' OR FormType = '10-Q' OR FormType = '8-K')");
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
-    $ids = $res->fetchAll(PDO::FETCH_COLUMN);
+    $ids = $res->fetchAll(PDO::FETCH_ASSOC);
     foreach ($ids as $key => $value) {
         try {
-            $res = $db->prepare("SELECT ticker FROM tickers WHERE id = ? AND exchange != 'OTC'");            
-            $res->execute(array($value));
+            $res = $db->prepare("SELECT ticker FROM tickers WHERE id = ?");            
+            $res->execute(array($value['ticker_id']));
         } catch(PDOException $ex) {
             echo " Database Error"; //user message
             die("Line: ".__LINE__." - ".$ex->getMessage());
         }
         $res = $res->fetchAll(PDO::FETCH_COLUMN);
         if(isset($res[0])){
-            $tickers[] = $res[0];
+            $tickers[] = array($res[0], $value['last_eol_date']);
         }        
-    }    
+    }        
     if(count($tickers)>0){  
         foreach ($tickers as $key => $value) {
             try {
                     $res = $db->prepare("SELECT ticker FROM osv_blacklist WHERE ticker = ?");            
-                    $res->execute(array($value));
+                    $res->execute(array($value[0]));
                 } catch(PDOException $ex) {
                     echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }        
             $res = $res->fetchAll(PDO::FETCH_COLUMN);
             if(!isset($res[0])){
-                try {
-                    $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = ? AND ((DATEDIFF('".$today."', tested_for_today)>7) OR tested_for_today is null) AND downloaded is null" );           
-                    $res->execute(array($value));
-                } catch(PDOException $ex) {
-                    echo " Database Error"; //user message
-                    die("Line: ".__LINE__." - ".$ex->getMessage());
-                }
-                $res = $res->fetchAll(PDO::FETCH_COLUMN);
-                if(isset($res[0])){
-                    $tickerstoupdate[] = $res[0];
-                }else{
-                    try {
-                        $res = $db->prepare("SELECT ticker FROM tickers_proedgard_updates WHERE ticker = ?" );            
-                        $res->execute(array($value));
-                    } catch(PDOException $ex) {
-                        echo " Database Error"; //user message
-                        die("Line: ".__LINE__." - ".$ex->getMessage());
-                    }
-                    $res = $res->fetchAll(PDO::FETCH_COLUMN);
-                    if(!isset($res[0])){
-                        $tickerstoupdate[] = $value;
-                    }
-                }
+                $tickerstoupdate[] = array($value[0], $value[1]);
             }
         }
         return $tickerstoupdate;
     }else{
-        echo " There is no tickers to process ";
         return NULL;
     }
 }

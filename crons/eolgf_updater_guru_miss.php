@@ -37,16 +37,27 @@ $AnnLot = AREPORTS;
 $QtrLot = QREPORTS;
 
 $count = array(0,0,0);
+$newlist = array();
 
 $list = listOfTickers();
 $lot = count($list);
+if($lot>0){
+    $newlist = backOff('C', $list, $newlist, 1, 7, TRUE);
+    $newlist = backOff('C', $list, $newlist, 2, 17, TRUE, 7);
+    $newlist = backOff('C', $list, $newlist, 7, 50, TRUE, 17);
+    $newlist = backOff('C', $list, $newlist, 30, 50, FALSE);
+    $newlist = array_unique($newlist);
+}
+$lot = count($newlist);
 
-if(! is_null($list)){
-    foreach($list as $i => $ticker){
+if($lot>0){
+    foreach($newlist as $i => $ticker){
         echo "Downloading data for ". $ticker."... ";
         $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE, TRUE);
         $count = statusCounter($ticker, $chek, $count);
     }
+}else{
+    echo "No tickers to Process...<br>\n";
 }
 
 if($count[0]>0){
@@ -62,18 +73,17 @@ function listOfTickers(){
     $today = date('Y/m/d');
 
     try {
-        $res = $db->prepare("SELECT a.ticker FROM tickers_proedgard_updates AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE b.ticker is null AND a.missing_gf_period is not NULL AND (DATEDIFF('".$today."',a.missing_gf_period) >= 1)");        
+        $res = $db->prepare("SELECT a.ticker, a.insdate, a.missing_gf_period FROM tickers_proedgard_updates AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE b.ticker is null AND a.missing_gf_period is not NULL ORDER BY a.ticker");        
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
-    $row = $res->fetchAll(PDO::FETCH_COLUMN);
-    $row = array_unique($row);
+    $row = $res->fetchAll(PDO::FETCH_ASSOC);
+    //$row = array_unique($row);
     if(count($row)>0){
         return $row;
     }else{
-        echo " There is no tickers to process ";
         return NULL;
     }
 }
