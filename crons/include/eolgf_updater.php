@@ -736,4 +736,69 @@ function cleanQuality() {
     }
     echo "done<br>\n";
 }
+
+function backOff($type, $list, $newlist, $d, $bo, $lessThan, $boi = 0, $days = 0){
+    $today = date('Y-m-d H:i:s');
+    if(count($list)>0){
+        if($type == 'A'){ // type A common cases
+            if($lessThan){
+                foreach ($list as $key => $value) {                    
+                    if(is_null($value['tested_for_today'])){
+                        $newlist[] = $value['ticker'];
+                    }else{
+                        if(dateDifference($value['insdate'], $today, '%a')<=$bo && dateDifference($value['insdate'], $today, '%a')>$boi && dateDifference($value['tested_for_today'], $today, '%a')>=$d){
+                            $newlist[] = $value['ticker'];
+                        }
+                    }
+                }
+            }else{
+                foreach ($list as $key => $value) {
+                    if(is_null($value['tested_for_today'])){
+                        $newlist[] = $value['ticker'];
+                    }else{
+                        if(dateDifference($value['insdate'], $today, '%a')>$bo && dateDifference($value['tested_for_today'], $today, '%a')>=$d){
+                            $newlist[] = $value['ticker'];
+                        }
+                    }
+                }
+            }
+            
+        }elseif($type == 'B'){  //type B 100 and 375 days
+            if($lessThan){
+                foreach ($list as $key => $value) {
+                    $date = date($value[1]);
+                    $newdate= strtotime( '+'.$days.' day', strtotime($date));
+                    $newdate = date('Y-m-d', $newdate);
+                    if(dateDifference($newdate, $today, '%a')<=$bo && dateDifference($newdate, $today, '%a')>$boi && dateDifference($newdate, $today, '%a')%$d == 0){
+                        $newlist[] = $value[0];
+                    }
+                }
+            }else{
+                foreach ($list as $key => $value) {
+                    $date = date($value[1]);
+                    $newdate= strtotime( '+'.$days.' day', strtotime($date));
+                    $newdate = date('Y-m-d', $newdate);
+                    if(dateDifference($date, $today, '%a')>$bo && dateDifference($date, $today, '%a')%$d == 0){
+                        $newlist[] = $value[0];
+                    }
+                }
+            }
+        }else{  //type C guru miss
+            if($lessThan){
+                foreach ($list as $key => $value) {                    
+                    if(dateDifference($value['insdate'], $today, '%a')<=$bo && dateDifference($value['insdate'], $today, '%a')>$boi && dateDifference($value['missing_gf_period'], $today, '%a')>=$d){
+                        $newlist[] = $value['ticker'];
+                    }
+                }
+            }else{
+                foreach ($list as $key => $value) {
+                    if(dateDifference($value['insdate'], $today, '%a')>$bo && dateDifference($value['missing_gf_period'], $today, '%a')>=$d){
+                        $newlist[] = $value['ticker'];
+                    }
+                }
+            }            
+        }
+    }
+    return $newlist;
+}
 ?>

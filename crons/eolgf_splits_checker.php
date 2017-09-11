@@ -37,12 +37,21 @@ $AnnLot = AREPORTS;
 $QtrLot = QREPORTS;
 
 $count = array(0,0,0);
+$newlist = array();
 
 $list = listOfTickers();
 $lot = count($list);
+if($lot>0){
+    $newlist = backOff('A', $list, $newlist, 2, 15, TRUE);
+    $newlist = backOff('A', $list, $newlist, 7, 50, TRUE, 15);
+    $newlist = backOff('A', $list, $newlist, 30, 50, FALSE);
+    $newlist = array_unique($newlist);
+}
 
-if(! is_null($list)){
-    foreach($list as $i => $ticker){
+$lot = count($newlist);
+
+if($lot>0){
+    foreach($newlist as $i => $ticker){
         echo "Downloading data for ". $ticker."... ";
         $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
         $count = statusCounter($ticker, $chek, $count);    
@@ -64,6 +73,8 @@ if(! is_null($list)){
             }
         }
     }
+}else{
+    echo "No tickers to Process...<br>\n";
 }
 
 if($count[0]>0){
@@ -79,7 +90,7 @@ function listOfTickers(){
     $tickerstoupdate = array();
     $today = date('Y/m/d H:i:s');
     try {
-        $res = $db->prepare("SELECT a.ticker FROM tickers_split_parser AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.updated_date is null AND b.ticker is null AND (DATEDIFF('".$today."',a.tested_for_today) > 2 OR a.tested_for_today is null)");        
+        $res = $db->prepare("SELECT a.ticker FROM tickers_split_parser AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.updated_date is null AND b.ticker is null ORDER BY a.ticker");        
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message
@@ -102,15 +113,15 @@ function listOfTickers(){
                     } 
                 }            
                 try {
-                    $res = $db->prepare("SELECT ticker FROM tickers_split_parser WHERE ticker = ? AND  old_eps != '".$EPS."' ");            
+                    $res = $db->prepare("SELECT ticker, insdate, tested_for_today FROM tickers_split_parser WHERE ticker = ? AND  old_eps != '".$EPS."' ");            
                     $res->execute(array($value));
                 } catch(PDOException $ex) {
                     echo " Database Error"; //user message
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
-                $res = $res->fetchAll(PDO::FETCH_COLUMN);
-                if(isset($res[0])){
-                    $tickerstoupdate[] = $res[0];
+                $res = $res->fetchAll(PDO::FETCH_ASSOC);
+                if(isset($res['ticker'])){
+                    $tickerstoupdate[] = array($res['ticker'], $res['insdate'], $res['tested_for_today']);
                     
                 }else{
                     try {
@@ -128,7 +139,6 @@ function listOfTickers(){
         }
         return $tickerstoupdate;
     }else{
-        echo " There is no tickers to process ";
         return NULL;
     }
 }
