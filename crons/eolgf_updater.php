@@ -61,6 +61,7 @@ if($lot>0){
     echo "No tickers to Process...<br>\n";
 }
 
+$newlist = array();
 $list = listOfTickersOTC();
 $lot = count($list);
 if($lot>0){
@@ -79,7 +80,7 @@ if($lot>0){
         $count = statusCounter($ticker, $chek, $count);
     }
 }else{
-    echo "No tickers to Process...<br>\n";
+    echo "No OTC tickers to Process...<br>\n";
 }
 
 if($count[0]>0){
