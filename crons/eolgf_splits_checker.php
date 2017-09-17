@@ -51,25 +51,28 @@ if($lot>0){
 $lot = count($newlist);
 
 if($lot>0){
-    foreach($newlist as $i => $ticker){
-        echo "Downloading data for ". $ticker."... ";
-        $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
-        $count = statusCounter($ticker, $chek, $count);    
-        if($chek==1){
-            try {
-                $res = $db->prepare("UPDATE tickers_split_parser SET updated_date = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
-                $res->execute(array(strval($ticker)));
-            } catch(PDOException $ex) {
-                echo " Database Error"; //user message
-                die("Line: ".__LINE__." - ".$ex->getMessage());
-            }
-        }else{
-            try {
-                $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
-                $res->execute(array(strval($ticker)));
-            } catch(PDOException $ex) {
-                echo " Database Error"; //user message
-                die("Line: ".__LINE__." - ".$ex->getMessage());
+    $newlist = checkEPS($newlist);
+    if(count($newlist) > 0) {
+        foreach($newlist as $i => $ticker){
+            echo "Downloading data for ". $ticker."... ";
+            $chek = ckeckNDown($ticker, $AnnLot, $QtrLot, FALSE, TRUE);
+            $count = statusCounter($ticker, $chek, $count);    
+            if($chek==1){
+                try {
+                    $res = $db->prepare("UPDATE tickers_split_parser SET updated_date = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
+                    $res->execute(array(strval($ticker)));
+                } catch(PDOException $ex) {
+                    echo " Database Error"; //user message
+                    die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
+            }else{
+                try {
+                    $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND  updated_date is null) ");            
+                    $res->execute(array(strval($ticker)));
+                } catch(PDOException $ex) {
+                    echo " Database Error"; //user message
+                    die("Line: ".__LINE__." - ".$ex->getMessage());
+                }
             }
         }
     }
@@ -87,16 +90,25 @@ resumeEcho($count);
 
 function listOfTickers(){
     $db = Database::GetInstance(); 
-    $tickerstoupdate = array();
-    $today = date('Y/m/d H:i:s');
     try {
-        $res = $db->prepare("SELECT a.ticker FROM tickers_split_parser AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.updated_date is null AND b.ticker is null ORDER BY a.ticker");        
+        $res = $db->prepare("SELECT a.ticker, a.insdate, a.tested_for_today FROM tickers_split_parser a LEFT JOIN osv_blacklist b ON a.ticker = b.ticker WHERE a.updated_date is null AND b.ticker is null ORDER BY a.ticker");        
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
     }
-    $tickers = $res->fetchAll(PDO::FETCH_COLUMN);
+    $tickers = $res->fetchAll(PDO::FETCH_ASSOC);
+    if(count($tickers)>0){
+        return $tickers;
+    }else{
+        return NULL;
+    }
+}
+
+function checkEPS($tickers) {
+    $db = Database::GetInstance(); 
+    $tickerstoupdate = array();
+    $today = date('Y/m/d H:i:s');
     $tickers = array_unique($tickers);
 
     if(count($tickers)>0){ 
@@ -120,9 +132,8 @@ function listOfTickers(){
                     die("Line: ".__LINE__." - ".$ex->getMessage());
                 }
                 $res = $res->fetchAll(PDO::FETCH_ASSOC);
-                if(isset($res['ticker'])){
-                    $tickerstoupdate[] = array($res['ticker'], $res['insdate'], $res['tested_for_today']);
-                    
+                if(isset($res[0]['ticker'])){
+                    $tickerstoupdate[] = $res[0]['ticker'];
                 }else{
                     try {
                         $res = $db->prepare("UPDATE tickers_split_parser SET tested_for_today = '".$today."' WHERE (ticker = ? AND updated_date is null) ");            
