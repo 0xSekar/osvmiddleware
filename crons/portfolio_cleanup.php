@@ -20,8 +20,6 @@ try {
     echo $res->rowCount() . " Stocks deleted.\n";
     $res = $db->query("DELETE a FROM portfolio_transactions a LEFT JOIN portfolio_persistent b ON a.portfolio_id = b.id WHERE b.id IS NULL");
     echo $res->rowCount() . " Transactions deleted.\n";
-    $res = $db->query("DELETE a FROM portfolio_notes a LEFT JOIN portfolio_stocks b ON a.pstock_id = b.pstock_id WHERE b.pstock_id IS NULL");
-    echo $res->rowCount() . " Notes deleted.\n";
     echo "Done\n";
 } catch(PDOException $ex) {
     echo "\nDatabase Error"; //user message
