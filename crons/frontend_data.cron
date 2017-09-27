@@ -17,6 +17,7 @@
 30 23 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_eod_valuation.php 2>&1 | tail -n 200 | mail -s "Update EOD Valuation Cron Output" cronreports.i9xgk@zapiermail.com
 0 5 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/update_portfolio_dividends.php 2>&1 | tail -n 200 | mail -s "Update Portfolio Dividends Cron Output" cronreports.i9xgk@zapiermail.com
 30 1 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/portfolio_cleanup.php 2>&1 | tail -n 200 | mail -s "Portfolio Cleanup" cronreports.i9xgk@zapiermail.com
+0 23 * * 5 root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/send_weekly_emails.php 2>&1 | tail -n 200 | mail -s "Send Weekly Emails" cronreports.i9xgk@zapiermail.com
 
 ##Other processes
 12 * * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/check_yahoo_status.php
