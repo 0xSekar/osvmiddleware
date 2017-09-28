@@ -1,0 +1,90 @@
+<?php
+// Database Connection
+include_once('../config.php');
+include_once('../db/db.php');
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+include_once('./include/raw_data_update_queries.php');
+include_once('./include/update_key_ratios_ttm.php');
+include_once('./include/update_quality_checks.php');
+include_once('./include/update_ratings.php');
+include_once('./include/update_ratings_ttm.php');
+include_once('./include/update_is_old_field.php');
+include_once('./update_frontend_yahoo_daily_include.php');
+include_once('./include/raw_data_update_yahoo_keystats.php');
+require_once("../include/yahoo/common.inc.php");
+include_once('./include/update_eod_valuation.php');
+include_once('./update_frontend_EOL_GF_data_include.php');
+
+// Tools & functions
+include_once('./include/guru.php'); 
+include_once('./include/eol.php'); 
+include_once('./include/eol_xml_parser.php');
+include_once('./include/eolgf_updater.php');
+
+set_time_limit(0);                   // ignore php timeout
+//ignore_user_abort(true);             // keep on going even if user pulls the plug*
+while(ob_get_level())ob_end_clean(); // remove output buffers
+ob_implicit_flush(true);             // output stuff directly
+
+// Should never be cached - do not remove this
+header("Content-type: text/xml; charset=utf-8");
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+
+$db = Database::GetInstance(); 
+
+$listofnotmatch = array();
+
+$list = listOfTickers();
+$lot = count($list);
+
+if($lot>0){
+    echo "Starting main Process...<br>\n";
+    foreach($list as $i => $ticker){
+        if(!is_null($ticker["industry_coc"])){
+            try {
+                $res = $db->prepare("UPDATE tickers SET industry = '".$ticker["industry_coc"]."' WHERE ticker = ?");
+                $res->execute(array(strval($ticker["ticker"]))); 
+            } catch(PDOException $ex) {
+                echo " Database Error"; //user message
+                die("Line: ".__LINE__." - ".$ex->getMessage());
+            }
+        }else{
+            if(!is_null($ticker["industry"]) AND $ticker["industry"]!=""){
+                $listofnotmatch[] = $ticker["industry"];
+            }
+        }
+    }
+    echo "Tickers industry correctly updated...<br>\n";
+}else{
+    echo "No tickers to Process...<br>\n";
+}
+
+if(count($listofnotmatch)>0){
+    $listofnotmatch = array_unique($listofnotmatch);
+    echo "The following ".count($listofnotmatch)." industries has no coincidence on matching table: <br>\n";
+    foreach($listofnotmatch as $i => $ticker){
+        echo $ticker." <br>\n";
+    }
+}
+
+// --------------------------------- Functions --------------------------------- 
+
+function listOfTickers(){
+    $db = Database::GetInstance(); 
+    try {
+        $res = $db->prepare("SELECT a.ticker, TRIM(a.industry) AS industry, b.industry_coc FROM tickers AS a LEFT JOIN industry_match AS b ON TRIM(a.industry) = b.industry_ticker ORDER BY TRIM(a.industry)");        
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $row = $res->fetchAll(PDO::FETCH_ASSOC);
+    if(count($row)>0){
+        return $row;
+    }else{
+        return NULL;
+    }
+}
+
+?>
