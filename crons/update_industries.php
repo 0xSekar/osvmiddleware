@@ -45,7 +45,7 @@ if($lot>0){
 
 if(count($listofnotmatch)>0){
     $listofnotmatch = array_unique($listofnotmatch);
-    echo "@jaejun<br>\nThe following ".count($listofnotmatch)." industries has no coincidence on matching table: <br>\n";
+    echo "The following ".count($listofnotmatch)." industries has no coincidence on matching table: <br>\n";
     foreach($listofnotmatch as $i => $ticker){
         echo $ticker." <br>\n";
     }
