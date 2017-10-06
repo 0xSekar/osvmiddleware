@@ -226,7 +226,7 @@ function cutValue($value, $max, $tail) {
 
     $value = substr($value,0, $max);
 
-    return trim($value) . ($tail ? $tail : 'â~@¦');
+    return trim($value) . ($tail ? $tail : '...');
 }
 
 function formatCurrency($value) {
