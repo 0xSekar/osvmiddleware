@@ -23,7 +23,8 @@ $user_list = getUserList();
 
 foreach ($user_list as $user) {
     //Get relevant Tickers
-    $stocks = getUserStocks($user);
+    //$stocks = getUserStocks($user);
+    $stocks = array();
 
     //Get Stocks arrays
     $upStocks = getUpTickers($stocks, $reference_date, $year, 10); //New A Grade stocks
@@ -75,7 +76,7 @@ function getUpTickers($stocks, $reference_date, $year, $limit) {
     $db = Database::GetInstance();
 
     $result = array();
-    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
+/*    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
         FROM tickers t
         INNER JOIN ttm_ratings r ON t.id = r.ticker_id
         INNER JOIN ttm_ratings_history h ON t.id = h.ticker_id
@@ -87,6 +88,19 @@ function getUpTickers($stocks, $reference_date, $year, $limit) {
         AND r.AS_grade =  'A'
         AND h.AS_grade !=  'A'
         AND t.ticker IN ('".implode("','", $stocks)."')
+        AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
+        AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade = 'A') ORDER BY r.AS DESC LIMIT $limit";*/
+    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
+        FROM tickers t
+        INNER JOIN ttm_ratings r ON t.id = r.ticker_id
+        INNER JOIN ttm_ratings_history h ON t.id = h.ticker_id
+        LEFT JOIN tickers_yahoo_keystats_1 k ON t.id = k.ticker_id
+        LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id
+        LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id
+        INNER JOIN ttm_ratings_history h2 ON t.id = h2.ticker_id
+        WHERE h.ratings_date = '$reference_date'
+        AND r.AS_grade =  'A'
+        AND h.AS_grade !=  'A'
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade = 'A') ORDER BY r.AS DESC LIMIT $limit";
     $res = $db->prepare($query);
@@ -102,7 +116,7 @@ function getDownTickers($stocks, $reference_date, $year, $limit) {
     $db = Database::GetInstance();
 
     $result = array();
-    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
+/*    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
         FROM tickers t
         INNER JOIN ttm_ratings r ON t.id = r.ticker_id
         INNER JOIN ttm_ratings_history h ON t.id = h.ticker_id
@@ -114,6 +128,19 @@ function getDownTickers($stocks, $reference_date, $year, $limit) {
         AND r.AS_grade !=  'A'
         AND h.AS_grade =  'A'
         AND t.ticker IN ('".implode("','", $stocks)."')
+        AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
+        AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade != 'A') ORDER BY r.AS DESC LIMIT $limit";*/
+    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
+        FROM tickers t
+        INNER JOIN ttm_ratings r ON t.id = r.ticker_id
+        INNER JOIN ttm_ratings_history h ON t.id = h.ticker_id
+        LEFT JOIN tickers_yahoo_keystats_1 k ON t.id = k.ticker_id
+        LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id
+        LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id
+        INNER JOIN ttm_ratings_history h2 ON t.id = h2.ticker_id
+        WHERE h.ratings_date = '$reference_date'
+        AND r.AS_grade !=  'A'
+        AND h.AS_grade =  'A'
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade != 'A') ORDER BY r.AS DESC LIMIT $limit";
     $res = $db->prepare($query);
@@ -226,7 +253,7 @@ function cutValue($value, $max, $tail) {
 
     $value = substr($value,0, $max);
 
-    return trim($value) . ($tail ? $tail : 'â~@¦');
+    return trim($value) . ($tail ? $tail : '...');
 }
 
 function formatCurrency($value) {
