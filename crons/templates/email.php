@@ -35,7 +35,7 @@
         <h4 style="<?php echo $styleh4?>"><b>OLD SCHOOL VALUE</b> - <?php echo date('l, F j, Y');?></h4>
     </div>
     <h3 style="<?php echo $styleh3?>">New "A" Grade Action Score Stocks</h3>
-    <p style="<?php echo $stylep ?>">The following stocks have entered the A list. This list is currently limited to 10 stocks. To see the full list, please <a href="https://app.oldschoovalue.com">log in</a> and go to "Stock Database" to see the full list.</p>
+    <p style="<?php echo $stylep ?>">The following stocks have entered the A list. This list is currently limited to 10 stocks. To see the full list, please <a href="https://app.oldschoolvalue.com">log in</a> and go to "Stock Database" to see the full list.</p>
     <div class= "table1" style="float:left">
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr?>">
@@ -90,7 +90,7 @@
             <?php }?>
         </table>
         <h3 style="<?php echo $styleh3?>">Downgraded Action Score Stocks</h3>
-        <p style="<?php echo $stylep ?>">The following stocks have left the A list. This list is currently limited to 10 stocks. To see the full list, please <a href="https://app.oldschoovalue.com">log in</a> and go to "Stock Database" to see the full list.</p>
+        <p style="<?php echo $stylep ?>">The following stocks have left the A list. This list is currently limited to 10 stocks. To see the full list, please <a href="https://app.oldschoolvalue.com">log in</a> and go to "Stock Database" to see the full list.</p>
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
