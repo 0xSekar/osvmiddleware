@@ -58,7 +58,7 @@ function update_yahoo_daily($pticker = NULL) {
 
     //Select all tickers not updated for at least a day
     try {
-        $res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1200 AND is_old = FALSE $addq order by ticker");
+        $res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_yahoo_date,NOW()) > 1200 AND (secondary = TRUE OR is_old = FALSE) $addq order by ticker");
     } catch(PDOException $ex) {
         echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -403,7 +403,7 @@ function update_yahoo_daily($pticker = NULL) {
 
     //Select all tickers not updated for at least a day
     try {
-        $res = $db->query("SELECT * FROM tickers t INNER JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1200 AND is_old = FALSE $addq order by ticker");
+        $res = $db->query("SELECT * FROM tickers t INNER JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1200 AND (secondary = TRUE OR is_old = FALSE) $addq order by ticker");
     } catch(PDOException $ex) {
         echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -411,6 +411,8 @@ function update_yahoo_daily($pticker = NULL) {
     while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         $count2 ++;
         $procAlt = false;
+        $secondary = $row["secondary"];
+
         echo "Updating ".$row["ticker"]."...";
 
         //UPDATE HISTORICAL DATA
@@ -430,7 +432,7 @@ function update_yahoo_daily($pticker = NULL) {
         $sym = str_replace("-", ".", $row["ticker"]);
         //Prequering Quotes in case we need for splits
         $resJS = array();
-        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$row["ticker"]."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume,previousTimestamp";
+        $queryOD = "http://ondemand.websol.barchart.com/getQuote.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbols=".$sym."&mode=I&fields=ask,avgVolume,bid,netChange,low,high,fiftyTwoWkLow,fiftyTwoWkHigh,lastPrice,percentChange,name,open,previousClose,exDividendDate,tradeTimestamp,volume,dividendYieldAnnual,sharesOutstanding,fiftyTwoWkHighDate,fiftyTwoWkLowDate,dividendRateAnnual,twentyDayAvgVol,averageQuarterlyVolume,previousTimestamp";
         $resOD = file_get_contents($queryOD);
         $resJS = json_decode($resOD, true);
 
@@ -520,20 +522,22 @@ function update_yahoo_daily($pticker = NULL) {
 
                 //Register to force update when GF updates data
                 if(is_null($pticker)) {
-                    try {
-                        $query_split = "SELECT * FROM `reports_header` a LEFT JOIN reports_gf_data b ON a.id=b.report_id where a.ticker_id= ? AND a.report_type = 'QTR' ORDER BY a.report_date DESC limit 1"; 
-                        $res_split = $db->prepare($query_split);
-                        $res_split->execute(array($row["id"]));
-                        $row_split = $res_split->fetch(PDO::FETCH_ASSOC);
-                        if (empty($row_split["EPSBasic"])) {
-                            $row_split["EPSBasic"] = 0;
+                    if(!$secondary) {
+                        try {
+                            $query_split = "SELECT * FROM `reports_header` a LEFT JOIN reports_gf_data b ON a.id=b.report_id where a.ticker_id= ? AND a.report_type = 'QTR' ORDER BY a.report_date DESC limit 1"; 
+                            $res_split = $db->prepare($query_split);
+                            $res_split->execute(array($row["id"]));
+                            $row_split = $res_split->fetch(PDO::FETCH_ASSOC);
+                            if (empty($row_split["EPSBasic"])) {
+                                $row_split["EPSBasic"] = 0;
+                            }
+                            $query_split = "INSERT INTO tickers_split_parser (ticker, insdate, split_date, old_eps, updated_date, tested_for_today) values (?, NOW(), ?, ?, NULL, NULL)";
+                            $res_split = $db->prepare($query_split);
+                            $res_split->execute(array($row["ticker"],date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate)),$row_split["EPSBasic"]));
+                        } catch(PDOException $ex) {
+                            echo "\nDatabase Error"; //user message
+                            die("Line: ".__LINE__." - ".$ex->getMessage());
                         }
-                        $query_split = "INSERT INTO tickers_split_parser (ticker, insdate, split_date, old_eps, updated_date, tested_for_today) values (?, NOW(), ?, ?, NULL, NULL)";
-                        $res_split = $db->prepare($query_split);
-                        $res_split->execute(array($row["ticker"],date("Y-m-d",strtotime($sresponse->query->results->splits->SplitDate)),$row_split["EPSBasic"]));
-                    } catch(PDOException $ex) {
-                        echo "\nDatabase Error"; //user message
-                        die("Line: ".__LINE__." - ".$ex->getMessage());
                     }
                 }
             }

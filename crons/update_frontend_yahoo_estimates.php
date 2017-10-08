@@ -43,7 +43,7 @@ $eerrors = 0;
 echo "Updating Tickers...\n";
 //Analyst Estimates needs more frequent updates
 try {
-    $res = $db->query("SELECT t.*, tc.*, es.EE_PercentGrowthCurrentFiscalYearMeanOverMostRecentFiscalYearE, es.EE_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id LEFT JOIN tickers_xignite_estimates es ON t.id = es.ticker_id WHERE is_old = FALSE ORDER BY t.ticker");
+    $res = $db->query("SELECT t.*, tc.*, es.EE_PercentGrowthCurrentFiscalYearMeanOverMostRecentFiscalYearE, es.EE_PercentGrowthNextFiscalYearMeanOverCurrentFiscalYearMean FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id LEFT JOIN tickers_xignite_estimates es ON t.id = es.ticker_id WHERE is_old = FALSE OR secondary = TRUE ORDER BY t.ticker");
 } catch(PDOException $ex) {
     echo "\nDatabase Error"; //user message
     die("Line: ".__LINE__." - ".$ex->getMessage());

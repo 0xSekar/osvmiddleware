@@ -84,6 +84,8 @@ if($ticker!=NULL){
         if($count[0] > 0) {
             ratings();
         }
+    } else {
+        echo "<br>\nTicker is in BlackList, not processing. ";
     }
 }
 
