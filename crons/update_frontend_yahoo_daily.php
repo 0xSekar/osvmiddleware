@@ -22,7 +22,11 @@ set_time_limit(0);                   // ignore php timeout
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
 
-update_yahoo_daily();
+if(isset($argv) && isset($argv[1]) && strtoupper($argv[1]) == "FULL") {
+    update_yahoo_daily(null, true);
+} else {
+    update_yahoo_daily();
+}
 
 function toFloat($num) {
 	if (is_null($num)) {

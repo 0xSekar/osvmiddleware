@@ -19,7 +19,7 @@ $indexes = ['VOO', 'DIA', 'QQQ', 'IWM'];
 foreach ($indexes as $index) {
     echo("Updating index $index... ");
     $resJS1 = array();
-    $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$index."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
+    $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$index."&dividends=0&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
     $resOD1 = file_get_contents($queryOD1);
     $resJS1 = json_decode($resOD1, true);
     $code = $resJS1['status']['code'];
