@@ -1,5 +1,5 @@
 <?php
-function update_yahoo_daily($pticker = NULL) {
+function update_yahoo_daily($pticker = NULL, $force_qhist = false) {
     $db = Database::GetInstance(); 
     $yquery = true;
     try {
@@ -403,7 +403,11 @@ function update_yahoo_daily($pticker = NULL) {
 
     //Select all tickers not updated for at least a day
     try {
-        $res = $db->query("SELECT * FROM tickers t INNER JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1200 AND (secondary = TRUE OR is_old = FALSE) $addq order by ticker");
+        if ($force_qhist) {
+            $res = $db->query("SELECT * FROM tickers t INNER JOIN tickers_control tc ON t.id = tc.ticker_id WHERE (secondary = TRUE OR is_old = FALSE) $addq order by ticker");
+        } else {
+            $res = $db->query("SELECT * FROM tickers t INNER JOIN tickers_control tc ON t.id = tc.ticker_id WHERE TIMESTAMPDIFF(MINUTE,tc.last_barchart_date,NOW()) > 1200 AND (secondary = TRUE OR is_old = FALSE) $addq order by ticker");
+        }
     } catch(PDOException $ex) {
         echo "\nDatabase Error"; //user message
         die("Line: ".__LINE__." - ".$ex->getMessage());
@@ -436,9 +440,9 @@ function update_yahoo_daily($pticker = NULL) {
         $resOD = file_get_contents($queryOD);
         $resJS = json_decode($resOD, true);
 
-        if($r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->splits) && isset($sresponse->query->results->splits->SplitDate) && $sresponse->query->results->splits->SplitDate > $split_date)) {
+        if($force_qhist || $r_row["a"] < 260 || (isset($sresponse->query) && isset($sresponse->query->results) && isset($sresponse->query->results->splits) && isset($sresponse->query->results->splits->SplitDate) && $sresponse->query->results->splits->SplitDate > $split_date)) {
             $resJS1 = array();
-            $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
+            $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&dividends=0&type=daily&startDate=".date("Ymd", strtotime("-15 years"))."&endDate=".date("Ymd")."";
             $resOD1 = file_get_contents($queryOD1);
             $resJS1 = json_decode($resOD1, true);
             $code = $resJS1['status']['code'];
@@ -543,7 +547,7 @@ function update_yahoo_daily($pticker = NULL) {
             }
         } else {
             $resJS1 = array();
-            $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&type=daily&startDate=".date("Ymd", strtotime("-1 month"))."&endDate=".date("Ymd")."";
+            $queryOD1 = "http://ondemand.websol.barchart.com/getHistory.json?apikey=fbb10c94f13efa7fccbe641643f7901f&symbol=".$sym."&dividends=0&type=daily&startDate=".date("Ymd", strtotime("-1 month"))."&endDate=".date("Ymd")."";
             $resOD1 = file_get_contents($queryOD1);
             $resJS1 = json_decode($resOD1, true);
             $code = $resJS1['status']['code'];
