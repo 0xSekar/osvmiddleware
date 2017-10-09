@@ -18,6 +18,13 @@ $reference_date = date('Y-m-d', strtotime('-7 days'));
 $year = date('Y');
 $count = 0;
 
+$headers = array();
+$headers[] = 'From: "Jae Jun" <osv@oldschoolvalue.com>';
+$headers[] = 'Reply-To: "Jae Jun" <osv@oldschoolvalue.com>';
+$headers[] = 'MIME-Version: 1.0\r\n';
+$headers[] = 'Content-Type: text/html; charset=UTF-8';
+$subject = "Weekly Old School Value Rating Update";
+
 //Get Valid users
 $user_list = getUserList();
 
@@ -34,11 +41,6 @@ foreach ($user_list as $user) {
 
     //Send Email
     $content = getContent("templates/email.php", $upStocks, $downStocks, $topTrifecta, $topAction);
-    $headers[] = 'From: "Jae Jun" <osv@oldschoolvalue.com>';
-    $headers[] = 'Reply-To: "Jae Jun" <osv@oldschoolvalue.com>';
-    $headers[] = 'MIME-Version: 1.0\r\n';
-    $headers[] = 'Content-Type: text/html; charset=UTF-8';
-    $subject = "Weekly Old School Value Rating Update";
     mail($user, $subject, $content, implode( "\r\n" , $headers ));
     echo "Email sent to $user<br>\n";
     $count++;
