@@ -18,19 +18,58 @@ function update_ratings() {
         die("- Line: ".__LINE__." - ".$ex->getMessage());
     }
 
-    //Variables to be used for linear transform and squeez
+//Values from DB for variables
+    try {
+        $res = $db->prepare("SELECT variable, weight FROM ratings_weight");            
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+//Variables to be used for linear transform and squeez
     $squ = 0.998;
-    $qw1 = 0.275;
-    $qw2 = 0.45;
-    $qw3 = 0.275;
-    $gw1 = 0.1;
-    $gw2 = 0.1;
-    $gw3 = 0.55;
-    $gw4 = 0.25;
-    $vw1 = 0.275;
-    $vw2 = 0.375;
-    $vw3 = 0.075;
-    $vw4 = 0.275;
+    foreach ($res as $key => $value) {
+        switch ($value['variable']) {
+            case 'G1':
+                $gw1 = $value['weight'];
+                break;
+            case 'G2':
+                $gw2 = $value['weight'];
+                break;
+            case 'G3':
+                $gw3 = $value['weight'];
+                break;
+            case 'G4':
+                $gw4 = $value['weight'];
+                break;       
+            case 'Q1':
+                $qw1 = $value['weight'];
+                break;
+            case 'Q2':
+                $qw2 = $value['weight'];
+                break;
+            case 'Q3':
+                $qw3 = $value['weight'];
+                break;
+            case 'V1':
+                $vw1 = $value['weight'];
+                break;
+            case 'V2':
+                $vw2 = $value['weight'];
+                break;
+            case 'V3':
+                $vw3 = $value['weight'];
+                break;
+            case 'V4':
+                $vw4 = $value['weight'];
+                break;
+            default:
+                echo "unknow variable: ".$value['variable']."\n";
+                break;
+        }
+    }
 
     while($rowy = $resy->fetch(PDO::FETCH_ASSOC)) {
         $values = array();
@@ -38,14 +77,40 @@ function update_ratings() {
 
         //GET SORTED QUALITY VARIABLES
         //FCF / Sales
+
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='FCF_S' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '1':
+                    $st1 = $value['value1'];
+                    $st2 = $value['value2'];
+                    break;
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= 0 AND FCF_S < 0.30 AND FCF_S IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= ".$st1." AND FCF_S < ".$st2." AND FCF_S IS NOT NULL
             UNION SELECT 2 as rank, report_id, FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= 0.30 AND FCF_S IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= ".$nd1." AND FCF_S IS NOT NULL
             UNION SELECT 3 as rank, report_id, -FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S < 0 AND FCF_S IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S < ".$rd1." AND FCF_S IS NOT NULL
             UNION SELECT 4 as rank, report_id, FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S IS NULL
             ORDER BY rank, value 
@@ -68,14 +133,39 @@ function update_ratings() {
         $b = 100 - $a;
 
         //CROIC
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='CROIC' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '1':
+                    $st1 = $value['value1'];
+                    $st2 = $value['value2'];
+                    break;
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= 0 AND CROIC < 0.40 AND CROIC IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= ".$st1." AND CROIC < ".$st2." AND CROIC IS NOT NULL
             UNION SELECT 2 as rank, report_id, CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= 0.40 AND CROIC IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= ".$nd1." AND CROIC IS NOT NULL
             UNION SELECT 3 as rank, report_id, -CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC < 0 AND CROIC IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC < ".$rd1." AND CROIC IS NOT NULL
             UNION SELECT 4 as rank, report_id, CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC IS NULL
             ORDER BY rank, value
@@ -117,14 +207,39 @@ function update_ratings() {
 
         //GET SORTED GROWTH VARIABLES
         //SalesPercChange
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='SalesPercChange' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '1':
+                    $st1 = $value['value1'];
+                    $st2 = $value['value2'];
+                    break;
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= 0 AND SalesPercChange < 0.60 AND SalesPercChange IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= ".$st1." AND SalesPercChange < ".$st2." AND SalesPercChange IS NOT NULL
             UNION SELECT 2 as rank, report_id, SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= 0.60 AND SalesPercChange IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= ".$nd1." AND SalesPercChange IS NOT NULL
             UNION SELECT 3 as rank, report_id, -SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange < 0 AND SalesPercChange IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange < ".$rd1." AND SalesPercChange IS NOT NULL
             UNION SELECT 4 as rank, report_id, SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange IS NULL
             ORDER BY rank, value
@@ -141,14 +256,39 @@ function update_ratings() {
             $position++;
         }
         //Sales5YYCGrPerc
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='Sales5YYCGrPerc' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '1':
+                    $st1 = $value['value1'];
+                    $st2 = $value['value2'];
+                    break;
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= 0 AND Sales5YYCGrPerc < 0.40 AND Sales5YYCGrPerc IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= ".$st1." AND Sales5YYCGrPerc < ".$st2." AND Sales5YYCGrPerc IS NOT NULL
             UNION SELECT 2 as rank, report_id, Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= 0.40 AND Sales5YYCGrPerc IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= ".$nd1." AND Sales5YYCGrPerc IS NOT NULL
             UNION SELECT 3 as rank, report_id, -Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc < 0 AND Sales5YYCGrPerc IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc < ".$rd1." AND Sales5YYCGrPerc IS NOT NULL
             UNION SELECT 4 as rank, report_id, Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc IS NULL
             ORDER BY rank, value
@@ -165,14 +305,39 @@ function update_ratings() {
             $position++;
         }
         //GrossProfitAstTotal
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='GPA' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '1':
+                    $st1 = $value['value1'];
+                    $st2 = $value['value2'];
+                    break;
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= 0 AND GPA < 1 AND GPA IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= ".$st1." AND GPA < ".$st2." AND GPA IS NOT NULL
             UNION SELECT 2 as rank, report_id, GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= 1 AND GPA IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= ".$nd1." AND GPA IS NOT NULL
             UNION SELECT 3 as rank, report_id, -GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA < 0 AND GPA IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA < ".$rd1." AND GPA IS NOT NULL
             UNION SELECT 4 as rank, report_id, GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA IS NULL
             ORDER BY rank, value
@@ -191,12 +356,33 @@ function update_ratings() {
 
         //GET SORTED VALUE VARIABLES
         //EV/EBIT
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='EV_EBIT' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 AS rank, report_id, EV_EBIT AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT >= 0 AND EV_EBIT IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT >= ".$nd1." AND EV_EBIT IS NOT NULL
             UNION SELECT 2 AS rank, report_id, -EV_EBIT AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT < 0 AND EV_EBIT IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT < ".$rd1." AND EV_EBIT IS NOT NULL
             UNION SELECT 3 AS rank, report_id, EV_EBIT AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT IS NULL
             ORDER BY rank, value
@@ -213,12 +399,33 @@ function update_ratings() {
             $position++;
         }
         //P/FCF
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='P_FCF' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 AS rank, report_id, P_FCF AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF >= 0 AND P_FCF IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF >= ".$nd1." AND P_FCF IS NOT NULL
             UNION SELECT 2 AS rank, report_id, -P_FCF AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF < 0 AND P_FCF IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF < ".$rd1." AND P_FCF IS NOT NULL
             UNION SELECT 3 AS rank, report_id, P_FCF AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF IS NULL
             ORDER BY rank, value
@@ -235,12 +442,33 @@ function update_ratings() {
             $position++;
         }
         //-Pr2BookQ
+        try {
+            $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='P_BV' ORDER BY field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($res as $key => $value) {
+            switch ($value['field_order']) {
+                case '2':
+                    $nd1 = $value['value1'];
+                    break;
+                case '3':
+                    $rd1 = $value['value1'];
+                    break;
+                default:
+                    break;
+            }
+        }
         $position = 1;
         $query = "
             SELECT 1 AS rank, report_id, P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV >= 0 AND P_BV IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV >= ".$nd1." AND P_BV IS NOT NULL
             UNION SELECT 2 AS rank, report_id, -P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV < 0 AND P_BV IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV < ".$rd1." AND P_BV IS NOT NULL
             UNION SELECT 3 AS rank, report_id, P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV IS NULL
             ORDER BY rank, value
@@ -462,5 +690,6 @@ function update_ratings() {
           }
           fclose($o);*/
     }
+    exit;
 }
 ?>

@@ -18,30 +18,95 @@ function update_ratings_ttm() {
         die("- Line: ".__LINE__." - ".$ex->getMessage());
     }
     $tickerCount = 0;
-    //Variables to be used for linear transform and squeez
+
+//Values from DB for variables
+    try {
+        $res = $db->prepare("SELECT variable, weight FROM ratings_weight");            
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+//Variables to be used for linear transform and squeez
     $squ = 0.998;
-    $qw1 = 0.275;
-    $qw2 = 0.45;
-    $qw3 = 0.275;
-    $gw1 = 0.1;
-    $gw2 = 0.1;
-    $gw3 = 0.55;
-    $gw4 = 0.25;
-    $vw1 = 0.275;
-    $vw2 = 0.375;
-    $vw3 = 0.075;
-    $vw4 = 0.275;
+    foreach ($res as $key => $value) {
+        switch ($value['variable']) {
+            case 'G1':
+                $gw1 = $value['weight'];
+                break;
+            case 'G2':
+                $gw2 = $value['weight'];
+                break;
+            case 'G3':
+                $gw3 = $value['weight'];
+                break;
+            case 'G4':
+                $gw4 = $value['weight'];
+                break;       
+            case 'Q1':
+                $qw1 = $value['weight'];
+                break;
+            case 'Q2':
+                $qw2 = $value['weight'];
+                break;
+            case 'Q3':
+                $qw3 = $value['weight'];
+                break;
+            case 'V1':
+                $vw1 = $value['weight'];
+                break;
+            case 'V2':
+                $vw2 = $value['weight'];
+                break;
+            case 'V3':
+                $vw3 = $value['weight'];
+                break;
+            case 'V4':
+                $vw4 = $value['weight'];
+                break;
+            default:
+                echo "unknow variable: ".$value['variable']."\n";
+                break;
+        }
+    }
 
     //GET SORTED QUALITY VARIABLES
     //FCF / Sales
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='FCF_S' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '1':
+                $st1 = $value['value1'];
+                $st2 = $value['value2'];
+                break;
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -FCF_S AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S >= 0 AND FCF_S < 0.30 AND FCF_S IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S >= ".$st1." AND FCF_S < ".$st2." AND FCF_S IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, FCF_S AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S >= 0.30 AND FCF_S IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S >= ".$nd1." AND FCF_S IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, -FCF_S AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S < 0 AND FCF_S IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S < ".$rd1." AND FCF_S IS NOT NULL
         UNION SELECT 4 as rank, ticker_id, FCF_S AS value from
         ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND FCF_S IS NULL
         ORDER BY rank, value
@@ -63,14 +128,39 @@ function update_ratings_ttm() {
     $b = 100 - $a;
 
     //CROIC
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='CROIC' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '1':
+                $st1 = $value['value1'];
+                $st2 = $value['value2'];
+                break;
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -CROIC AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC >= 0 AND CROIC < 0.40 AND CROIC IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC >= ".$st1." AND CROIC < ".$st2." AND CROIC IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, CROIC AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC >= 0.40 AND CROIC IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC >= ".$nd1." AND CROIC IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, -CROIC AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC < 0 AND CROIC IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC < ".$rd1." AND CROIC IS NOT NULL
         UNION SELECT 4 as rank, ticker_id, CROIC AS value from
         ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND CROIC IS NULL
         ORDER BY rank, value
@@ -112,14 +202,39 @@ function update_ratings_ttm() {
 
     //GET SORTED GROWTH VARIABLES
     //SalesPercChange
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='RevenuePctGrowthTTM' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '1':
+                $st1 = $value['value1'];
+                $st2 = $value['value2'];
+                break;
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -RevenuePctGrowthTTM AS value from
-        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM >= 0 AND RevenuePctGrowthTTM < 0.60 AND RevenuePctGrowthTTM IS NOT NULL
+        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM >= ".$st1." AND RevenuePctGrowthTTM < ".$st2." AND RevenuePctGrowthTTM IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, RevenuePctGrowthTTM AS value from
-        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM >= 0.60 AND RevenuePctGrowthTTM IS NOT NULL
+        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM >= ".$nd1." AND RevenuePctGrowthTTM IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, -RevenuePctGrowthTTM AS value from
-        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM < 0 AND RevenuePctGrowthTTM IS NOT NULL
+        tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM < ".$rd1." AND RevenuePctGrowthTTM IS NOT NULL
         UNION SELECT 4 as rank, ticker_id, RevenuePctGrowthTTM AS value from
         tickers_growth_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND RevenuePctGrowthTTM IS NULL
         ORDER BY rank, value
@@ -136,14 +251,39 @@ function update_ratings_ttm() {
         $position++;
     }
     //Sales5YYCGrPerc
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='Sales5YYCGrPerc' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '1':
+                $st1 = $value['value1'];
+                $st2 = $value['value2'];
+                break;
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }    
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -Sales5YYCGrPerc AS value from
-        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc >= 0 AND Sales5YYCGrPerc < 0.40 AND Sales5YYCGrPerc IS NOT NULL
+        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc >= ".$st1." AND Sales5YYCGrPerc < ".$st2." AND Sales5YYCGrPerc IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, Sales5YYCGrPerc AS value from
-        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc >= 0.40 AND Sales5YYCGrPerc IS NOT NULL
+        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc >= ".$nd1." AND Sales5YYCGrPerc IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, -Sales5YYCGrPerc AS value from
-        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc < 0 AND Sales5YYCGrPerc IS NOT NULL
+        ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc < ".$rd1." AND Sales5YYCGrPerc IS NOT NULL
         UNION SELECT 4 as rank, ticker_id, Sales5YYCGrPerc AS value from
         ttm_financialscustom a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND Sales5YYCGrPerc IS NULL
         ORDER BY rank, value
@@ -160,14 +300,39 @@ function update_ratings_ttm() {
         $position++;
     }
     //GrossProfitAstTotal
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='GPA' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '1':
+                $st1 = $value['value1'];
+                $st2 = $value['value2'];
+                break;
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -GPA AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA >= 0 AND GPA < 1 AND GPA IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA >= ".$st1." AND GPA < ".$st2." AND GPA IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, GPA AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA >= 1 AND GPA IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA >= ".$nd1." AND GPA IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, -GPA AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA < 0 AND GPA IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA < ".$rd1." AND GPA IS NOT NULL
         UNION SELECT 4 as rank, ticker_id, GPA AS value from
         ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND GPA IS NULL
         ORDER BY rank, value
@@ -185,12 +350,33 @@ function update_ratings_ttm() {
     }
     //GET SORTED VALUE VARIABLES
     //EV/EBIT
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='EV_EBIT' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, EV_EBIT AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT >= 0 AND EV_EBIT IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT >= ".$nd1." AND EV_EBIT IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, -EV_EBIT AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT < 0 AND EV_EBIT IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT < ".$rd1." AND EV_EBIT IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, EV_EBIT AS value from
         ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND EV_EBIT IS NULL
         ORDER BY rank, value
@@ -207,12 +393,33 @@ function update_ratings_ttm() {
         $position++;
     }
     //P/FCF
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='P_FCF' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, P_FCF AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF >= 0 AND P_FCF IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF >= ".$nd1." AND P_FCF IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, -P_FCF AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF < 0 AND P_FCF IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF < ".$rd1." AND P_FCF IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, P_FCF AS value from
         ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_FCF IS NULL
         ORDER BY rank, value
@@ -229,12 +436,33 @@ function update_ratings_ttm() {
         $position++;
     }
     //-Pr2BookQ
+    try {
+        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='P_BV' ORDER BY field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($res as $key => $value) {
+        switch ($value['field_order']) {
+            case '2':
+                $nd1 = $value['value1'];
+                break;
+            case '3':
+                $rd1 = $value['value1'];
+                break;
+            default:
+                break;
+        }
+    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, P_BV AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV >= 0 AND P_BV IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV >= ".$nd1." AND P_BV IS NOT NULL
         UNION SELECT 2 as rank, ticker_id, -P_BV AS value from
-        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV < 0 AND P_BV IS NOT NULL
+        ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV < ".$rd1." AND P_BV IS NOT NULL
         UNION SELECT 3 as rank, ticker_id, P_BV AS value from
         ttm_key_ratios a INNER JOIN tickers b on a.ticker_id=b.id where is_old = FALSE AND P_BV IS NULL
         ORDER BY rank, value
