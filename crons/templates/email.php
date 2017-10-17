@@ -143,10 +143,10 @@
             <?php }?>
             <?php }?>
         </table>
-        <h3 style="<?php echo $styleh3?>">Top 5 TRIFECTA Stocks (MktCap>$500M)</h3>
-        <p style="<?php echo $stylep?>">A <b>Trifecta</b> represents a stock where Q,V,G and Action is 'A' grade and the score is above 85. This list includes stocks from the full stock universe. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        <h3 style="<?php echo $styleh3?>">New 52 Week High Stocks</h3>
+        <p style="<?php echo $stylep?>">The Top 10 stocks (based on Market Capitalization) in our full universe that this week reached his new 52 Week High Value.
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks.</p>
         <table style="<?php echo $table?>">
-
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
                     Name
@@ -171,18 +171,21 @@
                 <td style="<?php echo $td50,$td?>">
                     G
                 </td>
+                <td style="<?php echo $td50,$td?>">
+                    Hit Date
+                </td>
             </tr>
-            <?php if (count($topTrifecta) == 0) {?>
+            <?php if (count($maxTick) == 0) {?>
             <tr style="<?php echo $styletr?>">
-                <td colspan="8" style="<?php echo $td100?>;width:100%;">
+                <td colspan="9" style="<?php echo $td100?>;width:100%;">
                     There is no stocks matching this criteria
                 </td>
             </tr>
             <?php } else {?>
-            <?php foreach($topTrifecta as $stock) {?>
+            <?php foreach($maxTick as $stock) {?>
             <tr style="<?php echo $styletr?>">
                 <td style="<?php echo $tdName200?>">
-                    <?php echo cutValue($stock["company"], 12)." (".$stock["ticker"].")";?>
+                    <?php echo cutValue($stock["company"], 11)." (".$stock["ticker"].")";?>
                 </td>
                 <td style="<?php echo $td50?>">
                     <?php echo formatCurrency($stock["MarketCapIntraday"]);?>
@@ -205,6 +208,81 @@
                 <td style="<?php echo $td50?>">
                     <?php echo number_format($stock["GT"], 2, '.', '');?>
                 </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo date("n/j/Y",strtotime($stock["c_date"]));?>
+                </td>
+            </tr>
+            <?php }?>
+            <?php }?>
+        </table>
+        <h3 style="<?php echo $styleh3?>">New 52 Week Low Stocks</h3>
+        <p style="<?php echo $stylep?>">The Top 10 stocks (based on Market Capitalization) in our full universe that this week reached his new 52 Week Low Value.
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks.</p>
+        <table style="<?php echo $table?>">
+            <tr style="<?php echo $styletr ;$td?>">
+                <td style="<?php echo $tdName200?>;color:#b1b4ba;">
+                    Name
+                </td >
+                <td style="<?php echo $td50,$td?>">
+                    Market Cap
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    YTD %Chg
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Grade
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Score
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Q
+                <td style="<?php echo $td50,$td?>">
+                    V
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    G
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Hit Date
+                </td>
+            </tr>
+            <?php if (count($minTick) == 0) {?>
+            <tr style="<?php echo $styletr?>">
+                <td colspan="9" style="<?php echo $td100?>;width:100%;">
+                    There is no stocks matching this criteria
+                </td>
+            </tr>
+            <?php } else {?>
+            <?php foreach($minTick as $stock) {?>
+            <tr style="<?php echo $styletr?>">
+                <td style="<?php echo $tdName200?>">
+                    <?php echo cutValue($stock["company"], 11)." (".$stock["ticker"].")";?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo formatCurrency($stock["MarketCapIntraday"]);?>
+                </td>
+                <td style="<?php echo $td100; echo $stock["YTD"] < 0 ? ' color:red;' : ' color:green;';?>">
+                    <span class="caret" style="<?php echo $stock["YTD"] < 0 ? $spanDown : $spanUp;?>"></span><?php echo number_format($stock["YTD"], 2, '.', '').'%';?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo $stock["AS_grade"];?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["AS"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["QT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["VT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["GT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo date("n/j/Y",strtotime($stock["c_date"]));?>
+                </td>
             </tr>
             <?php }?>
             <?php }?>
@@ -213,7 +291,6 @@
         <p style="<?php echo $stylep?>">The Top 5 ACTION Score stocks in our full universe where market cap is > $500m.
         Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
         <table style="<?php echo $table?>">
-
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
                     Name
@@ -247,6 +324,270 @@
             </tr>
             <?php } else {?>
             <?php foreach($topAction as $stock) {?>
+            <tr style="<?php echo $styletr?>">
+                <td style="<?php echo $tdName200?>">
+                    <?php echo cutValue($stock["company"], 12)." (".$stock["ticker"].")";?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo formatCurrency($stock["MarketCapIntraday"]);?>
+                </td>
+                <td style="<?php echo $td100; echo $stock["YTD"] < 0 ? ' color:red;' : ' color:green;';?>">
+                    <span class="caret" style="<?php echo $stock["YTD"] < 0 ? $spanDown : $spanUp;?>"></span><?php echo number_format($stock["YTD"], 2, '.', '').'%';?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo $stock["AS_grade"];?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["AS"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["QT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["VT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["GT"], 2, '.', '');?>
+                </td>
+            </tr>
+            <?php }?>
+            <?php }?>
+        </table>
+        <h3 style="<?php echo $styleh3?>">Top 5 POPULAR Stocks (MktCap>$500M)</h3>
+        <p style="<?php echo $stylep?>">The Top 5 most viewed stocks by OSV insiders the past 30 days in our full universe where market cap is > $500m.
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks.</p>
+        <table style="<?php echo $table?>">
+            <tr style="<?php echo $styletr ;$td?>">
+                <td style="<?php echo $tdName200?>;color:#b1b4ba;">
+                    Name
+                </td >
+                <td style="<?php echo $td50,$td?>">
+                    Market Cap
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    YTD %Chg
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Grade
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Score
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Q
+                <td style="<?php echo $td50,$td?>">
+                    V
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    G
+                </td>
+            </tr>
+            <?php if (count($popular) == 0) {?>
+            <tr style="<?php echo $styletr?>">
+                <td colspan="8" style="<?php echo $td100?>;width:100%;">
+                    There is no stocks matching this criteria
+                </td>
+            </tr>
+            <?php } else {?>
+            <?php foreach($popular as $stock) {?>
+            <tr style="<?php echo $styletr?>">
+                <td style="<?php echo $tdName200?>">
+                    <?php echo cutValue($stock["company"], 12)." (".$stock["ticker"].")";?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo formatCurrency($stock["MarketCapIntraday"]);?>
+                </td>
+                <td style="<?php echo $td100; echo $stock["YTD"] < 0 ? ' color:red;' : ' color:green;';?>">
+                    <span class="caret" style="<?php echo $stock["YTD"] < 0 ? $spanDown : $spanUp;?>"></span><?php echo number_format($stock["YTD"], 2, '.', '').'%';?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo $stock["AS_grade"];?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["AS"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["QT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["VT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["GT"], 2, '.', '');?>
+                </td>
+            </tr>
+            <?php }?>
+            <?php }?>
+        </table>
+        <h3 style="<?php echo $styleh3?>">Top 5 QUALITY Stocks (MktCap>$500M)</h3>
+        <p style="<?php echo $stylep?>">The Top 5 QUALITY stocks in our full universe where market cap is > $500m.
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        <table style="<?php echo $table?>">
+            <tr style="<?php echo $styletr ;$td?>">
+                <td style="<?php echo $tdName200?>;color:#b1b4ba;">
+                    Name
+                </td >
+                <td style="<?php echo $td50,$td?>">
+                    Market Cap
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    YTD %Chg
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Grade
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Score
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Q
+                <td style="<?php echo $td50,$td?>">
+                    V
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    G
+                </td>
+            </tr>
+            <?php if (count($topQuality) == 0) {?>
+            <tr style="<?php echo $styletr?>">
+                <td colspan="8" style="<?php echo $td100?>;width:100%;">
+                    There is no stocks matching this criteria
+                </td>
+            </tr>
+            <?php } else {?>
+            <?php foreach($topQuality as $stock) {?>
+            <tr style="<?php echo $styletr?>">
+                <td style="<?php echo $tdName200?>">
+                    <?php echo cutValue($stock["company"], 12)." (".$stock["ticker"].")";?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo formatCurrency($stock["MarketCapIntraday"]);?>
+                </td>
+                <td style="<?php echo $td100; echo $stock["YTD"] < 0 ? ' color:red;' : ' color:green;';?>">
+                    <span class="caret" style="<?php echo $stock["YTD"] < 0 ? $spanDown : $spanUp;?>"></span><?php echo number_format($stock["YTD"], 2, '.', '').'%';?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo $stock["AS_grade"];?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["AS"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["QT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["VT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["GT"], 2, '.', '');?>
+                </td>
+            </tr>
+            <?php }?>
+            <?php }?>
+        </table>
+        <h3 style="<?php echo $styleh3?>">Top 5 VALUE Stocks (MktCap>$500M)</h3>
+        <p style="<?php echo $stylep?>">The Top 5 VALUE stocks in our full universe where market cap is > $500m.
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        <table style="<?php echo $table?>">
+            <tr style="<?php echo $styletr ;$td?>">
+                <td style="<?php echo $tdName200?>;color:#b1b4ba;">
+                    Name
+                </td >
+                <td style="<?php echo $td50,$td?>">
+                    Market Cap
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    YTD %Chg
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Grade
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Score
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Q
+                <td style="<?php echo $td50,$td?>">
+                    V
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    G
+                </td>
+            </tr>
+            <?php if (count($topValue) == 0) {?>
+            <tr style="<?php echo $styletr?>">
+                <td colspan="8" style="<?php echo $td100?>;width:100%;">
+                    There is no stocks matching this criteria
+                </td>
+            </tr>
+            <?php } else {?>
+            <?php foreach($topValue as $stock) {?>
+            <tr style="<?php echo $styletr?>">
+                <td style="<?php echo $tdName200?>">
+                    <?php echo cutValue($stock["company"], 12)." (".$stock["ticker"].")";?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo formatCurrency($stock["MarketCapIntraday"]);?>
+                </td>
+                <td style="<?php echo $td100; echo $stock["YTD"] < 0 ? ' color:red;' : ' color:green;';?>">
+                    <span class="caret" style="<?php echo $stock["YTD"] < 0 ? $spanDown : $spanUp;?>"></span><?php echo number_format($stock["YTD"], 2, '.', '').'%';?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo $stock["AS_grade"];?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["AS"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["QT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["VT"], 2, '.', '');?>
+                </td>
+                <td style="<?php echo $td50?>">
+                    <?php echo number_format($stock["GT"], 2, '.', '');?>
+                </td>
+            </tr>
+            <?php }?>
+            <?php }?>
+        </table>
+        <h3 style="<?php echo $styleh3?>">Top 5 GROWTH Stocks (MktCap>$500M)</h3>
+        <p style="<?php echo $stylep?>">The Top 5 GROWTH stocks in our full universe where market cap is > $500m.
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        <table style="<?php echo $table?>">
+            <tr style="<?php echo $styletr ;$td?>">
+                <td style="<?php echo $tdName200?>;color:#b1b4ba;">
+                    Name
+                </td >
+                <td style="<?php echo $td50,$td?>">
+                    Market Cap
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    YTD %Chg
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Grade
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Action Score
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    Q
+                <td style="<?php echo $td50,$td?>">
+                    V
+                </td>
+                <td style="<?php echo $td50,$td?>">
+                    G
+                </td>
+            </tr>
+            <?php if (count($topGrowth) == 0) {?>
+            <tr style="<?php echo $styletr?>">
+                <td colspan="8" style="<?php echo $td100?>;width:100%;">
+                    There is no stocks matching this criteria
+                </td>
+            </tr>
+            <?php } else {?>
+            <?php foreach($topGrowth as $stock) {?>
             <tr style="<?php echo $styletr?>">
                 <td style="<?php echo $tdName200?>">
                     <?php echo cutValue($stock["company"], 12)." (".$stock["ticker"].")";?>
