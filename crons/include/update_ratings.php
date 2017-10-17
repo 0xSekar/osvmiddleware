@@ -18,34 +18,93 @@ function update_ratings() {
         die("- Line: ".__LINE__." - ".$ex->getMessage());
     }
 
-    //Variables to be used for linear transform and squeez
+//Values from DB for variables
+    try {
+        $res = $db->prepare("SELECT variable, weight FROM ratings_weight");            
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+
+//Variables to be used for linear transform and squeez
     $squ = 0.998;
-    $qw1 = 0.275;
-    $qw2 = 0.45;
-    $qw3 = 0.275;
-    $gw1 = 0.1;
-    $gw2 = 0.1;
-    $gw3 = 0.55;
-    $gw4 = 0.25;
-    $vw1 = 0.275;
-    $vw2 = 0.375;
-    $vw3 = 0.075;
-    $vw4 = 0.275;
+    foreach ($res as $key => $value) {
+        switch ($value['variable']) {
+            case 'G1':
+                $gw1 = $value['weight'];
+                break;
+            case 'G2':
+                $gw2 = $value['weight'];
+                break;
+            case 'G3':
+                $gw3 = $value['weight'];
+                break;
+            case 'G4':
+                $gw4 = $value['weight'];
+                break;       
+            case 'Q1':
+                $qw1 = $value['weight'];
+                break;
+            case 'Q2':
+                $qw2 = $value['weight'];
+                break;
+            case 'Q3':
+                $qw3 = $value['weight'];
+                break;
+            case 'V1':
+                $vw1 = $value['weight'];
+                break;
+            case 'V2':
+                $vw2 = $value['weight'];
+                break;
+            case 'V3':
+                $vw3 = $value['weight'];
+                break;
+            case 'V4':
+                $vw4 = $value['weight'];
+                break;
+            default:
+                echo "unknow variable: ".$value['variable']."\n";
+                break;
+        }
+    }
+
+    //GET SORTED QUALITY VARIABLES
+    try {
+        $res = $db->prepare("SELECT * FROM ratings_filters ORDER BY variable, field_order ASC");
+        $res->execute();
+    } catch(PDOException $ex) {
+        echo " Database Error"; //user message
+        die("Line: ".__LINE__." - ".$ex->getMessage());
+    }
+    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+    
+    $var = array();
+    foreach ($res as $key => $value) {
+        $var[$value["variable"]][$value["field_order"]] = array('v1' => $value["value1"], 'v2' => $value["value2"]);            
+    }
+    
 
     while($rowy = $resy->fetch(PDO::FETCH_ASSOC)) {
         $values = array();
         $tickerCount = 0;
 
-        //GET SORTED QUALITY VARIABLES
-        //FCF / Sales
+        //FCF_S Sales
+        $st1 = $var['FCF_S'][1]['v1'];
+        $st2 = $var['FCF_S'][1]['v2'];
+        $nd1 = $var['FCF_S'][2]['v1'];
+        $rd1 = $var['FCF_S'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= 0 AND FCF_S < 0.30 AND FCF_S IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= ".$st1." AND FCF_S < ".$st2." AND FCF_S IS NOT NULL
             UNION SELECT 2 as rank, report_id, FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= 0.30 AND FCF_S IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S >= ".$nd1." AND FCF_S IS NOT NULL
             UNION SELECT 3 as rank, report_id, -FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S < 0 AND FCF_S IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S < ".$rd1." AND FCF_S IS NOT NULL
             UNION SELECT 4 as rank, report_id, FCF_S as value, ticker_id FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND FCF_S IS NULL
             ORDER BY rank, value 
@@ -68,14 +127,19 @@ function update_ratings() {
         $b = 100 - $a;
 
         //CROIC
+        $st1 = $var['CROIC'][1]['v1'];
+        $st2 = $var['CROIC'][1]['v2'];
+        $nd1 = $var['CROIC'][2]['v1'];
+        $rd1 = $var['CROIC'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= 0 AND CROIC < 0.40 AND CROIC IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= ".$st1." AND CROIC < ".$st2." AND CROIC IS NOT NULL
             UNION SELECT 2 as rank, report_id, CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= 0.40 AND CROIC IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC >= ".$nd1." AND CROIC IS NOT NULL
             UNION SELECT 3 as rank, report_id, -CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC < 0 AND CROIC IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC < ".$rd1." AND CROIC IS NOT NULL
             UNION SELECT 4 as rank, report_id, CROIC AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND CROIC IS NULL
             ORDER BY rank, value
@@ -91,6 +155,7 @@ function update_ratings() {
             $values[$row["report_id"]]["QP2"] = $position;
             $position++;
         }
+
         //PIO F Score
         $query = "
             SELECT report_id, pioTotal AS value FROM reports_pio_checks r LEFT JOIN reports_header h ON r.report_id = h.id
@@ -115,16 +180,20 @@ function update_ratings() {
             }
         }
 
-        //GET SORTED GROWTH VARIABLES
         //SalesPercChange
+        $st1 = $var['SalesPercChange'][1]['v1'];
+        $st2 = $var['SalesPercChange'][1]['v2'];
+        $nd1 = $var['SalesPercChange'][2]['v1'];
+        $rd1 = $var['SalesPercChange'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= 0 AND SalesPercChange < 0.60 AND SalesPercChange IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= ".$st1." AND SalesPercChange < ".$st2." AND SalesPercChange IS NOT NULL
             UNION SELECT 2 as rank, report_id, SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= 0.60 AND SalesPercChange IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange >= ".$nd1." AND SalesPercChange IS NOT NULL
             UNION SELECT 3 as rank, report_id, -SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange < 0 AND SalesPercChange IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange < ".$rd1." AND SalesPercChange IS NOT NULL
             UNION SELECT 4 as rank, report_id, SalesPercChange as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND SalesPercChange IS NULL
             ORDER BY rank, value
@@ -140,15 +209,21 @@ function update_ratings() {
             $values[$row["report_id"]]["GP1"] = $position;
             $position++;
         }
+
         //Sales5YYCGrPerc
+        $st1 = $var['Sales5YYCGrPerc'][1]['v1'];
+        $st2 = $var['Sales5YYCGrPerc'][1]['v2'];
+        $nd1 = $var['Sales5YYCGrPerc'][2]['v1'];
+        $rd1 = $var['Sales5YYCGrPerc'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= 0 AND Sales5YYCGrPerc < 0.40 AND Sales5YYCGrPerc IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= ".$st1." AND Sales5YYCGrPerc < ".$st2." AND Sales5YYCGrPerc IS NOT NULL
             UNION SELECT 2 as rank, report_id, Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= 0.40 AND Sales5YYCGrPerc IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc >= ".$nd1." AND Sales5YYCGrPerc IS NOT NULL
             UNION SELECT 3 as rank, report_id, -Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc < 0 AND Sales5YYCGrPerc IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc < ".$rd1." AND Sales5YYCGrPerc IS NOT NULL
             UNION SELECT 4 as rank, report_id, Sales5YYCGrPerc as value FROM reports_financialscustom r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND Sales5YYCGrPerc IS NULL
             ORDER BY rank, value
@@ -164,15 +239,21 @@ function update_ratings() {
             $values[$row["report_id"]]["GP2"] = $position;
             $position++;
         }
+
         //GrossProfitAstTotal
+        $st1 = $var['GPA'][1]['v1'];
+        $st2 = $var['GPA'][1]['v2'];
+        $nd1 = $var['GPA'][2]['v1'];
+        $rd1 = $var['GPA'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 as rank, report_id, -GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= 0 AND GPA < 1 AND GPA IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= ".$st1." AND GPA < ".$st2." AND GPA IS NOT NULL
             UNION SELECT 2 as rank, report_id, GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= 1 AND GPA IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA >= ".$nd1." AND GPA IS NOT NULL
             UNION SELECT 3 as rank, report_id, -GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA < 0 AND GPA IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA < ".$rd1." AND GPA IS NOT NULL
             UNION SELECT 4 as rank, report_id, GPA AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND GPA IS NULL
             ORDER BY rank, value
@@ -189,14 +270,16 @@ function update_ratings() {
             $position++;
         }
 
-        //GET SORTED VALUE VARIABLES
         //EV/EBIT
+        $nd1 = $var['EV_EBIT'][2]['v1'];
+        $rd1 = $var['EV_EBIT'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 AS rank, report_id, EV_EBIT AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT >= 0 AND EV_EBIT IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT >= ".$nd1." AND EV_EBIT IS NOT NULL
             UNION SELECT 2 AS rank, report_id, -EV_EBIT AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT < 0 AND EV_EBIT IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT < ".$rd1." AND EV_EBIT IS NOT NULL
             UNION SELECT 3 AS rank, report_id, EV_EBIT AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND EV_EBIT IS NULL
             ORDER BY rank, value
@@ -213,12 +296,15 @@ function update_ratings() {
             $position++;
         }
         //P/FCF
+        $nd1 = $var['P_FCF'][2]['v1'];
+        $rd1 = $var['P_FCF'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 AS rank, report_id, P_FCF AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF >= 0 AND P_FCF IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF >= ".$nd1." AND P_FCF IS NOT NULL
             UNION SELECT 2 AS rank, report_id, -P_FCF AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF < 0 AND P_FCF IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF < ".$rd1." AND P_FCF IS NOT NULL
             UNION SELECT 3 AS rank, report_id, P_FCF AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_FCF IS NULL
             ORDER BY rank, value
@@ -234,13 +320,17 @@ function update_ratings() {
             $values[$row["report_id"]]["VP2"] = $position;
             $position++;
         }
-        //-Pr2BookQ
+
+        //-Pr2BookQ        
+        $nd1 = $var['P_BV'][2]['v1'];
+        $rd1 = $var['P_BV'][3]['v1'];
+
         $position = 1;
         $query = "
             SELECT 1 AS rank, report_id, P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV >= 0 AND P_BV IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV >= ".$nd1." AND P_BV IS NOT NULL
             UNION SELECT 2 AS rank, report_id, -P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
-            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV < 0 AND P_BV IS NOT NULL
+            WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV < ".$rd1." AND P_BV IS NOT NULL
             UNION SELECT 3 AS rank, report_id, P_BV AS value FROM reports_key_ratios r LEFT JOIN reports_header h ON r.report_id = h.id
             WHERE h.report_type = 'ANN' AND h.fiscal_year = ".$rowy["fiscal_year"]." AND P_BV IS NULL
             ORDER BY rank, value
@@ -462,5 +552,6 @@ function update_ratings() {
           }
           fclose($o);*/
     }
+    exit;
 }
 ?>
