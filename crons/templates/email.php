@@ -144,8 +144,7 @@
             <?php }?>
         </table>
         <h3 style="<?php echo $styleh3?>">New 52 Week High Stocks</h3>
-        <p style="<?php echo $stylep?>">The Top 10 stocks (based on Market Capitalization) in our full universe that this week reached his new 52 Week High Value.
-        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks.</p>
+        <p style="<?php echo $stylep?>">Top 10 stocks (based on Market Cap) that reached its 52 Week High price this week.</p>
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
@@ -216,8 +215,7 @@
             <?php }?>
         </table>
         <h3 style="<?php echo $styleh3?>">New 52 Week Low Stocks</h3>
-        <p style="<?php echo $stylep?>">The Top 10 stocks (based on Market Capitalization) in our full universe that this week reached his new 52 Week Low Value.
-        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks.</p>
+        <p style="<?php echo $stylep?>">Top 10 stocks (based on Market Cap) that reached its 52 Week Low price this week.</p>
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
