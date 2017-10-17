@@ -73,32 +73,26 @@ function update_ratings_ttm() {
     }
 
     //GET SORTED QUALITY VARIABLES
-    //FCF / Sales
     try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='FCF_S' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '1':
-                $st1 = $value['value1'];
-                $st2 = $value['value2'];
-                break;
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
+            $res = $db->prepare("SELECT * FROM ratings_filters ORDER BY variable, field_order ASC");
+            $res->execute();
+        } catch(PDOException $ex) {
+            echo " Database Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
         }
-    }
+        $res = $res->fetchAll(PDO::FETCH_ASSOC);
+        
+        $var = array();
+        foreach ($res as $key => $value) {
+            $var[$value["variable"]][$value["field_order"]] = array('v1' => $value["value1"], 'v2' => $value["value2"]);            
+        }
+
+    //FCF / Sales
+    $st1 = $var['FCF_S'][1]['v1'];
+    $st2 = $var['FCF_S'][1]['v2'];
+    $nd1 = $var['FCF_S'][2]['v1'];
+    $rd1 = $var['FCF_S'][3]['v1'];
+
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -FCF_S AS value from
@@ -128,31 +122,11 @@ function update_ratings_ttm() {
     $b = 100 - $a;
 
     //CROIC
-    try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='CROIC' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+    $st1 = $var['CROIC'][1]['v1'];
+    $st2 = $var['CROIC'][1]['v2'];
+    $nd1 = $var['CROIC'][2]['v1'];
+    $rd1 = $var['CROIC'][3]['v1'];
 
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '1':
-                $st1 = $value['value1'];
-                $st2 = $value['value2'];
-                break;
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
-        }
-    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -CROIC AS value from
@@ -176,6 +150,7 @@ function update_ratings_ttm() {
         $values[$row["ticker_id"]]["QP2"] = $position;
         $position++;
     }
+
     //PIO F Score
     $query = "
         select ticker_id, pioTotal AS value from
@@ -200,33 +175,12 @@ function update_ratings_ttm() {
         }
     }
 
-    //GET SORTED GROWTH VARIABLES
-    //SalesPercChange
-    try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='RevenuePctGrowthTTM' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+    //SalesPercChange 
+    $st1 = $var['RevenuePctGrowthTTM'][1]['v1'];
+    $st2 = $var['RevenuePctGrowthTTM'][1]['v2'];
+    $nd1 = $var['RevenuePctGrowthTTM'][2]['v1'];
+    $rd1 = $var['RevenuePctGrowthTTM'][3]['v1'];
 
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '1':
-                $st1 = $value['value1'];
-                $st2 = $value['value2'];
-                break;
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
-        }
-    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -RevenuePctGrowthTTM AS value from
@@ -250,32 +204,13 @@ function update_ratings_ttm() {
         $values[$row["ticker_id"]]["GP1"] = $position;
         $position++;
     }
-    //Sales5YYCGrPerc
-    try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='Sales5YYCGrPerc' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '1':
-                $st1 = $value['value1'];
-                $st2 = $value['value2'];
-                break;
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
-        }
-    }    
+    //Sales5YYCGrPerc
+    $st1 = $var['Sales5YYCGrPerc'][1]['v1'];
+    $st2 = $var['Sales5YYCGrPerc'][1]['v2'];
+    $nd1 = $var['Sales5YYCGrPerc'][2]['v1'];
+    $rd1 = $var['Sales5YYCGrPerc'][3]['v1'];   
+
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -Sales5YYCGrPerc AS value from
@@ -299,32 +234,13 @@ function update_ratings_ttm() {
         $values[$row["ticker_id"]]["GP2"] = $position;
         $position++;
     }
-    //GrossProfitAstTotal
-    try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='GPA' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '1':
-                $st1 = $value['value1'];
-                $st2 = $value['value2'];
-                break;
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
-        }
-    }
+    //GrossProfitAstTotal
+    $st1 = $var['GPA'][1]['v1'];
+    $st2 = $var['GPA'][1]['v2'];
+    $nd1 = $var['GPA'][2]['v1'];
+    $rd1 = $var['GPA'][3]['v1'];
+
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, -GPA AS value from
@@ -348,29 +264,11 @@ function update_ratings_ttm() {
         $values[$row["ticker_id"]]["GP3"] = $position;
         $position++;
     }
-    //GET SORTED VALUE VARIABLES
-    //EV/EBIT
-    try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='EV_EBIT' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
-        }
-    }
+    //EV/EBIT
+    $nd1 = $var['EV_EBIT'][2]['v1'];
+    $rd1 = $var['EV_EBIT'][3]['v1'];
+
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, EV_EBIT AS value from
@@ -392,28 +290,11 @@ function update_ratings_ttm() {
         $values[$row["ticker_id"]]["VP1"] = $position;
         $position++;
     }
-    //P/FCF
-    try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='P_FCF' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
-        }
-    }
+    //P/FCF
+    $nd1 = $var['P_FCF'][2]['v1'];
+    $rd1 = $var['P_FCF'][3]['v1'];
+
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, P_FCF AS value from
@@ -435,28 +316,11 @@ function update_ratings_ttm() {
         $values[$row["ticker_id"]]["VP2"] = $position;
         $position++;
     }
+    
     //-Pr2BookQ
-    try {
-        $res = $db->prepare("SELECT field_order, value1, value2 FROM ratings_filters WHERE variable='P_BV' ORDER BY field_order ASC");
-        $res->execute();
-    } catch(PDOException $ex) {
-        echo " Database Error"; //user message
-        die("Line: ".__LINE__." - ".$ex->getMessage());
-    }
-    $res = $res->fetchAll(PDO::FETCH_ASSOC);
+    $nd1 = $var['P_BV'][2]['v1'];
+    $rd1 = $var['P_BV'][3]['v1'];
 
-    foreach ($res as $key => $value) {
-        switch ($value['field_order']) {
-            case '2':
-                $nd1 = $value['value1'];
-                break;
-            case '3':
-                $rd1 = $value['value1'];
-                break;
-            default:
-                break;
-        }
-    }
     $position = 1;
     $query = "
         select 1 as rank, ticker_id, P_BV AS value from
