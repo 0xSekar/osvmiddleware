@@ -20,7 +20,7 @@ $enotfound = 0;
 $eerror = 0;
 echo "Updating Tickers...\n";
 try {
-	$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE";
+	$query = "SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE (is_old = FALSE OR secondary = TRUE)";
 	$res = $db->query($query);
 } catch (Exception $e) {
 	var_dump($e);

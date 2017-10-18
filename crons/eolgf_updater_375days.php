@@ -72,7 +72,7 @@ function listOfTickers(){
     $today = date('Y/m/d');
     $tickerstoupdate = array();
     try {
-        $res = $db->prepare("SELECT a.ticker_id, last_eol_date, b.ticker, b.country, e.MaxDate, d.FormType FROM tickers_control a LEFT JOIN tickers b ON a.ticker_id=b.id LEFT JOIN osv_blacklist c ON b.ticker = c.ticker INNER JOIN (SELECT id, MAX(report_date) MaxDate, ticker_id FROM reports_header GROUP BY ticker_id) e ON a.ticker_id = e.ticker_id INNER JOIN reports_financialheader d ON d.report_id=e.id WHERE (DATEDIFF(now(),last_eol_date) > 375) AND (b.country != 'UNITED STATES OF AMERICA' AND FormType != '10-K' AND FormType != '10-Q' AND FormType != '8-K')");
+        $res = $db->prepare("SELECT a.ticker_id, last_eol_date, b.ticker, b.country, e.MaxDate, d.FormType FROM tickers_control a LEFT JOIN tickers b ON a.ticker_id=b.id LEFT JOIN osv_blacklist c ON b.ticker = c.ticker INNER JOIN (SELECT id, MAX(report_date) MaxDate, ticker_id FROM reports_header GROUP BY ticker_id) e ON a.ticker_id = e.ticker_id INNER JOIN reports_financialheader d ON d.report_id=e.id WHERE (DATEDIFF(now(),last_eol_date) > 375) AND b.secondary = FALSE AND (b.country != 'UNITED STATES OF AMERICA' AND FormType != '10-K' AND FormType != '10-Q' AND FormType != '8-K')");
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message

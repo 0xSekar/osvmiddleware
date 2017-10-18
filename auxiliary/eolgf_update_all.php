@@ -76,7 +76,7 @@ function listOfTickers(){
     $db = Database::GetInstance(); 
     $today = date('Y/m/d');
     try {
-        $res = $db->prepare("SELECT a.ticker FROM tickers AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.is_old = FALSE AND b.ticker is null AND a.exchange != 'OTC'");
+        $res = $db->prepare("SELECT a.ticker FROM tickers AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.is_old = FALSE AND a.secondary = FALSE AND b.ticker is null AND a.exchange != 'OTC'");
         
         $res->execute();
     } catch(PDOException $ex) {
@@ -96,7 +96,7 @@ function listOfTickersOTC(){
     $db = Database::GetInstance(); 
     $today = date('Y/m/d');
     try {
-        $res = $db->prepare("SELECT a.ticker FROM tickers AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.is_old = FALSE AND b.ticker is null AND a.exchange = 'OTC'");
+        $res = $db->prepare("SELECT a.ticker FROM tickers AS a LEFT JOIN osv_blacklist AS b ON a.ticker = b.ticker WHERE a.is_old = FALSE AND a.secondary = FALSE AND b.ticker is null AND a.exchange = 'OTC'");
         
         $res->execute();
     } catch(PDOException $ex) {

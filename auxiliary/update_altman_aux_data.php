@@ -18,7 +18,7 @@ ob_implicit_flush(true);             // output stuff directly
 $count2 = 0;
 echo "Updating Tickers...\n";
 try {
-	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE ORDER BY ticker");
+	$res = $db->query("SELECT * FROM tickers t LEFT JOIN tickers_control tc ON t.id = tc.ticker_id WHERE is_old = FALSE AND secondary = FALSE ORDER BY ticker");
 } catch(PDOException $ex) {
 	echo "\nDatabase Error"; //user message
 	die("Line: ".__LINE__." - ".$ex->getMessage());

@@ -28,22 +28,34 @@ $subject = "Weekly Old School Value Rating Update";
 //Get Valid users
 $user_list = getUserList();
 
+//Get Stocks arrays
+//Up and Downs can ve put outside foreach while no user selected stocks is used
+$stocks = array();
+$upStocks = getUpTickers($stocks, $reference_date, $year, 10); //New A Grade stocks
+$downStocks = getDownTickers($stocks, $reference_date, $year, 10); //Downgraded from A stocks
+$topAction = getActionWidget($year, "action", "desc", 5, false, 500);
+$topQuality = getActionWidget($year, "quality", "desc", 5, false, 500, null, null, null, 75);
+$topValue = getActionWidget($year, "value", "desc", 5, false, 500, null, null, null, 75);
+$topGrowth = getActionWidget($year, "growth", "desc", 5, false, 500, null, null, null, 75);
+$popular = getPopularTickers(5);
+$maxTick = getMaxTickers($reference_date, $year, 10);
+$minTick = getMinTickers($reference_date, $year, 10);
+$first_run = true;
+
 foreach ($user_list as $user) {
     //Get relevant Tickers
     //$stocks = getUserStocks($user);
-    $stocks = array();
-
-    //Get Stocks arrays
-    $upStocks = getUpTickers($stocks, $reference_date, $year, 10); //New A Grade stocks
-    $downStocks = getDownTickers($stocks, $reference_date, $year, 10); //Downgraded from A stocks
-    $topTrifecta = getActionWidget($year, $sort = "action", $sorttype = "desc", $number = 5, $filter = false, $mc = 500, $qt = 85, $vt = 85, $gt = 85);
-    $topAction = getActionWidget($year, $sort = "action", $sorttype = "desc", $number = 5, $filter = false, $mc = 500);
 
     //Send Email
-    $content = getContent("templates/email.php", $upStocks, $downStocks, $topTrifecta, $topAction);
+    $content = getContent("templates/email.php", $upStocks, $downStocks, $topAction, $topQuality, $topValue, $topGrowth, $popular, $maxTick, $minTick);
     mail($user, $subject, $content, implode( "\r\n" , $headers ));
     echo "Email sent to $user<br>\n";
     $count++;
+    if($first_run) {
+        $fd = fopen("../../weeklyupdate.php","w");
+        fwrite($fd, $content);
+    }
+    $first_run = false;
 }
 echo "<br>\n$count mails sent<br>\n";
 
@@ -78,20 +90,6 @@ function getUpTickers($stocks, $reference_date, $year, $limit) {
     $db = Database::GetInstance();
 
     $result = array();
-/*    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
-        FROM tickers t
-        INNER JOIN ttm_ratings r ON t.id = r.ticker_id
-        INNER JOIN ttm_ratings_history h ON t.id = h.ticker_id
-        LEFT JOIN tickers_yahoo_keystats_1 k ON t.id = k.ticker_id
-        LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id
-        LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id
-        INNER JOIN ttm_ratings_history h2 ON t.id = h2.ticker_id
-        WHERE h.ratings_date = '$reference_date'
-        AND r.AS_grade =  'A'
-        AND h.AS_grade !=  'A'
-        AND t.ticker IN ('".implode("','", $stocks)."')
-        AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
-        AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade = 'A') ORDER BY r.AS DESC LIMIT $limit";*/
     $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
         FROM tickers t
         INNER JOIN ttm_ratings r ON t.id = r.ticker_id
@@ -103,6 +101,8 @@ function getUpTickers($stocks, $reference_date, $year, $limit) {
         WHERE h.ratings_date = '$reference_date'
         AND r.AS_grade =  'A'
         AND h.AS_grade !=  'A'
+        AND t.is_old = FALSE
+        AND t.secondary = FALSE
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade = 'A') ORDER BY r.AS DESC LIMIT $limit";
     $res = $db->prepare($query);
@@ -118,20 +118,22 @@ function getDownTickers($stocks, $reference_date, $year, $limit) {
     $db = Database::GetInstance();
 
     $result = array();
-/*    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
-        FROM tickers t
-        INNER JOIN ttm_ratings r ON t.id = r.ticker_id
-        INNER JOIN ttm_ratings_history h ON t.id = h.ticker_id
-        LEFT JOIN tickers_yahoo_keystats_1 k ON t.id = k.ticker_id
-        LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id
-        LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id
-        INNER JOIN ttm_ratings_history h2 ON t.id = h2.ticker_id
-        WHERE h.ratings_date = '$reference_date'
-        AND r.AS_grade !=  'A'
-        AND h.AS_grade =  'A'
-        AND t.ticker IN ('".implode("','", $stocks)."')
-        AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
-        AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade != 'A') ORDER BY r.AS DESC LIMIT $limit";*/
+    /*    $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
+          FROM tickers t
+          INNER JOIN ttm_ratings r ON t.id = r.ticker_id
+          INNER JOIN ttm_ratings_history h ON t.id = h.ticker_id
+          LEFT JOIN tickers_yahoo_keystats_1 k ON t.id = k.ticker_id
+          LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id
+          LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id
+          INNER JOIN ttm_ratings_history h2 ON t.id = h2.ticker_id
+          WHERE h.ratings_date = '$reference_date'
+          AND r.AS_grade !=  'A'
+          AND h.AS_grade =  'A'
+          AND t.is_old = FALSE
+          AND t.secondary = FALSE
+          AND t.ticker IN ('".implode("','", $stocks)."')
+          AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
+          AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade != 'A') ORDER BY r.AS DESC LIMIT $limit";*/
     $query = "SELECT t.id, t.ticker, t.company, r.AS AS c_AS, h.AS AS o_AS, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.ratings_date as c_date
         FROM tickers t
         INNER JOIN ttm_ratings r ON t.id = r.ticker_id
@@ -143,11 +145,78 @@ function getDownTickers($stocks, $reference_date, $year, $limit) {
         WHERE h.ratings_date = '$reference_date'
         AND r.AS_grade !=  'A'
         AND h.AS_grade =  'A'
+        AND t.is_old = FALSE
+        AND t.secondary = FALSE
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade != 'A') ORDER BY r.AS DESC LIMIT $limit";
     $res = $db->prepare($query);
     $res->execute();
     $res1 = $res->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res1 as $value) {
+        $result[$value["ticker"]] = $value;
+    }
+    return $result;
+}
+
+function getMaxTickers($reference_date, $year, $limit) {
+    $db = Database::GetInstance();
+
+    $result = array();
+    $query = "SELECT t.id, t.ticker, t.company, r.QT, r.VT, r.GT, r.AS, r.AS_grade, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.52WeekHighDate as c_date
+        FROM tickers t
+        INNER JOIN ttm_ratings r ON t.id = r.ticker_id
+        LEFT JOIN tickers_yahoo_keystats_1 k ON t.id = k.ticker_id
+        LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id
+        LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id
+        INNER JOIN  tickers_yahoo_keystats_2 h2 ON t.id = h2.ticker_id
+        WHERE t.is_old = FALSE
+        AND t.secondary = FALSE
+        AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
+        AND h2.52WeekHighDate > '$reference_date'
+        ORDER BY k.MarketCapIntraday DESC LIMIT $limit";
+    $res = $db->prepare($query);
+    $res->execute();
+    $res1 = $res->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res1 as $value) {
+        $result[$value["ticker"]] = $value;
+    }
+    return $result;
+}
+
+function getMinTickers($reference_date, $year, $limit) {
+    $db = Database::GetInstance();
+
+    $result = array();
+    $query = "SELECT t.id, t.ticker, t.company, r.QT, r.VT, r.GT, r.AS, r.AS_grade, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, h2.52WeekLowDate as c_date
+        FROM tickers t
+        INNER JOIN ttm_ratings r ON t.id = r.ticker_id
+        LEFT JOIN tickers_yahoo_keystats_1 k ON t.id = k.ticker_id
+        LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id
+        LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id
+        INNER JOIN  tickers_yahoo_keystats_2 h2 ON t.id = h2.ticker_id
+        WHERE t.is_old = FALSE
+        AND t.secondary = FALSE
+        AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
+        AND h2.52WeekLowDate > '$reference_date'
+        ORDER BY k.MarketCapIntraday DESC LIMIT $limit";
+    $res = $db->prepare($query);
+    $res->execute();
+    $res1 = $res->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res1 as $value) {
+        $result[$value["ticker"]] = $value;
+    }
+    return $result;
+}
+
+function getPopularTickers($limit) {
+    $db = Database::GetInstance();
+
+    $query = "SELECT l.ticker, COUNT(l.ticker) as tcount, t.company, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, r.QT, r.VT, r.GT, r.AS, r.AS_grade FROM ttm_ratings r LEFT JOIN tickers t on r.ticker_id=t.id LEFT JOIN ticker_view_log l ON t.ticker=l.ticker LEFT JOIN tickers_yahoo_keystats_1 k ON t.id=k.ticker_id LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id WHERE t.is_old = FALSE AND t.secondary = FALSE AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '2017-01-01') AND k.MarketCapIntraday > 500000000 AND DATEDIFF(now(), created_date) <= 30 GROUP BY l.ticker order by tcount DESC LIMIT :limit";
+    $res = $db->prepare($query);
+    $res->bindParam(':limit', $limit, PDO::PARAM_INT);
+    $res->execute();
+    $res1 = $res->fetchAll(PDO::FETCH_ASSOC);
+    $result = array();
     foreach ($res1 as $value) {
         $result[$value["ticker"]] = $value;
     }
@@ -162,7 +231,7 @@ function getActionWidget($year, $sort = "action", $sorttype = "desc", $number = 
         return $result;
     }
     $query = "SELECT t.ticker, t.company, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, r.QT, r.VT, r.GT, r.AS, r.AS_grade FROM ttm_ratings r LEFT JOIN tickers t on r.ticker_id=t.id LEFT JOIN tickers_yahoo_keystats_1 k ON t.id=k.ticker_id LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id";
-    $query .= " WHERE t.is_old = FALSE AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')";
+    $query .= " WHERE t.is_old = FALSE AND t.secondary = FALSE AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')";
     if (!is_null($mc)) {
         $mc = $mc * 1000000;
         $query .= " AND k.MarketCapIntraday > :mc";
@@ -237,7 +306,7 @@ function getActionWidget($year, $sort = "action", $sorttype = "desc", $number = 
     return $result;
 }
 
-function getContent($file = "templates/email.php", $upStocks = array(), $downStocks = array(), $topTrifecta = array(), $topAction= array()) {
+function getContent($file = "templates/email.php", $upStocks = array(), $downStocks = array(), $topAction = array(), $topQuality = array(), $topValue = array(), $topGrowth = array(), $popular = array(), $maxTick = array(), $minTick = array()) {
     ob_start(); // start output buffer
 
     include $file;
