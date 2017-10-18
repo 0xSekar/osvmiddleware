@@ -40,6 +40,7 @@ $topGrowth = getActionWidget($year, "growth", "desc", 5, false, 500, null, null,
 $popular = getPopularTickers(5);
 $maxTick = getMaxTickers($reference_date, $year, 10);
 $minTick = getMinTickers($reference_date, $year, 10);
+$first_run = true;
 
 foreach ($user_list as $user) {
     //Get relevant Tickers
@@ -50,6 +51,11 @@ foreach ($user_list as $user) {
     mail($user, $subject, $content, implode( "\r\n" , $headers ));
     echo "Email sent to $user<br>\n";
     $count++;
+    if($first_run) {
+        $fd = fopen("../../weeklyupdate.php","w");
+        fwrite($fd, $content);
+    }
+    $first_run = false;
 }
 echo "<br>\n$count mails sent<br>\n";
 
