@@ -103,6 +103,7 @@ function getUpTickers($stocks, $reference_date, $year, $limit) {
         AND h.AS_grade !=  'A'
         AND t.is_old = FALSE
         AND t.secondary = FALSE
+        AND t.exchange != 'OTC'
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade = 'A') ORDER BY r.AS DESC LIMIT $limit";
     $res = $db->prepare($query);
@@ -147,6 +148,7 @@ function getDownTickers($stocks, $reference_date, $year, $limit) {
         AND h.AS_grade =  'A'
         AND t.is_old = FALSE
         AND t.secondary = FALSE
+        AND t.exchange != 'OTC'
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.ratings_date = (SELECT MIN(h3.ratings_date) from ttm_ratings_history h3 where h3.ticker_id=t.id and h3.ratings_date <= now() AND h3.ratings_date >= '$reference_date' AND h3.AS_grade != 'A') ORDER BY r.AS DESC LIMIT $limit";
     $res = $db->prepare($query);
@@ -171,6 +173,7 @@ function getMaxTickers($reference_date, $year, $limit) {
         INNER JOIN  tickers_yahoo_keystats_2 h2 ON t.id = h2.ticker_id
         WHERE t.is_old = FALSE
         AND t.secondary = FALSE
+        AND t.exchange != 'OTC'
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.52WeekHighDate > '$reference_date'
         ORDER BY k.MarketCapIntraday DESC LIMIT $limit";
@@ -196,6 +199,7 @@ function getMinTickers($reference_date, $year, $limit) {
         INNER JOIN  tickers_yahoo_keystats_2 h2 ON t.id = h2.ticker_id
         WHERE t.is_old = FALSE
         AND t.secondary = FALSE
+        AND t.exchange != 'OTC'
         AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')
         AND h2.52WeekLowDate > '$reference_date'
         ORDER BY k.MarketCapIntraday DESC LIMIT $limit";
@@ -231,7 +235,7 @@ function getActionWidget($year, $sort = "action", $sorttype = "desc", $number = 
         return $result;
     }
     $query = "SELECT t.ticker, t.company, k.MarketCapIntraday, ((q.LastTradePriceOnly - qh.adj_close) / qh.adj_close * 100) AS YTD, r.QT, r.VT, r.GT, r.AS, r.AS_grade FROM ttm_ratings r LEFT JOIN tickers t on r.ticker_id=t.id LEFT JOIN tickers_yahoo_keystats_1 k ON t.id=k.ticker_id LEFT JOIN tickers_yahoo_quotes_2 q ON t.id = q.ticker_id LEFT JOIN tickers_yahoo_historical_data qh ON t.id = qh.ticker_id";
-    $query .= " WHERE t.is_old = FALSE AND t.secondary = FALSE AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')";
+    $query .= " WHERE t.is_old = FALSE AND t.exchange != 'OTC' AND t.secondary = FALSE AND qh.report_date = (SELECT MAX(report_date) from tickers_yahoo_historical_data te where te.ticker_id=t.id and te.report_date < '$year-01-01')";
     if (!is_null($mc)) {
         $mc = $mc * 1000000;
         $query .= " AND k.MarketCapIntraday > :mc";
