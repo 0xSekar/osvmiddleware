@@ -1,17 +1,13 @@
 <?php 
 require_once dirname(dirname(__FILE__)).'/config.php';
-class Database 
-{
-    private $db_host = DB_FRONTEND_HOST;
-    private $db_user = DB_FRONTEND_USER;
-    private $db_pass = DB_FRONTEND_PASSWORD;
-    private $db_name = DB_FRONTEND_DATABASE;
-
+class Database {
     private $_db;
-    static $_instance;
 
-    private function __construct() {
-        $this->_db = new PDO("mysql:host=$this->db_host;dbname=$this->db_name;charset=utf8", $this->db_user, $this->db_pass);
+    static $_instance;
+    static $_backendInstance;
+
+    private function __construct($host, $db, $user, $pass) {
+        $this->_db = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
         $this->_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
@@ -22,9 +18,16 @@ class Database
      */
     public static function getInstance() {
         if (!(self::$_instance instanceof self)) {
-            self::$_instance = new self();
+            self::$_instance = new Database(DB_FRONTEND_HOST, DB_FRONTEND_DATABASE, DB_FRONTEND_USER, DB_FRONTEND_PASSWORD);
         }
         return self::$_instance;
+    }
+
+    public static function getBackendInstance() {
+        if (!(self::$_backendInstance instanceof self)) {
+            self::$_backendInstance = new Database(DB_MEMBER_HOST, DB_MEMBER_DATABASE, DB_MEMBER_USER, DB_MEMBER_PASSWORD);
+        }
+        return self::$_backendInstance;
     }
 
     public function __call ( $method, $args ) {
@@ -36,3 +39,22 @@ class Database
         }
     }
 }
+
+function getrealip()
+{
+    if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+    {
+        $ip=$_SERVER['HTTP_CLIENT_IP'];
+    }
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+    {
+        $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    else
+    {
+        $ip=$_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+}
+
+?>

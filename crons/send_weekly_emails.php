@@ -5,6 +5,10 @@ include_once('../config.php');
 include_once('../db/db.php');
 
 set_time_limit(0);                   // ignore php timeout
+
+require_once('../include/chargebeephp/lib/ChargeBee.php');
+ChargeBee_Environment::configure(CHARGEBEE_SITE, CHARGEBEE_API_KEY);
+
 //ignore_user_abort(true);             // keep on going even if user pulls the plug*
 while(ob_get_level())ob_end_clean(); // remove output buffers
 ob_implicit_flush(true);             // output stuff directly
@@ -47,17 +51,44 @@ foreach ($user_list as $user) {
     //$stocks = getUserStocks($user);
 
     //Send Email
-    $content = getContent("templates/email.php", $upStocks, $downStocks, $topAction, $topQuality, $topValue, $topGrowth, $popular, $maxTick, $minTick);
-    mail($user, $subject, $content, implode( "\r\n" , $headers ));
-    echo "Email sent to $user<br>\n";
-    $count++;
-    if($first_run) {
-        $fd = fopen("../../weeklyupdate.php","w");
-        fwrite($fd, $content);
+    if(userStatus($user)) {
+        $content = getContent("templates/email.php", $upStocks, $downStocks, $topAction, $topQuality, $topValue, $topGrowth, $popular, $maxTick, $minTick);
+        mail($user, $subject, $content, implode( "\r\n" , $headers ));
+        echo "Email sent to $user<br>\n";
+        $count++;
+        if($first_run) {
+            $fd = fopen("../../weeklyupdate.php","w");
+            fwrite($fd, $content);
+        }
+        $first_run = false;
     }
-    $first_run = false;
 }
 echo "<br>\n$count mails sent<br>\n";
+
+function userStatus($email) {
+    $query="SELECT * FROM `chargebee_user` WHERE `email` = :email LIMIT 1";
+    $res = Database::getBackendInstance()->prepare($query);
+    $res->bindParam(":email", $email);
+    $res->execute();
+    $row = $res->fetch(PDO::FETCH_ASSOC);
+    if (empty($row)) {
+        // user not found
+        return false;
+    }
+
+    try {
+        $subscription_id = $row['chargebee_subscription_id'];
+        $result = ChargeBee_Subscription::retrieve($subscription_id);
+        $subscription = $result->subscription();
+        $status= @$subscription->status;
+        if ($status == "cancelled") {
+            return false;
+        }
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
 
 function getUserList() {
     $db = Database::GetInstance();
