@@ -618,7 +618,7 @@
     </div>
     <div style="clear: both"></div>
     <div class="title" style="<?php echo $title?>;height:40px">
-        <h4 style="<?php echo $styleh4?>">Having trouble reading this in your email? Click this <a href="https://job.oldschoolvalue.com/weeklyupdate.php">link</a> to see it on your browser.</h4>
+        <h4 style="<?php echo $styleh4?>">Having trouble reading this in your email? Click this <a href="https://app.oldschoolvalue.com/weeklyupdate.php">link</a> to see it on your browser.</h4>
     </div>
 </div>
 </body>

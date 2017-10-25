@@ -58,7 +58,7 @@ foreach ($user_list as $user) {
         echo "Email sent to $user<br>\n";
         $count++;
         if($first_run) {
-            $fd = fopen("../../weeklyupdate.php","w");
+            $fd = fopen("../../app/weeklyupdate.php","w");
             fwrite($fd, $content);
         }
         $first_run = false;
