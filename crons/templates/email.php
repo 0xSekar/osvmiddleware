@@ -29,7 +29,7 @@
 ?>
 <div class = "container" style="<?php echo $container ?>">
     <div class="logo" style="<?php echo $logo ?>">
-        <img alt="old school value" src="http://cdn8.oldschoolvalue.com/images/oldschoolvalue-logo.png" style="padding: 18px">
+        <img alt="old school value" src="https://cdn8.oldschoolvalue.com/images/oldschoolvalue-logo.png" style="padding: 18px">
     </div>
     <div class="title" style="<?php echo $title?>">
         <h4 style="<?php echo $styleh4?>"><b>OLD SCHOOL VALUE</b> - <?php echo date('l, F j, Y');?></h4>
@@ -287,7 +287,7 @@
         </table>
         <h3 style="<?php echo $styleh3?>">Top 5 ACTION Stocks (MktCap>$500M)</h3>
         <p style="<?php echo $stylep?>">The Top 5 ACTION Score stocks in our full universe where market cap is > $500m.
-        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='https://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
@@ -419,7 +419,7 @@
         </table>
         <h3 style="<?php echo $styleh3?>">Top 5 QUALITY Stocks (MktCap>$500M)</h3>
         <p style="<?php echo $stylep?>">The Top 5 QUALITY stocks in our full universe where market cap is > $500m.
-        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='https://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
@@ -485,7 +485,7 @@
         </table>
         <h3 style="<?php echo $styleh3?>">Top 5 VALUE Stocks (MktCap>$500M)</h3>
         <p style="<?php echo $stylep?>">The Top 5 VALUE stocks in our full universe where market cap is > $500m.
-        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='https://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
@@ -551,7 +551,7 @@
         </table>
         <h3 style="<?php echo $styleh3?>">Top 5 GROWTH Stocks (MktCap>$500M)</h3>
         <p style="<?php echo $stylep?>">The Top 5 GROWTH stocks in our full universe where market cap is > $500m.
-        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='http://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
+        Stock universe includes financials, basic materials, utilities, OTC and ADR stocks. Read how the Action Score was created from <a href='https://www.oldschoolvalue.com/blog/valuation-methods/action-score-quality-value-growth/' target='_blank'>this article</a></p>
         <table style="<?php echo $table?>">
             <tr style="<?php echo $styletr ;$td?>">
                 <td style="<?php echo $tdName200?>;color:#b1b4ba;">
