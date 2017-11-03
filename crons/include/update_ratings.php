@@ -552,6 +552,5 @@ function update_ratings() {
           }
           fclose($o);*/
     }
-    exit;
 }
 ?>
