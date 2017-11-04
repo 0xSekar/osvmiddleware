@@ -380,8 +380,10 @@ function update_raw_data_tickers($dates, $rawdata) {
                     $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
                     $rdate = $pricerow["report_date"];
                     $price = $pricerow["adj_close"];
-                    $rawdata["SharesOutstandingDiluted"][$i] = max($rawdata["SharesOutstandingDiluted"][$i], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
-                    $rawdata["SharesOutstandingBasic"][$i] = max($rawdata["SharesOutstandingBasic"][$i], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+                    //$rawdata["SharesOutstandingDiluted"][$i] = max($rawdata["SharesOutstandingDiluted"][$i], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+                    //$rawdata["SharesOutstandingBasic"][$i] = max($rawdata["SharesOutstandingBasic"][$i], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+                    $rawdata["SharesOutstandingDiluted"][$i] = max($rawdata["SharesOutstandingDiluted"][$i], $pricerow["SharesOutstandingBC"]/1000000);
+                    $rawdata["SharesOutstandingBasic"][$i] = max($rawdata["SharesOutstandingBasic"][$i], $pricerow["SharesOutstandingBC"]/1000000);
                 }
 
                 //GrossProfit fix

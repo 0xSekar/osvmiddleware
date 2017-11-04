@@ -224,7 +224,8 @@ function update_altman_checks($ti = null) {
         if($row_count > 0) {
             $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
             $price = $pricerow["adj_close"];
-            $rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+            //$rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingY"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+            $rawdata["SharesOutstandingDiluted"] = max($rawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingBC"]/1000000);
         }
 
         $query1 = "INSERT INTO `reports_alt_checks` (`report_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `MarketValueofEquity`, `NetSales`, `X1`, `X2`, `X3`, `X4`, `X5`, `AltmanZNormal`, `AltmanZRevised`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `MarketValueofEquity`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X4`=?, `X5`=?, `AltmanZNormal`=?, `AltmanZRevised`=?";
@@ -627,7 +628,8 @@ function pioTTM($ppid,$prawdata,$querypre,$pprawdata) {
         $row_count = $rquote->rowCount();
         if($row_count > 0) {
             $pricerow  = $rquote->fetch(PDO::FETCH_ASSOC);
-            $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+            //$trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+            $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingBC"]/1000000);
         }
         $query1 = "INSERT INTO `ttm_pio_checks` (`ticker_id`, `pio1`, `pio2`, `pio3`, `pio4`, `pio5`, `pio6`, `pio7`, `pio8`, `pio9`, `pioTotal`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `pio1`=?, `pio2`=?, `pio3`=?, `pio4`=?, `pio5`=?, `pio6`=?, `pio7`=?, `pio8`=?, `pio9`=?, `pioTotal`=?";
         $params = array();
@@ -721,7 +723,8 @@ function altmanTTM($ppid) {
     $row_count = $rquote->rowCount();
     if($row_count > 0) {
         $pricerow = $rquote->fetch(PDO::FETCH_ASSOC);
-        $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+        //$trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstanding"]/1000000, $pricerow["SharesOutstandingBC"]/1000000);
+        $trawdata["SharesOutstandingDiluted"] = max($trawdata["SharesOutstandingDiluted"], $pricerow["SharesOutstandingBC"]/1000000);
     }
     $query1 = "INSERT INTO `ttm_alt_checks` (`ticker_id`, `WorkingCapital`, `TotalAssets`, `TotalLiabilities`, `RetainedEarnings`, `EBIT`, `SharesOutstandingDiluted`, `NetSales`, `X1`, `X2`, `X3`, `X5`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `WorkingCapital`=?, `TotalAssets`=?, `TotalLiabilities`=?, `RetainedEarnings`=?, `EBIT`=?, `SharesOutstandingDiluted`=?, `NetSales`=?, `X1`=?, `X2`=?, `X3`=?, `X5`=?";
     $params = array();

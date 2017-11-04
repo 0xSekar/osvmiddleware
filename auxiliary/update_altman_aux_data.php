@@ -31,9 +31,9 @@ while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 		(CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL OR X5 IS NULL)
 		 THEN NULL ELSE (1.2 * X1 + 1.4 * X2 + 3.3 * X3 + 0.6 * X4 + 0.999 * X5) END) AS AltmanZNormal,
 		(CASE WHEN (X1 IS NULL OR X2 IS NULL OR X3 IS NULL OR X4 IS NULL) THEN NULL ELSE (6.56 * X1 + 3.26 * X2 + 6.72 * X3 + 1.05 * X4) END) AS AltmanZRevised
-			FROM (SELECT c.id,a.*, MarketCapitalization as MarketValueofEquity,
-					(CASE WHEN (TotalLiabilities IS NULL OR TotalLiabilities = 0) THEN NULL ELSE MarketCapitalization / TotalLiabilities END) AS X4
-					FROM tickers c, mrq_alt_checks a, tickers_yahoo_quotes_1 b WHERE c.id=a.ticker_id and c.id=b.ticker_id AND c.id=".$row["id"].") AS x";
+			FROM (SELECT c.id,a.*, MarketCapIntraday as MarketValueofEquity,
+					(CASE WHEN (TotalLiabilities IS NULL OR TotalLiabilities = 0) THEN NULL ELSE MarketCapIntraday / TotalLiabilities END) AS X4
+					FROM tickers c, mrq_alt_checks a, tickers_yahoo_keystats_1 b WHERE c.id=a.ticker_id and c.id=b.ticker_id AND c.id=".$row["id"].") AS x";
 	try {
 		$res1 = $db->query($query1);
 		$row1 = $res1->fetch(PDO::FETCH_ASSOC);
