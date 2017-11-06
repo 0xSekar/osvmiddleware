@@ -150,6 +150,7 @@ function update_yahoo_daily($pticker = NULL, $force_qhist = false) {
         }
 
         // UPDATE QUOTES
+        /*
         if($yquery) {
             $response = $yql->execute("select * from osv.finance.quotes where symbol='".str_replace(".", ",", $row["ticker"])."';", array(), 'GET', "oauth", "store://rNXPWuZIcepkvSahuezpUq");
             if(isset($response->query) && isset($response->query->results)) {
@@ -373,7 +374,7 @@ function update_yahoo_daily($pticker = NULL, $force_qhist = false) {
             } else {
                 $eerrors ++;
             }
-        }
+        }*/
 
         // UPDATE DATES
         if($yquery) {
@@ -590,7 +591,7 @@ function update_yahoo_daily($pticker = NULL, $force_qhist = false) {
         //Keystats & Quotes From Barchart
         if($resJS['status']['code'] == 200){
             update_raw_data_barchart_keystats($row["id"], $resJS);
-            $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id` , `Ask`, `AverageDailyVolume`, `Bid`, `Change`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, LastTradeDate, PreviousTradeDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE `Ask` = ?, `AverageDailyVolume` = ?, `Bid` = ?, `Change` = ?, `DaysLow` = ?, `DaysHigh` = ?, `YearLow` = ?, `YearHigh` = ?, LastTradeDate = ?, PreviousTradeDate = ?";
+            $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id` , `Ask`, `AverageDailyVolume`, `Bid`, `Change`, `DaysLow`, `DaysHigh`, `YearLow`, `YearHigh`, LastTradeDate, PreviousTradeDate, ChangeFromYearLow, PercentChangeFromYearLow, ChangeFromYearHigh, PercentChangeFromYearHigh) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE `Ask` = ?, `AverageDailyVolume` = ?, `Bid` = ?, `Change` = ?, `DaysLow` = ?, `DaysHigh` = ?, `YearLow` = ?, `YearHigh` = ?, LastTradeDate = ?, PreviousTradeDate = ?, ChangeFromYearLow = ?, PercentChangeFromYearLow = ?, ChangeFromYearHigh = ?, PercentChangeFromYearHigh = ?";
             $params = array();
             $params[] = $row["id"];
             $params[] = $resJS['results'][0]['ask'];
@@ -603,6 +604,10 @@ function update_yahoo_daily($pticker = NULL, $force_qhist = false) {
             $params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
             $params[] = substr($resJS['results'][0]['tradeTimestamp'],0,10);
             $params[] = substr($resJS['results'][0]['previousTimestamp'],0,10);
+            $params[] = $resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkLow'];
+            $params[] = ($resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkLow']) / $resJS['results'][0]['fiftyTwoWkLow'] * 100;
+            $params[] = $resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkHigh'];
+            $params[] = ($resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkHigh']) / $resJS['results'][0]['fiftyTwoWkHigh'] * 100;
 
             $params[] = $resJS['results'][0]['ask'];
             $params[] = $resJS['results'][0]['avgVolume'];
@@ -614,6 +619,10 @@ function update_yahoo_daily($pticker = NULL, $force_qhist = false) {
             $params[] = $resJS['results'][0]['fiftyTwoWkHigh'];
             $params[] = substr($resJS['results'][0]['tradeTimestamp'],0,10);
             $params[] = substr($resJS['results'][0]['previousTimestamp'],0,10);
+            $params[] = $resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkLow'];
+            $params[] = ($resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkLow']) / $resJS['results'][0]['fiftyTwoWkLow'] * 100;
+            $params[] = $resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkHigh'];
+            $params[] = ($resJS['results'][0]['lastPrice'] - $resJS['results'][0]['fiftyTwoWkHigh']) / $resJS['results'][0]['fiftyTwoWkHigh'] * 100;
             try {
                 $resb = $db->prepare($query);
                 $resb->execute($params);
@@ -848,10 +857,10 @@ function update_yahoo_daily($pticker = NULL, $force_qhist = false) {
         echo "\t".$supdated2." tickers updates\n";
         echo "\t".$snotfound2." tickers not found on yahoo\n";
         echo "\t".$kerrors." errors updating tickers\n";
-        echo "Quotes Yahoo:\n";
+        /*echo "Quotes Yahoo:\n";
         echo "\t".$eupdated." tickers updates\n";
         echo "\t".$enotfound." tickers not found on yahoo\n";
-        echo "\t".$eerrors." errors updating tickers\n";
+        echo "\t".$eerrors." errors updating tickers\n";*/
         echo "Quotes Barchart:\n";
         echo "\t".$eupdated2." tickers updates\n";
         echo "\t".$enotfound2." tickers not found on barchart\n";
