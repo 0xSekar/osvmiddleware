@@ -22,4 +22,4 @@
 ##Other processes
 12 * * * * root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/check_yahoo_status.php
 30 2 * * * root cd /var/www/oldschoolvalue/middleware/crons/; /var/www/oldschoolvalue/middleware/crons/img_cleanup.sh 2>&1 | tail -n 200 | mail -s "Image Cache Cleanup Cron Output" cronreports.i9xgk@zapiermail.com
-0 23 * * 5 root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/send_weekly_emails.php 2>&1 | tail -n 200 | mail -s "Send Weekly Emails" cronreports.i9xgk@zapiermail.com
+0 14 * * 5 root cd /var/www/oldschoolvalue/middleware/crons/; /usr/bin/php /var/www/oldschoolvalue/middleware/crons/send_weekly_emails.php 2>&1 | tail -n 200 | mail -s "Send Weekly Emails" cronreports.i9xgk@zapiermail.com
