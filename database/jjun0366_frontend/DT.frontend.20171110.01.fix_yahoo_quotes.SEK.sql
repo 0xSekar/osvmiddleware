@@ -1,0 +1,12 @@
+update tickers_yahoo_quotes_1 set EarningsShare = null;
+update tickers_yahoo_quotes_1 inner join ttm_gf_data on tickers_yahoo_quotes_1.ticker_id=ttm_gf_data.ticker_id set EarningsShare = EPSDiluted;
+update tickers_yahoo_quotes_1 set EPSEstimateCurrentYear = null;
+update tickers_yahoo_quotes_1 set EPSEstimateNextYear = null;
+update tickers_yahoo_quotes_1 set EPSEstimateNextQuarter = null;
+update tickers_yahoo_quotes_1 inner join tickers_yahoo_estimates_curr_year on tickers_yahoo_quotes_1.ticker_id=tickers_yahoo_estimates_curr_year.ticker_id set EPSEstimateCurrentYear = EarningsAvg;
+update tickers_yahoo_quotes_1 inner join tickers_yahoo_estimates_next_year on tickers_yahoo_quotes_1.ticker_id=tickers_yahoo_estimates_next_year.ticker_id set EPSEstimateNextYear = EarningsAvg;
+update tickers_yahoo_quotes_1 inner join tickers_yahoo_estimates_next_qtr on tickers_yahoo_quotes_1.ticker_id=tickers_yahoo_estimates_next_qtr.ticker_id set EPSEstimateNextQuarter = EarningsAvg;
+update tickers_yahoo_quotes_2 set PriceEPSEstimateCurrentYear = null;
+update tickers_yahoo_quotes_2 set PriceEPSEstimateNextYear = null;
+update tickers_yahoo_quotes_2 inner join tickers_xignite_estimates on tickers_yahoo_quotes_2.ticker_id=tickers_xignite_estimates.ticker_id set PriceEPSEstimateCurrentYear = SA_PERatioCompanyPerCurrentFiscalYearMean;
+update tickers_yahoo_quotes_2 inner join tickers_xignite_estimates on tickers_yahoo_quotes_2.ticker_id=tickers_xignite_estimates.ticker_id set PriceEPSEstimateNextYear = EGR_CompanyNextFiscalYearPERatio;

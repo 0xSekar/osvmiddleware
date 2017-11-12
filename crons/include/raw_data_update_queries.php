@@ -1379,6 +1379,19 @@ function update_raw_data_tickers($dates, $rawdata) {
 
     //Cashflow and Financial
     if($stock_type == "ADR") {
+        $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id`, `EarningsShare`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `EarningsShare` = ?";
+        $params = array();
+        $params[] = $dates->ticker_id;
+        $params[] = ((!isset($rawdata["EPSDiluted"]) || $rawdata["EPSDiluted"][$MRQRow] =='null') ? null:toFloat($rawdata["EPSDiluted"][$MRQRow]));
+        $params[] = ((!isset($rawdata["EPSDiluted"]) || $rawdata["EPSDiluted"][$MRQRow] =='null') ? null:toFloat($rawdata["EPSDiluted"][$MRQRow]));
+        try {
+            $res = $db->prepare($query);
+            $res->execute($params);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+
         $query = "INSERT INTO `ttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?, ?, ? ,?, ?, ?) ON DUPLICATE KEY UPDATE `InterestIncome`=?, `InterestExpense`=?, `EPSBasic`=?, `EPSDiluted`=?, `SharesOutstandingDiluted`=?, `InventoriesRawMaterialsComponents`=?, `InventoriesWorkInProcess`=?, `InventoriesInventoriesAdjustments`=?, `InventoriesFinishedGoods`=?, `InventoriesOther`=?, `TotalInventories`=?, `LandAndImprovements`=?, `BuildingsAndImprovements`=?, `MachineryFurnitureEquipment`=?, `ConstructionInProgress`=?, `GrossPropertyPlantandEquipment`=?, `SharesOutstandingBasic`=?"; 
         $params = array();
         $params[] = ((!isset($rawdata["InterestIncome"]) || $rawdata["InterestIncome"][$MRQRow] =='null') ? null:toFloat($rawdata["InterestIncome"][$MRQRow]));
@@ -1840,6 +1853,19 @@ function update_raw_data_tickers($dates, $rawdata) {
             die("Line: ".__LINE__." - ".$ex->getMessage());
         }
     } else {
+        $query = "INSERT INTO `tickers_yahoo_quotes_1` (`ticker_id`, `EarningsShare`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `EarningsShare` = ?";
+        $params = array();
+        $params[] = $dates->ticker_id;
+        $params[] = ((!isset($rawdata["EPSDiluted"]) || ($rawdata["EPSDiluted"][$treports-3]=='null'&&$rawdata["EPSDiluted"][$treports-2]=='null'&&$rawdata["EPSDiluted"][$treports-1]=='null'&&$rawdata["EPSDiluted"][$treports]=='null'))?null:(toFloat($rawdata["EPSDiluted"][$treports-3])+toFloat($rawdata["EPSDiluted"][$treports-2])+toFloat($rawdata["EPSDiluted"][$treports-1])+toFloat($rawdata["EPSDiluted"][$treports])));
+        $params[] = ((!isset($rawdata["EPSDiluted"]) || ($rawdata["EPSDiluted"][$treports-3]=='null'&&$rawdata["EPSDiluted"][$treports-2]=='null'&&$rawdata["EPSDiluted"][$treports-1]=='null'&&$rawdata["EPSDiluted"][$treports]=='null'))?null:(toFloat($rawdata["EPSDiluted"][$treports-3])+toFloat($rawdata["EPSDiluted"][$treports-2])+toFloat($rawdata["EPSDiluted"][$treports-1])+toFloat($rawdata["EPSDiluted"][$treports])));
+        try {
+            $res = $db->prepare($query);
+            $res->execute($params);
+        } catch(PDOException $ex) {
+            echo "\nDatabase Error"; //user message
+            die("Line: ".__LINE__." - ".$ex->getMessage());
+        }
+
         $query = "INSERT INTO `ttm_gf_data` (`ticker_id`, `InterestIncome`, `InterestExpense`, `EPSBasic`, `EPSDiluted`, `SharesOutstandingDiluted`, `InventoriesRawMaterialsComponents`, `InventoriesWorkInProcess`, `InventoriesInventoriesAdjustments`, `InventoriesFinishedGoods`, `InventoriesOther`, `TotalInventories`, `LandAndImprovements`, `BuildingsAndImprovements`, `MachineryFurnitureEquipment`, `ConstructionInProgress`, `GrossPropertyPlantandEquipment`, `SharesOutstandingBasic`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `InterestIncome`=?, `InterestExpense`=?, `EPSBasic`=?, `EPSDiluted`=?, `SharesOutstandingDiluted`=?, `InventoriesRawMaterialsComponents`=?, `InventoriesWorkInProcess`=?, `InventoriesInventoriesAdjustments`=?, `InventoriesFinishedGoods`=?, `InventoriesOther`=?, `TotalInventories`=?, `LandAndImprovements`=?, `BuildingsAndImprovements`=?, `MachineryFurnitureEquipment`=?, `ConstructionInProgress`=?, `GrossPropertyPlantandEquipment`=?, `SharesOutstandingBasic`=?";
         $params = array();
         $params[] = ((!isset($rawdata["InterestIncome"]) || ($rawdata["InterestIncome"][$treports-3]=='null'&&$rawdata["InterestIncome"][$treports-2]=='null'&&$rawdata["InterestIncome"][$treports-1]=='null'&&$rawdata["InterestIncome"][$treports]=='null'))?null:(toFloat($rawdata["InterestIncome"][$treports-3])+toFloat($rawdata["InterestIncome"][$treports-2])+toFloat($rawdata["InterestIncome"][$treports-1])+toFloat($rawdata["InterestIncome"][$treports])));
