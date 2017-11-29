@@ -46,23 +46,14 @@ $db = Database::GetInstance();
     $store = curl_exec($ch);
     //the login is now done and you can continue to get the
     //protected content.
-    ///$query = http_build_query($_GET);
-    ///$query = html_entity_decode($query);
     $t_parameter = "";
     $count=0;
-    $batchsize=149;
+    $batchsize=150;
     $content='';
     $response='';
-    //$tickerlist = strtoupper($_REQUEST["t"]);
-    ///parse_str($query, $res);
-    ///$tickerlist ='';
-    ///$tickerlist = $res['t'];
-    //Conver tickers list into array
-    ///$tickerarray = explode(",",$tickerlist);
-
+    //Convert tickers list into array
     try {
-        $res = $db->prepare("SELECT ticker, id FROM tickers WHERE (is_old != '1' AND secondary != '1') ORDER BY ticker");
-        
+        $res = $db->prepare("SELECT ticker, id FROM tickers WHERE (is_old != '1' AND secondary != '1') ORDER BY ticker");      
         $res->execute();
     } catch(PDOException $ex) {
         echo " Database Error"; //user message
@@ -73,76 +64,47 @@ $db = Database::GetInstance();
     foreach ($info as $key => $value) {
         $tickerarray[] = $value["ticker"];
     }
+    $tickersQty = count($tickerarray);
 
-    //var_dump($tickerarray);
-    //Remove repeated tickers
-    //$temp_memory = fopen('php://temp', 'w+');
-    $tmp = fopen('php://temp', 'r+');
-    //start batch loop
-    foreach ($tickerarray as $value)
-    {   
-        if( isset($value) )
-        {
+    echo " ---- Lista de Tickers devenida de la consulta a la BD --- \n";
+    var_dump($info);
+
+    //Start batch loop
+    foreach ($tickerarray as $value){   
+        if(isset($value)){
             $t_parameter .=  $value . ",";
             $count++;
-            if($count == $batchsize)
-            {
-                try 
-                {
+            if($count == $batchsize || $count == $tickersQty){
+                try {
+                    $tmp = fopen('php://temp', 'r+');
                     $t_parameter=rtrim($t_parameter,",");
                     //set the URL to the protected file
                     curl_setopt($ch, CURLOPT_URL, 'http://elite.finviz.com/export.ashx?v=151&t=' . $t_parameter . "&c=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68");
+                    echo " ---- Se pide a Finbiz --- \n";
+                    var_dump($t_parameter);
                     curl_setopt($ch, CURLOPT_FILE, $tmp);
-                    //execute the request
+                    //Execute the request
                     $content = curl_exec($ch);
-                    //fwrite($tmp, '');
                     rewind($tmp);
-                    $response=stream_get_contents($tmp);
                     $count = 0;
+                    echo "  tickersQty: ";
+                    var_dump($tickersQty );
+                    $tickersQty = $tickersQty - $batchsize;
+                    echo "  tickersQty - batchsize: ";
+                    var_dump($tickersQty );
                     $t_parameter = "";
-                    fwrite($tmp, $response);
                     rewind($tmp);
-
+                    /** Send file to DB */
                     DBinsert($tmp, $info); 
-                    echo " FINNNNN ";
+                    echo " ----------------------- BATCH ---------------------- \n";
                     fclose($tmp);
                     $tmp = fopen('php://temp', 'w');
-                    fclose($tmp);
-                    $tmp = fopen('php://temp', 'r+');
+                    fclose($tmp);                    
                 } 
                 catch (Exception $e) { null;}
-            } //end of batchsize = count                          
-            
-        } //end of if set  
-
-      
+            } //end of batchsize = count     
+        } //end of if set        
     } //end of for
-    //finish batch loop
-    // Sending last batch
-    
-    $t_parameter=rtrim($t_parameter,",");
-    //set the URL to the protected file
-    curl_setopt($ch, CURLOPT_URL, 'http://elite.finviz.com/export.ashx?v=151&t=' . $t_parameter . "&c=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68");
-    
-    curl_setopt($ch, CURLOPT_FILE, $tmp);
-    //execute the request
-    $content = curl_exec($ch);
-    curl_close($ch);
-    $response=stream_get_contents($tmp);
-    fwrite($tmp, $response); //dirty trick to assign back to $tmp the values that this var has been creating
-    rewind($tmp);
-
-    /** Send file to DB */
-    //fpassthru($tmp);
-    
-    DBinsert($tmp, $info);
-    fclose($tmp);
-    $tmp = fopen('php://temp', 'w');    
-    
-    //fpassthru($response);
-    fclose($tmp);
-    
-
 
 function DBinsert($tmp, $info){
     $db = Database::GetInstance(); 
@@ -161,7 +123,6 @@ function DBinsert($tmp, $info){
         
         $query = "INSERT INTO `finviz`(`ticker_id`,`company`,`sector`,`industry`,`country`,`market_cap`,`p_e`,`forward_p_e`,`peg`,`p_s`,`p_b`,`p_cash`,`p_free_cash_flow`,`dividend_yield`,`payout_ratio`,`eps_ttm`,`eps_growth_this_year`,`eps_growth_next_year`,`eps_growth_past5years`,`eps_growth_next5years`,`sales_growth_past5years`,`eps_growth_qtr_over_qtr`,`sales_growth_qtr_over_qtr`,`shares_outstanding`,`shares_float`,`insider_ownership`,`insider_transactions`,`institutional_ownership`,`institutional_transactions`,`float_short`,`short_ratio`,`return_on_assets`,`return_on_equity`,`return_on_investment`,`current_ratio`,`quick_ratio`,`lt_debt_equity`,`total_debt_equity`,`gross_margin`,`operating_margin`,`profit_margin`,`performance_week`,`performance_month`,`performance_qtr`,`performance_half_year`,`performance_year`,`performance_ytd`,`beta`,`average_true_range`,`volatility_week`,`volatility_month`,`20_day_simple_moving_avg`,`50_day_simple_moving_avg`,`200_day_simple_moving_avg`,`50_day_high`,`50_day_low`,`52_week_high`,`52_week_low`,`relative_strength_index_14`,`change_from_open`,`gap`,`analyst_recom`,`avg_volume`,`relative_volume`,`price`,`change`,`volume`,`earnings_date`) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `company`= ?,`sector`= ?,`industry`= ?,`country`= ?,`market_cap`= ?,`p_e`= ?,`forward_p_e`= ?,`peg`= ?,`p_s`= ?,`p_b`= ?,`p_cash`= ?,`p_free_cash_flow`= ?,`dividend_yield`= ?,`payout_ratio`= ?,`eps_ttm`= ?,`eps_growth_this_year`= ?,`eps_growth_next_year`= ?,`eps_growth_past5years`= ?,`eps_growth_next5years`= ?,`sales_growth_past5years`= ?,`eps_growth_qtr_over_qtr`= ?,`sales_growth_qtr_over_qtr`= ?,`shares_outstanding`= ?,`shares_float`= ?,`insider_ownership`= ?,`insider_transactions`= ?,`institutional_ownership`= ?,`institutional_transactions`= ?,`float_short`= ?,`short_ratio`= ?,`return_on_assets`= ?,`return_on_equity`= ?,`return_on_investment`= ?,`current_ratio`= ?,`quick_ratio`= ?,`lt_debt_equity`= ?,`total_debt_equity`= ?,`gross_margin`= ?,`operating_margin`= ?,`profit_margin`= ?,`performance_week`= ?,`performance_month`= ?,`performance_qtr`= ?,`performance_half_year`= ?,`performance_year`= ?,`performance_ytd`= ?,`beta`= ?,`average_true_range`= ?,`volatility_week`= ?,`volatility_month`= ?,`20_day_simple_moving_avg`= ?,`50_day_simple_moving_avg`= ?,`200_day_simple_moving_avg`= ?,`50_day_high`= ?,`50_day_low`= ?,`52_week_high`= ?,`52_week_low`= ?,`relative_strength_index_14`= ?,`change_from_open`= ?,`gap`= ?,`analyst_recom`= ?,`avg_volume`= ?,`relative_volume`= ?,`price`= ?,`change`= ?,`volume`= ?,`earnings_date`= ?";
                 $params = array();
-                //$params[] = (!isset($id)||($a[0]=="")?NULL:$id);
                 $params[] = (!isset($a[1])||($a[1]=="")?NULL:$a[1]);
                 $params[] = (!isset($a[2])||($a[2]=="")?NULL:$a[2]);
                 $params[] = (!isset($a[3])||($a[3]=="")?NULL:$a[3]);
@@ -240,8 +201,6 @@ function DBinsert($tmp, $info){
                 echo "\nDatabase Error "; //user message
                 die("- Line: ".__LINE__." - ".$ex->getMessage());
             }
-
         }
-
 }
 ?>
